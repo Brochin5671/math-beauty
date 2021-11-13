@@ -7,7 +7,7 @@
     "start": "npm run lint && node app.js",
     "dev": "nodemon app.js --exec \"npm run lint && node\"",
     "test": "jest",
-    "lint": "eslint **/*.js"
+    "lint": "eslint public __tests__"
   },
   "author": "Maxim Brochin",
   "license": "ISC",
