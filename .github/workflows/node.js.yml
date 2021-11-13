@@ -18,7 +18,7 @@ jobs:
                   node-version: '16.x'
                   cache: 'npm'
             - run: npm ci
-            - run: npm lint
+            - run: npm run lint
             - run: npm start & npx wait-on http://localhost:3000
             - run: npm test
               env:
