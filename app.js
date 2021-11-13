@@ -6,7 +6,7 @@ const connectLiveReload = require('connect-livereload');
 
 // Setup app and port
 const app = express();
-const port = process.env.PORT || 443;
+const port = process.env.PORT || 3000;
 
 // Use compression and helmet for http headers
 app.use(compression());
