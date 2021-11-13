@@ -98,10 +98,10 @@
                                 </div>
                                 <div class="form-check form-switch form-check-inline ms-3">
                                     <input class="form-check-input" type="checkbox" id="juliaToggle">
-                                    <label class="form-check-label text-muted" for="juliaToggle">Julia Set</label>
+                                    <label class="form-check-label text-muted user-select-none" for="juliaToggle">Julia Set</label>
                                 </div>
                             </div>
-                            <div class="tab-pane fade" id="nav-draw" role="tabpanel" aria-labelledby="nav-draw-tab">
+                            <div class="tab-pane fade user-select-none" id="nav-draw" role="tabpanel" aria-labelledby="nav-draw-tab">
                                 <label for="colorMethod" class="form-label">Coloring Methods</label>
                                 <div class="mb-2" id="colorMethod">
                                     <div class="form-check form-check-inline">
@@ -113,7 +113,7 @@
                                         <label class="form-check-label text-muted" for="smoothColoring">Smooth</label>
                                     </div>
                                 </div>
-                                <label for="colorPresetsInput" class="form-label">Coloring</label>
+                                <label for="colorPresetsInput" class="form-label user-select-none">Coloring</label>
                                 <div class="dropdown mb-2">
                                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="colorPresetsBtn" data-bs-toggle="dropdown" aria-expanded="false">
                                         Color Presets
@@ -127,9 +127,9 @@
                                 </div>
                                 <div class="form-check form-switch mb-2">
                                     <input class="form-check-input" type="checkbox" id="gradientLoop">
-                                    <label class="form-check-label text-muted" for="gradientLoop">Gradient Loop</label>
+                                    <label class="form-check-label text-muted user-select-none" for="gradientLoop">Gradient Loop</label>
                                 </div>
-                                <label for="rgbRange" class="form-label">RGB Factors/Shifts</label>
+                                <label for="rgbRange" class="form-label user-select-none">RGB Factors/Shifts</label>
                                 <div class="mb-2" id='rgbRange'>
                                     <input type="range" class="form-range" id="redRange" min="0" max="30" value="1">
                                     <input type="range" class="form-range" id="greenRange" min="0" max="30" value="1">
@@ -138,7 +138,7 @@
                                 <canvas id="colorPalette" width="256" height="20"></canvas>
                                 <div class="form-check form-switch my-3">
                                     <input class="form-check-input" type="checkbox" id="autoDraw" checked>
-                                    <label class="form-check-label text-muted" for="autoDraw">Auto-Draw</label>
+                                    <label class="form-check-label text-muted user-select-none" for="autoDraw">Auto-Draw</label>
                                 </div>
                             </div>
                         </div>
@@ -147,7 +147,7 @@
                         <canvas id="canvas" width="320" height="320"></canvas>
                     </div>
                 </div>
-                <div class="row mb-3">
+                <div class="row mb-3 user-select-none">
                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
                 </div>
             </div>
