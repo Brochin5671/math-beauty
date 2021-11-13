@@ -4,7 +4,7 @@
   "description": "create mathematical beauty",
   "main": "app.js",
   "scripts": {
-    "start": "npm run lint && node app.js",
+    "start": "node app.js",
     "dev": "nodemon app.js --exec \"npm run lint && node\"",
     "test": "jest",
     "lint": "eslint public __tests__"

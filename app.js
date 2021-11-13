@@ -1,8 +1,6 @@
 const express = require('express');
 const compression = require('compression');
 const helmet = require('helmet');
-const liveReload = require('livereload');
-const connectLiveReload = require('connect-livereload');
 
 // Setup app and port
 const app = express();
@@ -25,8 +23,10 @@ app.use(
     })
 );
 
-// Create livereload server when not in production
+/* Create livereload server when not in production
 if (process.env.NODE_ENV !== 'production') {
+    const liveReload = require('livereload');
+    const connectLiveReload = require('connect-livereload');
     const liveReloadServer = liveReload.createServer();
     liveReloadServer.server.once('connection', () => {
         setTimeout(() => {
@@ -34,7 +34,7 @@ if (process.env.NODE_ENV !== 'production') {
         }, 100);
     });
     app.use(connectLiveReload());
-}
+}*/
 
 // Serves js and css
 app.use(express.static('public/js'));
