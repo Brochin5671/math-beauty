@@ -1,0 +1,27 @@
+{
+  "name": "math-beauty",
+  "version": "1.0.0",
+  "description": "create mathematical beauty",
+  "main": "app.js",
+  "scripts": {
+    "start": "npm run lint && node app.js",
+    "dev": "nodemon app.js --exec \"npm run lint && node\"",
+    "test": "jest",
+    "lint": "eslint **/*.js"
+  },
+  "author": "Maxim Brochin",
+  "license": "ISC",
+  "dependencies": {
+    "@types/jest": "^27.0.2",
+    "express": "^4.17.1",
+    "helmet": "^4.6.0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.16.0",
+    "connect-livereload": "^0.6.1",
+    "eslint": "^8.1.0",
+    "jest": "^27.3.1",
+    "livereload": "^0.9.3",
+    "nodemon": "^2.0.15"
+  }
+}
