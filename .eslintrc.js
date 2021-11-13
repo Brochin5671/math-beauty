@@ -11,4 +11,5 @@ module.exports = {
         sourceType: 'module',
     },
     rules: {},
+    ignorePatterns: ['**/node_modules/**'],
 };
