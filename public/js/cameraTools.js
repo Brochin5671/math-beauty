@@ -42,13 +42,13 @@ export function changeZoom(target, options) {
     const { name, valueAsNumber } = target;
 
     if (name === 'dec') {
-        options.zoom /= 1.1;
-        options.offsetX /= 1.1;
-        options.offsetY /= 1.1;
+        options.zoom /= 1.15;
+        options.offsetX /= 1.15;
+        options.offsetY /= 1.15;
     } else if (name === 'inc') {
-        options.zoom *= 1.1;
-        options.offsetX *= 1.1;
-        options.offsetY *= 1.1;
+        options.zoom *= 1.15;
+        options.offsetX *= 1.15;
+        options.offsetY *= 1.15;
     } else {
         if (!isNaN(valueAsNumber)) {
             options.zoom = valueAsNumber;
@@ -301,12 +301,12 @@ export function clickZoom(target, clientX, clientY, options) {
     const y = mapToRange(clientY - top, 0, height, -halfHeight, halfHeight);
 
     // Change pan factor based off size of canvas
-    const panFactor = width === 320 ? 10 : width === 275 ? 8 : 7;
+    const panFactor = width === 320 ? 7.25 : width === 275 ? 6 : 5;
 
     // Zoom and slightly move towards clicked point
-    options.zoom *= 1.1;
-    options.offsetX = (options.offsetX + x / panFactor) * 1.1;
-    options.offsetY = (options.offsetY - y / panFactor) * 1.1;
+    options.zoom *= 1.15;
+    options.offsetX = (options.offsetX + x / panFactor) * 1.15;
+    options.offsetY = (options.offsetY - y / panFactor) * 1.15;
 
     // Update inputs and dispatch change event
     const zoomInput = document.querySelector('#zoomInput > form > input');

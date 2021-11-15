@@ -23,18 +23,14 @@ app.use(
     })
 );
 
-/* Create livereload server when not in production
-if (process.env.NODE_ENV !== 'production') {
-    const liveReload = require('livereload');
-    const connectLiveReload = require('connect-livereload');
-    const liveReloadServer = liveReload.createServer();
-    liveReloadServer.server.once('connection', () => {
-        setTimeout(() => {
-            liveReloadServer.refresh('/');
-        }, 100);
+// Redirect to secure if request is not secure and not localhost
+if (port == process.env.PORT) {
+    app.enable('trust proxy'); // Enable reverse proxy support
+    app.use((req, res, next) => {
+        if (req.secure) next();
+        else res.redirect(301, `https://${req.headers.host}${req.url}`);
     });
-    app.use(connectLiveReload());
-}*/
+}
 
 // Serves js and css
 app.use(express.static('public/js'));
