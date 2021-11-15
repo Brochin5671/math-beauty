@@ -231,14 +231,14 @@ document.addEventListener('keydown', ({ key }) => {
             options.offsetX += 25;
             break;
         case 'z':
-            options.zoom *= 1.1;
-            options.offsetX *= 1.1;
-            options.offsetY *= 1.1;
+            options.zoom *= 1.15;
+            options.offsetX *= 1.15;
+            options.offsetY *= 1.15;
             break;
         case 'x':
-            options.zoom /= 1.1;
-            options.offsetX /= 1.1;
-            options.offsetY /= 1.1;
+            options.zoom /= 1.15;
+            options.offsetX /= 1.15;
+            options.offsetY /= 1.15;
             break;
         case 'm':
             if (options.maxIterations < 10000) {

@@ -22,7 +22,6 @@
     "connect-livereload": "^0.6.1",
     "eslint": "^8.1.0",
     "jest": "^27.3.1",
-    "livereload": "^0.9.3",
     "nodemon": "^2.0.15"
   }
 }
