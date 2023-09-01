@@ -1,12 +1,26 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Math Beauty</title>
+        <title>Escape Fractal Viewer</title>
         <meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width,initial-scale=1">
-		<meta name="description" content="Watch mathematical beauty blossom!">
+		<meta name="description" content="View several escape fractals!">
 		<meta name="author" content="Maxim Brochin">
-        <meta name="keywords" content="math,beauty,art">
+        <meta name="keywords" content="math,beauty,art,escape,fractals">
+        <meta property="og:type" content="website">
+		<meta property="og:title" content="Escape Fractal Viewer">
+		<meta property="og:description" content="View several escape fractals!">
+		<meta property="og:url" content="https://escape-fractal-viewer.fly.dev">
+		<meta name="twitter:card" content="summary_large_image">
+		<meta property="og:site_name" content="Escape Fractal Viewer">
+		<meta name="twitter:image:alt" content="Escape Fractal Viewer Logo">
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=1">
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=1">
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=1">
+		<link rel="manifest" href="/site.webmanifest?v=1">
+		<link rel="shortcut icon" href="/favicon.ico?v=1">
+		<meta name="apple-mobile-web-app-title" content="Escape Fractal Viewer">
+		<meta name="application-name" content="Escape Fractal Viewer">
         <script type="module" src="./index.js"></script>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
         <link rel="stylesheet" href="./index.css">
@@ -14,8 +28,15 @@
     <body>
         <div class="container">
             <div class="card shadow my-3 p-3">
+                <div class="text-end">
+                    <button type="button" class="btn btn-light btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#helpModal">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question" viewBox="0 0 16 16">
+                            <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                        </svg>
+                  </button>
+                </div>
                 <div class="d-flex justify-content-center">
-                    <h1 class="mt-2">Escape Fractals</h1>
+                    <h1 class="mt-2">Escape Fractal Viewer</h1>
                     <div class="dropdown ps-3 my-auto">
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="escapeFractalsBtn" data-bs-toggle="dropdown" aria-expanded="false"></button>
                         <ul id="escapeFractalsInput" class="dropdown-menu dropdown-menu-end" aria-labelledby="escapeFractalsBtn">
@@ -25,12 +46,48 @@
                             <li><a class="dropdown-item" href="#" name="multibrot">Multibrot Set</a></li>
                         </ul>
                     </div>
+                    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="helpModalLabel">Help</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h6>Controls</h6>
+                                    <p><em>Zoom</em> - Tap on canvas where you want to zoom in or use <code>Q</code> and <code>E</code> to zoom in/out.</p>
+                                    <p><em>x/y</em> - Use <code>WASD</code> keys to move around the fractal.</p>
+                                    <p><em>Iterations</em> - Use <code>Z</code> and <code>X</code> to increase/decrease number of iterations (detail).</p>
+                                    <p><em>Reset</em> - Use <code>R</code> to reset the canvas.</p>
+                                    <p>Right click or hold on mobile device to save render.</p>
+                                    <hr>
+                                    <h6>Camera Settings</h6>
+                                    <p><em>x/y</em> - Controls camera position.</p>
+                                    <p><em>Iterations</em> - Number of times to check if a value reached a critical escape condition, basically increases detail.</p>
+                                    <p><em>Exponent</em> - Controls the <code>d</code> value of <code>z = z^d + c</code>.</p>
+                                    <p><em>Complex Real/Imaginary</em> - Used as a fixed term for <code>c</code> values when displaying Julia Sets.</p>
+                                    <hr>
+                                    <h6>Render Settings</h6>
+                                    <p><em>Iteration Coloring</em> - Assigns a value based on iteration for each point.</p>
+                                    <p><em>Smooth Coloring</em> - Assigns a color for each iteration using linear interpolation providing a smooth transition of colors between iterations.</p>
+                                    <p><em>Color Presets</em> - Select predefined color schemes for the renders.</p>
+                                    <p><em>Gradient Loop</em> - Makes color pallete loop from end to start.</p>
+                                    <p><em>RGB Factors/Shifts</em> - RGB channels for adjusting a color pallete's factors or shifts depending on if gradient is looped.</p>
+                                    <p><em>Auto-render</em> - On by default, won't render when settings change when off.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                <h2 class="small text-center">View escape fractals directly in your browser!</h2>
                 <div class="row mb-3">
                     <nav class="my-3">
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <button class="nav-link text-reset active" id="nav-camera-tab" data-bs-toggle="tab" data-bs-target="#nav-camera" type="button" role="tab" aria-controls="nav-camera" aria-selected="true">Camera Tools</button>
-                            <button class="nav-link text-reset" id="nav-draw-tab" data-bs-toggle="tab" data-bs-target="#nav-draw" type="button" role="tab" aria-controls="nav-draw" aria-selected="false">Draw Tools</button>
+                            <button class="nav-link text-reset" id="nav-draw-tab" data-bs-toggle="tab" data-bs-target="#nav-draw" type="button" role="tab" aria-controls="nav-draw" aria-selected="false">Render Tools</button>
                         </div>
                     </nav>
                     <div class="col-md-5 col-lg-4 gx-5 my-3">
@@ -92,8 +149,8 @@
                                     </form>
                                     <button type="button" class="btn btn-outline-secondary" name="inc">+</button>
                                 </div>
-                                <div class="btn-group mb-3" role="group" aria-label="Draw/Reset Buttons" id="drawGroup">
-                                    <button type="button" class="btn btn-outline-secondary" name="draw">Draw</button>
+                                <div class="btn-group mb-3" role="group" aria-label="Render/Reset Buttons" id="drawGroup">
+                                    <button type="button" class="btn btn-outline-secondary" name="render">Render</button>
                                     <button type="button" class="btn btn-outline-secondary" name="reset">Reset</button>
                                 </div>
                                 <div class="form-check form-switch form-check-inline ms-3">
@@ -138,7 +195,7 @@
                                 <canvas id="colorPalette" width="256" height="20"></canvas>
                                 <div class="form-check form-switch my-3">
                                     <input class="form-check-input" type="checkbox" id="autoDraw" checked>
-                                    <label class="form-check-label text-muted user-select-none" for="autoDraw">Auto-Draw</label>
+                                    <label class="form-check-label text-muted user-select-none" for="autoDraw">Auto-render</label>
                                 </div>
                             </div>
                         </div>
@@ -152,6 +209,17 @@
                 </div>
             </div>
         </div>
+        <footer>
+            <div class="col-md text-center">
+                <p class="font-weight-bold">Written in plain JavaScript, HTML/CSS along with Bootstrap.</p>
+                <p class="">Source code on <a href="https://github.com/Brochin5671/math-beauty" target="_blank" rel="noreferrer">GitHub</a></p>
+            </div>
+            <div class="row mt-4 mb-2">
+                <div class="col-md text-center">
+                    <p class="h5 font-weight-bold small">Developed by Maxim Brochin</p>
+                </div>
+            </div>
+        </footer>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     </body>
 </html>
