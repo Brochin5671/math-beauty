@@ -1,6 +1,6 @@
 {
   "name": "math-beauty",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "create mathematical beauty",
   "main": "app.js",
   "scripts": {
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.16.0",
+    "@flydotio/dockerfile": "^0.4.8",
     "connect-livereload": "^0.6.1",
     "eslint": "^8.1.0",
     "jest": "^27.3.1",
