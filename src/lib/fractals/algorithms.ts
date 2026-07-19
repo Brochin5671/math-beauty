@@ -3,7 +3,8 @@ import { getRelativeValue } from "@/lib/fractals/utils";
 
 // Maps a pixel to the complex plane, offsets pan and zoom divides
 // cr/ci override c for the Julia variant, otherwise c is the pixel itself
-function seed(x: number, y: number, width: number, height: number, options: EscapeParams) {
+// Exported so camera.ts can be tested against this mapping rather than a copy of it
+export function seed(x: number, y: number, width: number, height: number, options: EscapeParams) {
   const { cr, ci, zoom, offsetX, offsetY } = options;
   const a = getRelativeValue(x + offsetX, width, -2, 4) / zoom;
   const b = getRelativeValue(y - offsetY, height, -2, 4) / zoom;
