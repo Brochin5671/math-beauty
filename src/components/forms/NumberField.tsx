@@ -51,13 +51,20 @@ function NumberField({
   controlLabel,
   onStep,
   onValueChange,
-  // Base UI defaults the input to a numeric keypad, which has no decimal point or minus
-  // sign on Android, so decimal is the safer default for a field that accepts both
-  inputMode = "decimal",
+  inputMode,
   // aria-invalid belongs on the input, forward it there where the error styling lives
   "aria-invalid": ariaInvalid,
   ...props
 }: NumberFieldProps) {
+  /*
+   * Software keypads on both iOS and Android lack a minus key, so a field that can go
+   * negative needs the ordinary keyboard or its value cannot be typed at all. Base UI
+   * reaches the same conclusion but only on iOS, and falls back to a numeric keypad
+   * elsewhere, which has neither a minus nor a decimal point. Apply it on every platform
+   */
+  const canBeNegative = props.min == null || props.min < 0;
+  const resolvedInputMode = inputMode ?? (canBeNegative ? "text" : "decimal");
+
   // Base UI stamps direction at the source of every step, so the buttons and the arrow keys
   // route through the same parent math and cannot drift apart
   const handleValueChange: NumberFieldPrimitive.Root.Props["onValueChange"] = (next, details) => {
@@ -85,7 +92,7 @@ function NumberField({
         <NumberFieldPrimitive.Input
           data-slot="number-field-input"
           aria-invalid={ariaInvalid}
-          inputMode={inputMode}
+          inputMode={resolvedInputMode}
           onKeyDown={(event) => {
             // Base UI treats Enter as a navigation key, so blur to reach its commit on blur
             if (event.key === "Enter") event.currentTarget.blur();
