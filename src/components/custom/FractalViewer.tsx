@@ -21,6 +21,7 @@ import { Slider } from "@/components/forms/Slider";
 import { Switch } from "@/components/forms/Switch";
 import { Stack } from "@/components/layouts/Stack";
 import { FRACTALS } from "@/lib/fractals/algorithms";
+import { backingScale, zoomAt } from "@/lib/fractals/camera";
 import { COLOR_METHODS, colorPresets, createPalette } from "@/lib/fractals/coloring";
 import { drawEscapeFractal, drawPalettePreview } from "@/lib/fractals/render";
 import type {
@@ -31,7 +32,6 @@ import type {
   PresetKind,
   RGB,
 } from "@/lib/fractals/types";
-import { mapToRange } from "@/lib/fractals/utils";
 
 const JULIA_CR = -0.70176;
 const JULIA_CI = 0.3842;
@@ -382,20 +382,18 @@ export function FractalViewer() {
     requestRender();
   };
 
+  // Zooms toward the tapped point, which stays put instead of drifting toward the centre
   const onCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const target = e.currentTarget;
-    const { left, top } = target.getBoundingClientRect();
-    const width = target.clientWidth;
-    const height = target.clientHeight;
-    const halfWidth = width / 2;
-    const halfHeight = height / 2;
-    const x = mapToRange(e.clientX - left, 0, width, -halfWidth, halfWidth);
-    const y = mapToRange(e.clientY - top, 0, height, -halfHeight, halfHeight);
-    const panFactor = width === 320 ? 7.25 : width === 275 ? 6 : 5;
+    const canvas = e.currentTarget;
+    const rect = canvas.getBoundingClientRect();
+    const scale = backingScale(canvas.width, rect.width);
     const o = optionsRef.current;
-    o.zoom *= 1.15;
-    o.offsetX = (o.offsetX + x / panFactor) * 1.15;
-    o.offsetY = (o.offsetY - y / panFactor) * 1.15;
+    zoomAt(
+      o,
+      1.15,
+      (e.clientX - rect.left - rect.width / 2) * scale,
+      (e.clientY - rect.top - rect.height / 2) * scale,
+    );
     setUi((u) => ({ ...u, zoom: String(o.zoom), x: String(o.offsetX), y: String(o.offsetY) }));
     requestRender();
   };
