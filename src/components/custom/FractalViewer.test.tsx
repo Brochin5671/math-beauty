@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FractalViewer } from "./FractalViewer";
@@ -215,6 +215,160 @@ describe("FractalViewer", () => {
     // poisoning the offsets
     expect(screen.getByLabelText("Pan X")).toHaveValue("0");
     expect(screen.getByLabelText("Pan Y")).toHaveValue("0");
+  });
+
+  describe("canvas gestures", () => {
+    const getCanvas = () => screen.getByRole("img", { name: /Mandelbrot Set/ });
+    const zoomValue = () => Number((screen.getByLabelText("Zoom") as HTMLInputElement).value);
+
+    // happy-dom drops the pointer coordinates from a WheelEvent init, and a wheel with no
+    // anchor is refused as a NaN camera step, so set them the way a browser would
+    const wheel = (target: HTMLElement, deltaY: number, deltaMode = 0) => {
+      const event = new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY, deltaMode });
+      Object.defineProperty(event, "clientX", { value: 160, configurable: true });
+      Object.defineProperty(event, "clientY", { value: 160, configurable: true });
+      fireEvent(target, event);
+    };
+
+    it("pans the camera with a pointer drag", async () => {
+      render(<FractalViewer />);
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
+      fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 140, clientY: 125 });
+      fireEvent.pointerUp(canvas, { pointerId: 1 });
+
+      // The image follows the pointer, so the offsets move opposite on x and with it on y
+      await waitFor(() => {
+        expect(screen.getByLabelText("Pan X")).toHaveValue("-40");
+        expect(screen.getByLabelText("Pan Y")).toHaveValue("25");
+      });
+    });
+
+    it("holds a sub-threshold move until the press becomes a drag", async () => {
+      render(<FractalViewer />);
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
+      // Under the threshold, so nothing moves yet and the anchor is not advanced
+      fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 102, clientY: 100 });
+      fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 110, clientY: 100 });
+      fireEvent.pointerUp(canvas, { pointerId: 1 });
+
+      // The full 10px from the press point, not 8 from the ignored move nor 12 counting it twice
+      await waitFor(() => expect(screen.getByLabelText("Pan X")).toHaveValue("-10"));
+    });
+
+    it("does not zoom on the click that closes a drag", async () => {
+      render(<FractalViewer />);
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
+      fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 140, clientY: 100 });
+      fireEvent.pointerUp(canvas, { pointerId: 1 });
+      fireEvent.click(canvas);
+      await waitFor(() => expect(screen.getByLabelText("Pan X")).toHaveValue("-40"));
+      expect(zoomValue()).toBe(1);
+    });
+
+    it("still zooms on a tap that never became a drag", async () => {
+      render(<FractalViewer />);
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
+      fireEvent.pointerUp(canvas, { pointerId: 1 });
+      fireEvent.click(canvas);
+      expect(zoomValue()).toBeCloseTo(1.15, 5);
+    });
+
+    it.each([
+      ["pixel", 0],
+      ["line", 1],
+    ])("zooms in on a %s-mode wheel scroll", async (_mode, deltaMode) => {
+      render(<FractalViewer />);
+      wheel(getCanvas(), -100, deltaMode);
+      await waitFor(() => expect(zoomValue()).toBeGreaterThan(1));
+    });
+
+    it("bounds a runaway wheel delta to one step", async () => {
+      render(<FractalViewer />);
+      // Page-mode deltas multiply by the element height, so an unbounded factor here
+      // would zoom by many orders of magnitude in a single event
+      wheel(getCanvas(), -100000);
+      await waitFor(() => expect(zoomValue()).toBeGreaterThan(1));
+      expect(zoomValue()).toBeLessThanOrEqual(4);
+    });
+
+    it("zooms out on a wheel scroll the other way", async () => {
+      render(<FractalViewer />);
+      wheel(getCanvas(), 100);
+      await waitFor(() => expect(zoomValue()).toBeLessThan(1));
+    });
+
+    it("zooms with a two-pointer pinch", async () => {
+      render(<FractalViewer />);
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
+      fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 120, clientY: 100 });
+      // Spreading the fingers from 20px apart to 60px is a threefold zoom
+      fireEvent.pointerMove(canvas, { pointerId: 2, clientX: 160, clientY: 100 });
+      await waitFor(() => expect(zoomValue()).toBeCloseTo(3, 5));
+
+      fireEvent.pointerCancel(canvas, { pointerId: 1 });
+      fireEvent.pointerCancel(canvas, { pointerId: 2 });
+    });
+
+    it("ignores a move from a pointer that never went down", async () => {
+      render(<FractalViewer />);
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
+      // A stray pointer must not register as a second finger nor move the camera
+      fireEvent.pointerMove(canvas, { pointerId: 9, clientX: 300, clientY: 300 });
+      fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 140, clientY: 100 });
+
+      // Only the tracked pointer counted, so the pan is its 40px and the zoom never moved
+      await waitFor(() => expect(screen.getByLabelText("Pan X")).toHaveValue("-40"));
+      expect(zoomValue()).toBe(1);
+    });
+
+    it("survives two pointers meeting at the same spot, which would zoom to zero", async () => {
+      render(<FractalViewer />);
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
+      fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 140, clientY: 100 });
+      // Pinching the fingers together reports zero distance, a factor of zero
+      fireEvent.pointerMove(canvas, { pointerId: 2, clientX: 100, clientY: 100 });
+
+      // A zero zoom would divide by zero in seed and blank the canvas for good
+      await waitFor(() => expect(zoomValue()).not.toBe(0));
+      expect(zoomValue()).toBeGreaterThan(0);
+    });
+
+    it("re-measures the pinch when a finger lifts, instead of against the lifted one", async () => {
+      render(<FractalViewer />);
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
+      fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 300, clientY: 100 });
+      fireEvent.pointerDown(canvas, { pointerId: 3, clientX: 303, clientY: 100 });
+      fireEvent.pointerUp(canvas, { pointerId: 1 });
+      // Measured against the lifted pair this reads as a 66x zoom out in one event
+      fireEvent.pointerMove(canvas, { pointerId: 3, clientX: 306, clientY: 100 });
+
+      await waitFor(() => expect(zoomValue()).toBeGreaterThan(0.5));
+    });
+
+    it("moves the camera without drawing while auto-render is off", async () => {
+      const ctx = stubCanvas();
+      const user = userEvent.setup();
+      render(<FractalViewer />);
+      await user.click(screen.getByRole("tab", { name: "Render" }));
+      await user.click(screen.getByRole("switch", { name: "Auto-render" }));
+      await user.click(screen.getByRole("tab", { name: "Camera" }));
+
+      const canvas = getCanvas();
+      ctx.putImageData.mockClear();
+      fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
+      fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 140, clientY: 100 });
+
+      await waitFor(() => expect(screen.getByLabelText("Pan X")).toHaveValue("-40"));
+      expect(ctx.putImageData).not.toHaveBeenCalled();
+    });
   });
 
   it("changes coloring method, preset, gradient loop and auto-render on the Render tab", async () => {

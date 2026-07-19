@@ -18,10 +18,18 @@ export function backingScale(backingWidth: number, cssWidth: number): number {
 // The y axis flips because seed() uses y - offsetY
 // Anchored zoom only: centre zoom keeps its own multiply and divide in the viewer, because
 // x/1.15 and x*(1/1.15) disagree in the last bit for about 15% of doubles
+// Refuses a step whose result the mapping cannot use, all or nothing so a rejected step
+// never leaves the camera half moved. A pinch that collapses to zero distance would
+// otherwise multiply zoom to zero, which seed() divides by and never recovers from
 export function zoomAt(camera: Camera, factor: number, u: number, v: number): void {
-  camera.zoom *= factor;
-  camera.offsetX = factor * camera.offsetX + (factor - 1) * u;
-  camera.offsetY = factor * camera.offsetY - (factor - 1) * v;
+  const zoom = camera.zoom * factor;
+  const offsetX = factor * camera.offsetX + (factor - 1) * u;
+  const offsetY = factor * camera.offsetY - (factor - 1) * v;
+  if (!Number.isFinite(zoom) || zoom === 0) return;
+  if (!Number.isFinite(offsetX) || !Number.isFinite(offsetY)) return;
+  camera.zoom = zoom;
+  camera.offsetX = offsetX;
+  camera.offsetY = offsetY;
 }
 
 // Moves the image with the pointer, deltas in backing pixels
