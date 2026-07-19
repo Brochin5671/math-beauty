@@ -1,0 +1,7 @@
+# Vulnerability disclosure pointer (RFC 9116)
+# Refresh Expires annually; it must be < 1 year out per RFC 9116 section 2.5.5
+
+Contact: mailto:maximbrochin@gmail.com
+Expires: 2027-04-28T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://fractal-viewer.brochin5671.workers.dev/.well-known/security.txt

@@ -1,0 +1,48 @@
+# Composite action that bundles the repeated CI setup boilerplate:
+# pnpm/action-setup -> setup-node (with cache: pnpm) -> pnpm install
+# --frozen-lockfile
+#
+# Used by most jobs in ci.yml + cd.yml. Two jobs deliberately don't
+# use it:
+# - ci.yml `secrets` does its own pnpm/setup-node inline because it
+#   doesn't need `pnpm install` (gitleaks runs its own binary)
+# - ci.yml `sast` runs in the `semgrep/semgrep` container which ships
+#   its own toolchain, no Node/pnpm available
+#
+# Each consumer drops 4 lines of boilerplate for one
+# `- uses: ./.github/actions/setup`
+#
+# Checkout is intentionally NOT in this composite: local composite
+# actions require the consuming workflow to check out the repo first
+# so the runner can read action.yml. The consumer keeps its own
+# checkout step (with `fetch-depth: 0` where needed for full history)
+#
+# Action versions pinned here so a single edit upgrades every consumer
+
+name: Setup
+description: pnpm + Node toolchain, install dependencies (frozen lockfile)
+
+runs:
+  using: composite
+  steps:
+    # pnpm version from package.json `packageManager` field
+    - uses: pnpm/action-setup@v6
+
+    # Node version from .nvmrc. `cache: pnpm` is REQUIRED for the
+    # pnpm store to be cached: setup-node only caches when the cache
+    # key is set explicitly (the `packageManager` field controls
+    # Corepack auto-enable, not cache behavior). Without this,
+    # every job pays the full `pnpm install` cost
+    - uses: actions/setup-node@v6
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+
+    # ::group:: folds the install output (~hundreds of lines on cache miss)
+    # under a single collapsible header in the GitHub Actions run UI
+    - name: Install dependencies
+      shell: bash
+      run: |
+        echo "::group::pnpm install --frozen-lockfile"
+        pnpm install --frozen-lockfile
+        echo "::endgroup::"

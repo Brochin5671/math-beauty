@@ -1,0 +1,116 @@
+---
+import { cn, type VariantProps } from "@/lib/utils";
+import { headerVariants, itemsGroupVariants } from "./Header.variants";
+import { HeaderDesktopMenu, type NavItemsGap } from "./HeaderDesktopMenu";
+import { HeaderMobile, type NavItem } from "./HeaderMobile";
+import { HeaderMobileCollapse } from "./HeaderMobileCollapse";
+
+/*
+ * Page-level navigation with responsive mobile drawer
+ * Desktop: horizontal flex row with logo, items, and optional CTA
+ * Mobile: hamburger trigger opens a Sheet drawer with the same items
+ * Active route highlighted based on Astro.url.pathname
+ * Variant and items-group class maps live in Header.variants.ts
+ */
+
+export interface Props
+  extends VariantProps<typeof headerVariants>,
+    VariantProps<typeof itemsGroupVariants> {
+  /** Additional Tailwind classes merged onto the nav element */
+  class?: string;
+  /** Spacing between the desktop nav items. Default 'default' */
+  itemsGap?: NavItemsGap;
+  /** Navigation items rendered in both the desktop row and the mobile drawer */
+  items: NavItem[];
+  /** aria-label for the mobile trigger button. Defaults to 'Open menu' */
+  mobileTriggerLabel?: string;
+  /** Which mobile UI pattern to use. `collapse` (default) expands links vertically below the header bar. `drawer` slides a Sheet in from the right with accordion support for nested items */
+  mobileVariant?: "collapse" | "drawer";
+}
+
+const {
+  items,
+  position = "sticky",
+  variant = "default",
+  itemsAlign = "start",
+  itemsGap = "default",
+  mobileVariant = "collapse",
+  mobileTriggerLabel = "Open menu",
+  class: className,
+} = Astro.props;
+const currentPath = Astro.url.pathname;
+---
+
+<style is:global>
+  :root {
+    /* Keep in sync with the h-16 nav bar below; Hero.tsx subtracts this var */
+    --header-height: 4rem;
+  }
+</style>
+<nav data-slot="header" class={cn(headerVariants({ position, variant }), className)}>
+  <div class="container mx-auto flex h-16 items-center gap-6 px-4">
+    <div class="flex items-center">
+      <slot name="logo" />
+    </div>
+
+    <div class={itemsGroupVariants({ itemsAlign })}>
+      <HeaderDesktopMenu client:load items={items} currentPath={currentPath} itemsGap={itemsGap} />
+    </div>
+
+    <div class="hidden md:flex md:items-center">
+      <slot name="cta" />
+    </div>
+
+    <div class="ml-auto flex md:hidden">
+      {
+        mobileVariant === "drawer" ? (
+          <HeaderMobile
+            client:load
+            items={items}
+            currentPath={currentPath}
+            mobileTriggerLabel={mobileTriggerLabel}>
+            <slot name="mobile-trigger">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="4" x2="20" y1="12" y2="12" />
+                <line x1="4" x2="20" y1="6" y2="6" />
+                <line x1="4" x2="20" y1="18" y2="18" />
+              </svg>
+            </slot>
+          </HeaderMobile>
+        ) : (
+          <HeaderMobileCollapse
+            client:load
+            items={items}
+            currentPath={currentPath}
+            mobileTriggerLabel={mobileTriggerLabel}>
+            <slot name="mobile-trigger">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+                <line x1="4" x2="20" y1="12" y2="12" />
+                <line x1="4" x2="20" y1="6" y2="6" />
+                <line x1="4" x2="20" y1="18" y2="18" />
+              </svg>
+            </slot>
+          </HeaderMobileCollapse>
+        )
+      }
+    </div>
+  </div>
+</nav>

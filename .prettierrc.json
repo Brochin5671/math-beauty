@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/prettierrc.json",
+  "plugins": ["prettier-plugin-astro"],
+  "overrides": [{ "files": "*.astro", "options": { "parser": "astro" } }],
+  "astroSkipFrontmatter": true,
+  "printWidth": 100,
+  "bracketSameLine": true,
+  "singleQuote": false,
+  "jsxSingleQuote": false
+}

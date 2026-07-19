@@ -1,0 +1,40 @@
+---
+import { FractalViewer } from "@/components/custom/FractalViewer";
+import { Link } from "@/components/elements/Link";
+import { Footer, FooterBottom } from "@/components/layouts/Footer";
+import { Main } from "@/components/layouts/Main";
+import { Section } from "@/components/layouts/Section";
+import { Stack } from "@/components/layouts/Stack";
+import Layout from "@/layouts/Layout.astro";
+import { pageMeta } from "@/lib/site-config";
+---
+
+<Layout
+  seoProps={{
+    description: pageMeta.home,
+  }}>
+  <Main>
+    <Section padding="compact">
+      <Stack gap="lg" align="center">
+        <div class="text-center">
+          <h1>Fractal Viewer</h1>
+          <p class="text-muted-foreground mt-2">View escape fractals directly in your browser</p>
+        </div>
+        <FractalViewer client:load />
+        <p class="max-w-2xl text-center text-sm text-muted-foreground">
+          Escape fractals are sets of complex numbers c for which a recursive function such as z =
+          z&sup2; + c stays bounded when iterated toward infinity. Explore the Mandelbrot, Burning
+          Ship, Tricorn and Multibrot sets along with their Julia variants.
+        </p>
+      </Stack>
+    </Section>
+  </Main>
+  <Footer density="compact">
+    <FooterBottom variant="stacked">
+      <Link href="https://github.com/Brochin5671/math-beauty" variant="link">
+        Source code on GitHub
+      </Link>
+      <p>Developed by Maxim Brochin</p>
+    </FooterBottom>
+  </Footer>
+</Layout>

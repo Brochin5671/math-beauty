@@ -1,0 +1,22 @@
+# pnpm 11+ moved settings out of package.json's `pnpm` block to this file
+# `allowBuilds` replaces the old `onlyBuiltDependencies` array with a more
+# expressive map (per-version pinning supported via `<pkg>@<version>: true`)
+#
+# Inherited pnpm 11 defaults (do NOT need to be set explicitly):
+#   - minimumReleaseAge: 1440      (block packages younger than 1 day)
+#   - blockExoticSubdeps: true     (refuse trusted deps pulling untrusted transitive)
+#   - trustPolicy: no-downgrade    (refuse weaker-provenance upgrades)
+#
+# See: pnpm.io/blog/2025-12-29-pnpm-in-2025, pnpm.io/blog/releases/11.0
+
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  sharp: true
+  workerd: true
+engineStrict: true
+
+# Pull the adapter's transitive vite-plugin to 1.42.1 so miniflare ships the
+# patched undici 7.28.0 (dev-only CVE-2026-12151, CVE-2026-6734).
+overrides:
+  '@cloudflare/vite-plugin': ^1.42.1

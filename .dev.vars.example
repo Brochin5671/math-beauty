@@ -1,0 +1,13 @@
+# Local server secrets for Cloudflare Workers dev.
+#
+# Copy to `.dev.vars` and fill in values. `.dev.vars` (and every other
+# `.dev.vars.*`) is gitignored; only this template is tracked. Real secrets do
+# NOT belong here; use empty placeholders.
+#
+# In production, set each with `wrangler secret put <NAME>`, not from a file.
+# Server secrets are declared in astro.config.mjs `env.schema`
+# (context: "server", access: "secret"). See SECURITY.md for the full map.
+
+# Optional server secret the contact handler reads at runtime. Left unset, the
+# contact endpoint stays on its log-only fallback and sends no mail.
+CONTACT_API_KEY=

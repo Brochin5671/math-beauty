@@ -1,0 +1,58 @@
+# - `applies-to: security-updates` batches CVE PRs (otherwise one PR per CVE)
+# - `cooldown` waits 7 days post-release to dodge yanked / supply-chain bad releases
+# - `@types/node` major bumps follow .nvmrc, not lead it (skip auto-bumps)
+# Schema: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      version-updates:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch
+      security-updates:
+        applies-to: security-updates
+        update-types:
+          - minor
+          - patch
+          - major
+    cooldown:
+      default-days: 7
+      semver-major-days: 7
+    ignore:
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
+      # conventionalcommits v10 switched the changelog preset to render functions;
+      # semantic-release 25's conventional-changelog-writer is still Handlebars, so
+      # v10 renders an empty changelog body (heading only). Hold at v9 until
+      # semantic-release ships a writer that accepts render-function presets.
+      - dependency-name: "conventional-changelog-conventionalcommits"
+        update-types:
+          - version-update:semver-major
+    commit-message:
+      # `include: scope` auto-appends (deps) for prod and (deps-dev) for dev, so
+      # the prefix must be bare `chore` or the scope doubles: chore(deps)(deps).
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions-version-updates:
+        update-types:
+          - minor
+          - patch
+    cooldown:
+      # github-actions is not semver-versioned, so Dependabot rejects
+      # semver-*-days here; default-days covers the supply-chain cooldown.
+      default-days: 7
+    commit-message:
+      # no `include: scope` here: it would append (deps) and read chore(ci)(deps)
+      prefix: chore(ci)

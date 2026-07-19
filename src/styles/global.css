@@ -1,0 +1,758 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Custom data-orientation shortcuts. Base UI primitives (ScrollArea,
+ * Slider, ToggleGroup, ...) emit `data-orientation="vertical"` /
+ * `data-orientation="horizontal"` as attribute=value pairs. shadcn's
+ * base-vega registry ships classes like `data-vertical:w-2.5` that
+ * would otherwise only match a bare `[data-vertical]` attribute. These
+ * variants wire the shorthand to the actual attribute=value selector
+ * so the verbatim registry source works without per-component patches.
+ */
+@custom-variant data-vertical (&[data-orientation="vertical"]);
+@custom-variant data-horizontal (&[data-orientation="horizontal"]);
+
+@theme inline {
+  /* System font stack, no web font is loaded */
+  --font-sans:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans",
+    "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/*
+ * Reusable motion utilities. Defining --animate-* in @theme generates the
+ * tree-shaken animate-* utilities (so they ship only where used); the keyframes
+ * live alongside. scroller scrolls a duplicated track by -50% for a seamless
+ * loop; shimmer sweeps a gradient for loading placeholders; shake is a one-shot
+ * error nudge; float is a gentle infinite bob for decorative elements; gradient
+ * drifts a background-position for animated gradient fills and text. All collapse
+ * under the reduced-motion hatch in this file.
+ */
+@theme {
+  --animate-scroller: scroller 30s linear infinite;
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+  --animate-shake: shake 0.4s ease-out;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-gradient: gradient 6s ease infinite;
+
+  @keyframes scroller {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: -150% 0;
+    }
+    100% {
+      background-position: 150% 0;
+    }
+  }
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20%,
+    60% {
+      transform: translateX(-6px);
+    }
+    40%,
+    80% {
+      transform: translateX(6px);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+  @keyframes gradient {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+}
+
+/*
+ * Scroller speed. The playground scroller demo sets data-speed on its track
+ * (default "normal" = the 30s utility); these override just the duration so a
+ * slower or faster pass is one attribute change. The attribute selector
+ * outranks the .animate-scroller utility, so only the duration is replaced.
+ */
+[data-scroller-track][data-speed="slow"] {
+  animation-duration: 45s;
+}
+[data-scroller-track][data-speed="fast"] {
+  animation-duration: 18s;
+}
+/* Default scrolls left (the keyframe translates to -50%); reverse for right. */
+[data-scroller-track][data-direction="right"] {
+  animation-direction: reverse;
+}
+
+/*
+ * Optimized background image via image-set() (Baseline: all browsers since
+ * Sept 2023). Zero JS: the browser picks the best format (AVIF, then the
+ * fallback) and resolution. The plain url() line comes first as the pre-2023
+ * fallback; the image-set() line overrides it where supported.
+ *
+ * CONFIGURE: set the two custom properties where you use the class, e.g.
+ *   style="--bg-image-set-fallback: url('/img/hero.jpg');
+ *          --bg-image-set: image-set(url('/img/hero.avif') type('image/avif'),
+ *                                     url('/img/hero.jpg') type('image/jpeg'))"
+ * Add 1x/2x candidates (e.g. `url('/img/hero@2x.avif') type('image/avif') 2x`)
+ * to switch on resolution too.
+ */
+.bg-image-set {
+  background-image: var(--bg-image-set-fallback);
+  /* biome-ignore lint/suspicious/noDuplicateProperties: intentional image-set() fallback - the plain url() line above is the pre-2023 fallback, overridden here where image-set() is supported */
+  background-image: var(--bg-image-set);
+  background-size: cover;
+  background-position: center;
+}
+
+:root {
+  /* Opt browser-rendered UI (native <select> dropdowns, date pickers,
+     scrollbars, file dialogs) into the matching theme. Without this the
+     native select popup stays light even when .dark is on <html>. */
+  color-scheme: light;
+
+  /* Motion tokens */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 500ms;
+  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Block sizing tokens: dimension defaults for block components. Override any
+     of these in your own :root to re-tokenize the blocks without forking their
+     source. Each block also inlines the same value as a Tailwind arbitrary-value
+     fallback, so the blocks stay self-contained if extracted without this file. */
+  --hero-min-height: 600px; /* Hero default size: minimum height */
+  --hero-height: 85svh; /* Hero default size: target height on large screens */
+  --hero-max-height: 900px; /* Hero default size: maximum height */
+  --hero-height-full: 100svh; /* Hero fullscreen size: target height */
+  --process-marker-size: 2.5rem; /* Process step number circle diameter */
+  --timeline-marker-size: 0.75rem; /* Timeline milestone dot diameter */
+
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  /* Fractal violet accent. White foreground clears WCAG AA on primary buttons.
+     The same values live in `.dark` below */
+  --primary: #a855f7;
+  --primary-foreground: #0a0a0a;
+  --ring: #a855f7;
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --warning: oklch(0.7 0.18 85);
+  --success: oklch(0.62 0.16 162);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  /* Fractal violet accent (dark mode), same as :root */
+  --primary: #a855f7;
+  --primary-foreground: #0a0a0a;
+  --ring: #a855f7;
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  /* Hex (not oklch) because axe-core 4.11.x has a color-parsing bug that
+     under-reads both oklch and rgb values when computing contrast, producing
+     false-positive violations on muted-foreground over backgrounds. #c0c0c0
+     is silver, visually equivalent to oklch(0.776 0 0) - a notch brighter than
+     the canonical oklch(0.708) to clear axe's miscomputed threshold while
+     keeping the same de-emphasized hierarchy against primary foreground. */
+  --muted-foreground: #c0c0c0;
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --warning: oklch(0.7 0.18 85);
+  --success: oklch(0.74 0.17 162);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  /* All elements use token-driven border and outline colors */
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    /* overflow-x-clip (not -hidden): hidden forces overflow-y to `auto`, turning
+       body into a scroll container so `position: sticky` headers only stick for
+       one viewport. clip prevents horizontal overflow without that side effect. */
+    @apply bg-background text-foreground overflow-x-clip;
+  }
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  /* Heading sizes are global (visual hierarchy applies everywhere); break-words
+     lets a long single-word heading wrap instead of overflowing on mobile */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold tracking-tight text-balance scroll-mt-20 break-words;
+  }
+  h1 {
+    @apply text-5xl lg:text-6xl xl:text-7xl;
+  }
+  h2 {
+    @apply text-4xl lg:text-5xl xl:text-6xl;
+  }
+  h3 {
+    @apply text-2xl lg:text-3xl xl:text-4xl;
+  }
+  h4 {
+    @apply text-xl lg:text-2xl;
+  }
+  h5 {
+    @apply text-lg;
+  }
+  h6 {
+    @apply text-base;
+  }
+
+  /*
+   * Inline code and code blocks: explicit text-foreground so axe-core 4.11.x
+   * doesn't fall back to the :root light value of --muted-foreground when
+   * <code> inherits color through `text-muted-foreground` on the parent (it
+   * misreads inheritance through var() in dark mode and reports #878787 on
+   * the dark #202222 bg-muted, failing 4.5:1 even though the rendered color
+   * is actually #c0c0c0 / passing). text-foreground also reads better:
+   * inline code is literal content (API paths, file names), not de-emphasis
+   */
+  code {
+    @apply bg-muted text-foreground rounded-sm px-1.5 py-1 font-mono text-sm font-semibold;
+  }
+  pre {
+    @apply bg-muted rounded-lg p-4 overflow-x-auto my-4;
+  }
+  pre code {
+    @apply bg-transparent p-0 rounded-none text-sm;
+  }
+  hr {
+    @apply my-4 border-t-2 border-border;
+  }
+}
+
+/*
+ * Shiki dual-theme activation for CodeBlock's theme="system" mode, which
+ * renders with `defaultColor: false` so every token carries both palettes
+ * as CSS variables. These rules pick one: the light values by default, the
+ * dark values under the site's .dark class (matching the theme toggle, not
+ * the OS preference). The forced "dark"/"light" modes bake absolute inline
+ * colors and ignore these rules
+ */
+@layer components {
+  .shiki,
+  .shiki span {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+    font-style: var(--shiki-light-font-style);
+    font-weight: var(--shiki-light-font-weight);
+    text-decoration: var(--shiki-light-text-decoration);
+  }
+  .dark .shiki,
+  .dark .shiki span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+    font-style: var(--shiki-dark-font-style);
+    font-weight: var(--shiki-dark-font-weight);
+    text-decoration: var(--shiki-dark-text-decoration);
+  }
+}
+
+/*
+ * Prose wrapper: apply to content areas (blog posts, about pages,
+ * service descriptions) to get typography rhythm. Components render
+ * outside .prose and are not affected by these styles
+ */
+.prose {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply mb-4;
+  }
+  p {
+    @apply leading-7 my-4;
+  }
+  ul {
+    @apply mt-4 list-disc list-inside;
+  }
+  ol {
+    @apply mt-4 list-decimal list-inside;
+  }
+  li {
+    @apply leading-7 my-2;
+  }
+  ul ul,
+  ul ol,
+  ol ul,
+  ol ol {
+    @apply ml-8;
+  }
+  blockquote {
+    @apply border-l-2 border-border pl-4 my-4;
+  }
+  a {
+    @apply underline underline-offset-2 transition-colors hover:text-muted-foreground focus-visible:text-muted-foreground;
+  }
+}
+
+/*
+ * Scroll reveal: sections animate in when entering viewport
+ * Content is always in the DOM (crawlers can read it)
+ * Intersection Observer adds .revealed class via inline script
+ * Respects prefers-reduced-motion
+ */
+.reveal {
+  opacity: 0;
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out,
+    filter 0.6s ease-out;
+}
+/* Direction picks the entrance offset; default (no attribute) lifts up. */
+.reveal:not([data-reveal]),
+.reveal[data-reveal="up"] {
+  transform: translateY(1.5rem);
+}
+.reveal[data-reveal="down"] {
+  transform: translateY(-1.5rem);
+}
+.reveal[data-reveal="left"] {
+  transform: translateX(1.5rem);
+}
+.reveal[data-reveal="right"] {
+  transform: translateX(-1.5rem);
+}
+.reveal[data-reveal="fade"] {
+  transform: none;
+}
+.reveal[data-reveal="zoom"] {
+  transform: scale(0.92);
+}
+/* Blur sharpens in from a soft blur; no positional offset. */
+.reveal[data-reveal="blur"] {
+  transform: none;
+  filter: blur(12px);
+}
+/* Revealed settles every direction to the identity transform (and clears blur). */
+.reveal.revealed {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/*
+ * Stagger reveal: children animate in sequentially
+ * Parent gets .reveal, children get style="--stagger-index: N"
+ * Each child delays by N * 100ms after the parent is revealed
+ * Children start hidden and inherit the reveal transition
+ */
+.reveal [data-stagger] {
+  opacity: 0;
+  transform: translateY(1rem);
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
+}
+.reveal.revealed [data-stagger] {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: calc(var(--stagger-index, 0) * 150ms);
+}
+
+/*
+ * Pop-in entry. Baseline-safe (@starting-style + transition-behavior:
+ * allow-discrete). An element animates in from the @starting-style values
+ * when it is inserted (or toggled from display:none); degrades to an instant
+ * appear where @starting-style is unsupported.
+ */
+.pop-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.5s ease-out,
+    transform 0.5s ease-out,
+    display 0.5s allow-discrete;
+}
+@starting-style {
+  .pop-in {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+/*
+ * Scroll-driven reveal: each element animates in as it enters the viewport,
+ * driven natively by `animation-timeline: view()`. Behind @supports so browsers
+ * without scroll-driven animations show the static end state. Add `.scroll-reveal`
+ * to any element; no script needed. Flattens under the reduced-motion hatch below.
+ */
+@supports (animation-timeline: view()) {
+  .scroll-reveal {
+    animation: scroll-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 35%;
+  }
+  @keyframes scroll-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(2rem) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/*
+ * Scroll progress: a bar that fills left to right as its scroll container
+ * scrolls, driven natively by `animation-timeline: scroll()`. Behind @supports
+ * so browsers without scroll-driven animations show no fill. Put `.scroll-progress`
+ * on a thin sticky element at the top of the scroller; keep it decorative
+ * (aria-hidden). Collapses to empty under the reduced-motion hatch below.
+ */
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    transform-origin: 0 50%;
+    animation: scroll-progress linear both;
+    animation-timeline: scroll();
+  }
+  @keyframes scroll-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+}
+
+/*
+ * Parallax: a perspective scroll container moves a back layer slower than the
+ * foreground via translateZ. Give `.parallax` a height (or override
+ * `--parallax-height`) so the container scrolls; each panel is a `.parallax__group`
+ * holding `.parallax__layer` children: `.parallax__base` (foreground, normal speed)
+ * and `.parallax__back` (the slower depth layer). No script: scrolling drives it.
+ * Flattens to a flat scroll under the reduced-motion hatch below.
+ */
+.parallax {
+  height: var(--parallax-height, 360px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  perspective: 1px;
+  perspective-origin: 0 0;
+}
+.parallax__group {
+  position: relative;
+  height: var(--parallax-height, 360px);
+  transform-style: preserve-3d;
+}
+.parallax__layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+}
+.parallax__base {
+  transform: translateZ(0);
+}
+.parallax__back {
+  transform: translateZ(-1px) scale(2);
+  transform-origin: 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * Escape hatch: every suppression selector below is gated on
+   * `html:not([data-force-motion])`. The playground animations showcase sets
+   * `data-force-motion` on the iframe root when the user clicks Play / Replay,
+   * an explicit request to SEE the motion, so that one demo plays at full
+   * duration while all other automatic, decorative motion stays suppressed.
+   */
+  html:not([data-force-motion]) .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+  html:not([data-force-motion]) .reveal [data-stagger] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  /* Scroll-driven reveal settles to its visible end state (mirrors .reveal). */
+  html:not([data-force-motion]) .scroll-reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  /* Scroll progress bar is decorative; collapse it to empty (no scroll-linked fill). */
+  html:not([data-force-motion]) .scroll-progress {
+    animation: none;
+    transform: scaleX(0);
+  }
+  /* Parallax flattens to a plain scroll: no perspective, back layer at rest. */
+  html:not([data-force-motion]) .parallax {
+    perspective: none;
+  }
+  html:not([data-force-motion]) .parallax__back {
+    transform: none;
+  }
+  /*
+   * Global transition/animation suppression mirrors the html[data-motion="reduce"]
+   * override below, but tied to the OS preference. Necessary so axe-core scans
+   * (Playwright emulates reduced-motion via page.emulateMedia) don't capture
+   * mid-flight color values from `transition-all` on Button + form controls
+   * during the disabled -> enabled hydration flip
+   */
+  html:not([data-force-motion]) *,
+  html:not([data-force-motion]) *::before,
+  html:not([data-force-motion]) *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: needs to override scoped component transitions, same rationale as data-motion="reduce" */
+    animation-duration: 0.001ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: see above */
+    animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: see above */
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/*
+ * Playground toolbar `Motion: reduce` override. The toolbar writes
+ * `data-motion="reduce"` on <html>; this rule disables animations and
+ * transitions site-wide regardless of the OS preference. The 0.001ms
+ * trick keeps `animationend` events firing for any code that depends
+ * on them while suppressing visible motion
+ */
+html[data-motion="reduce"]:not([data-force-motion]) *,
+html[data-motion="reduce"]:not([data-force-motion]) *::before,
+html[data-motion="reduce"]:not([data-force-motion]) *::after {
+  /* biome-ignore lint/complexity/noImportantStyles: intentional cascade reversal, needs to override scoped component animations + transitions */
+  animation-duration: 0.001ms !important;
+  /* biome-ignore lint/complexity/noImportantStyles: see above */
+  animation-iteration-count: 1 !important;
+  /* biome-ignore lint/complexity/noImportantStyles: see above */
+  transition-duration: 0.001ms !important;
+  /* biome-ignore lint/complexity/noImportantStyles: see above */
+  scroll-behavior: auto !important;
+}
+
+/*
+ * Theme-switch flicker suppression. ThemeToggle adds `.theme-switching`
+ * to <html> for one paint while flipping the dark class, then removes
+ * it. Without this, every component with `transition-colors` (links,
+ * buttons, form controls, ...) animates from light to dark token values
+ * and the user sees the mid-flight grey.
+ */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  /* biome-ignore lint/complexity/noImportantStyles: must override scoped component transitions during the flip */
+  transition: none !important;
+}
+
+/* System font stack for html/body */
+html,
+body {
+  font-family: var(--font-sans);
+  font-optical-sizing: auto;
+  margin: 0;
+  width: 100%;
+  /* No `height: 100%`: it would cap body to one viewport, so a `position: sticky`
+     header (whose containing block is body) only sticks for one screen. Body
+     grows with content; the body background still fills the viewport via the
+     canvas background propagation. The playground shell sets its own viewport
+     height (SidebarShell `h-svh`), so it is unaffected. */
+}
+
+/*
+ * Playground toolbar font-family override. ToolbarSettings writes
+ * data-font on <html>; these rules swap body font without disturbing
+ * component-level `font-mono` utilities (which keep their own stack).
+ */
+html[data-font="system"] body {
+  font-family: system-ui, sans-serif;
+}
+
+html[data-font="serif"] body {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+}
+
+/*
+ * Wave gesture. Opt-in class for single-fire or repeated attention
+ * animations (e.g. "Hi, I'm X 👋"). Pair with a small inline script that
+ * toggles .waving on an element with .wave to trigger the animation
+ */
+.wave {
+  display: inline-block;
+  transform-origin: 70% 70%;
+}
+
+.wave.waving {
+  animation: wave 0.6s ease-in-out;
+}
+
+@keyframes wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  15% {
+    transform: rotate(16deg);
+  }
+  30% {
+    transform: rotate(-6deg);
+  }
+  45% {
+    transform: rotate(16deg);
+  }
+  60% {
+    transform: rotate(-4deg);
+  }
+  80% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-force-motion]) .wave.waving {
+    animation: none;
+  }
+}
+
+/*
+ * CONFIGURE: project-level overrides live here, OUTSIDE @layer base, so
+ * they take cascade priority over the library defaults. Replace the
+ * example below (heading font-medium) with your own typography overrides
+ * or delete the block entirely if you don't need any
+ */
+/* Override outside @layer so it has higher cascade priority than base */
+:root h1,
+:root h2,
+:root h3,
+:root h4,
+:root h5,
+:root h6 {
+  @apply font-medium;
+}
