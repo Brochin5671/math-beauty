@@ -9,7 +9,7 @@ A website for viewing escape fractals such as the [Mandelbrot Set](https://en.wi
 - Fractal picker: Mandelbrot, Burning Ship, Tricorn, Multibrot, each with a Julia toggle
 - Camera: zoom, pan, iterations, exponent (Multibrot), complex constant (Julia)
 - Render: iteration or smooth coloring, palette presets, gradient loop, RGB factors, auto-render
-- Tap the canvas to zoom toward a point, drag to move, scroll or pinch to zoom
+- Press the canvas to zoom toward a point, drag to move, scroll or pinch to zoom
 - Keyboard: `Q` / `E` zoom, `W` `A` `S` `D` pan, `Z` / `X` iterations, `R` reset
 
 ## Development

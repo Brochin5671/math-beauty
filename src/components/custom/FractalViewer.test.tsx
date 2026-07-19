@@ -295,7 +295,7 @@ describe("FractalViewer", () => {
       expect(zoomValue()).toBe(1);
     });
 
-    it("still zooms on a tap that never became a drag", async () => {
+    it("still zooms on a press that never became a drag", async () => {
       render(<FractalViewer />);
       const canvas = getCanvas();
       fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
