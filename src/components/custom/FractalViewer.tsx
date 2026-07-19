@@ -36,8 +36,16 @@ const FractalHelp = lazy(() =>
 const JULIA_CR = -0.70176;
 const JULIA_CI = 0.3842;
 
-// CSS pixels a press may wander before it counts as a drag rather than a zoom
-const DRAG_THRESHOLD = 4;
+/*
+ * CSS pixels a press may wander before it counts as a drag rather than a zoom
+ * A finger rolls several pixels on even a deliberate tap, where a mouse does not move at
+ * all, so touch gets the wider slop the platforms themselves use. Sharing the mouse value
+ * made most real taps register as tiny drags and swallowed the zoom
+ */
+const DRAG_THRESHOLD_MOUSE = 4;
+const DRAG_THRESHOLD_TOUCH = 12;
+const dragThresholdFor = (pointerType: string) =>
+  pointerType === "touch" ? DRAG_THRESHOLD_TOUCH : DRAG_THRESHOLD_MOUSE;
 // Wheel deltas are continuous, so zoom exponentially rather than by a fixed step, which a
 // trackpad would apply dozens of times per flick. A 100px pixel-mode notch lands near the
 // 1.15 the keyboard and a press use
@@ -100,7 +108,13 @@ export function FractalViewer() {
 
   // Gesture state, all refs so a pointer stream never re-renders on its own
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
-  const dragRef = useRef({ active: false, moved: false, lastX: 0, lastY: 0 });
+  const dragRef = useRef({
+    active: false,
+    moved: false,
+    lastX: 0,
+    lastY: 0,
+    threshold: DRAG_THRESHOLD_MOUSE,
+  });
   const pinchRef = useRef<{ dist: number; cx: number; cy: number } | null>(null);
   const frameRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
 
@@ -505,7 +519,13 @@ export function FractalViewer() {
     e.currentTarget.setPointerCapture(e.pointerId);
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 1) {
-      dragRef.current = { active: true, moved: false, lastX: e.clientX, lastY: e.clientY };
+      dragRef.current = {
+        active: true,
+        moved: false,
+        lastX: e.clientX,
+        lastY: e.clientY,
+        threshold: dragThresholdFor(e.pointerType),
+      };
       return;
     }
     // Any further pointer restarts the pinch from the spread as it stands, so a stale
@@ -547,7 +567,7 @@ export function FractalViewer() {
     const dy = e.clientY - drag.lastY;
     // Keep the whole delta until the threshold clears, so the first accepted move
     // does not have a dead zone to jump back over
-    if (!drag.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+    if (!drag.moved && Math.hypot(dx, dy) < drag.threshold) return;
     drag.moved = true;
     drag.lastX = e.clientX;
     drag.lastY = e.clientY;
@@ -571,7 +591,13 @@ export function FractalViewer() {
     const [remaining] = [...pointers.values()];
     if (remaining) {
       // Carry on panning with the finger still down rather than going dead until it lifts
-      dragRef.current = { active: true, moved: true, lastX: remaining.x, lastY: remaining.y };
+      dragRef.current = {
+        active: true,
+        moved: true,
+        lastX: remaining.x,
+        lastY: remaining.y,
+        threshold: dragThresholdFor(e.pointerType),
+      };
       return;
     }
     dragRef.current.active = false;

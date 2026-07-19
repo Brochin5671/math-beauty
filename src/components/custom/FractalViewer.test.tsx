@@ -302,6 +302,50 @@ describe("FractalViewer", () => {
       expect(zoomValue()).toBe(1);
     });
 
+    it("still zooms when a finger rolls a few pixels during a tap", async () => {
+      await renderViewer();
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, {
+        pointerId: 1,
+        pointerType: "touch",
+        clientX: 100,
+        clientY: 100,
+      });
+      // A real tap is never perfectly still, and this much drift used to be read as a drag
+      fireEvent.pointerMove(canvas, {
+        pointerId: 1,
+        pointerType: "touch",
+        clientX: 106,
+        clientY: 103,
+      });
+      fireEvent.pointerUp(canvas, { pointerId: 1, pointerType: "touch" });
+      fireEvent.click(canvas);
+
+      expect(zoomValue()).toBeCloseTo(1.15, 5);
+    });
+
+    it("treats a deliberate touch drag as a pan, not a tap", async () => {
+      await renderViewer();
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, {
+        pointerId: 1,
+        pointerType: "touch",
+        clientX: 100,
+        clientY: 100,
+      });
+      fireEvent.pointerMove(canvas, {
+        pointerId: 1,
+        pointerType: "touch",
+        clientX: 140,
+        clientY: 100,
+      });
+      fireEvent.pointerUp(canvas, { pointerId: 1, pointerType: "touch" });
+      fireEvent.click(canvas);
+
+      await waitFor(() => expect(screen.getByLabelText("Pan X")).toHaveValue("-40"));
+      expect(zoomValue()).toBe(1);
+    });
+
     it("still zooms on a press that never became a drag", async () => {
       await renderViewer();
       const canvas = getCanvas();
