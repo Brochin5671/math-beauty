@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.0.1](https://github.com/Brochin5671/math-beauty/compare/v2.0.0...v2.0.1) (2026-07-19)
+
+### Fixes
+
+* **seo:** use the fractal favicon as the social card image ([#8](https://github.com/Brochin5671/math-beauty/issues/8)) ([4677732](https://github.com/Brochin5671/math-beauty/commit/4677732c4c13e2304832bcd4495d8e56bff9ff2a))
+
 ## [2.0.0](https://github.com/Brochin5671/math-beauty/compare/v1.0.0...v2.0.0) (2026-07-19)
 
 ### ⚠ BREAKING CHANGES
