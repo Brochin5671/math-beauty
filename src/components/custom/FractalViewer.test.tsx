@@ -278,6 +278,23 @@ describe("FractalViewer", () => {
       });
     });
 
+    it("finishes a gesture whose move and release never target the canvas", async () => {
+      await renderViewer();
+      const canvas = getCanvas();
+      fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
+      // Tracking and release are bound to the window, so neither has to reach the canvas
+      fireEvent.pointerMove(document.body, { pointerId: 1, clientX: 140, clientY: 100 });
+      fireEvent.pointerUp(document.body, { pointerId: 1 });
+      await waitFor(() => expect(screen.getByLabelText("Pan X")).toHaveValue("-40"));
+
+      // A stranded pointer would make this second press read as the start of a pinch
+      fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 100, clientY: 100 });
+      fireEvent.pointerMove(document.body, { pointerId: 2, clientX: 130, clientY: 100 });
+      fireEvent.pointerUp(document.body, { pointerId: 2 });
+      await waitFor(() => expect(screen.getByLabelText("Pan X")).toHaveValue("-70"));
+      expect(zoomValue()).toBe(1);
+    });
+
     it("holds a sub-threshold move until the press becomes a drag", async () => {
       await renderViewer();
       const canvas = getCanvas();

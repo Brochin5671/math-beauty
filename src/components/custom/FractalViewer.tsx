@@ -261,6 +261,34 @@ export function FractalViewer() {
     return () => canvas.removeEventListener("wheel", onWheel);
   }, []);
 
+  /*
+   * Drag and pinch, registered by hand so the press lands on the canvas itself rather than
+   * on the island root React would otherwise delegate it to. global.css gives that root a
+   * layout box because iOS Safari ignores a boxless listener target; binding here keeps
+   * drag and pinch off that rule, though tap to zoom still rides the delegated click
+   *
+   * Only the press is bound to the canvas. Tracking and release listen on the window, so a
+   * gesture follows the pointer wherever it travels instead of resting on pointer capture
+   * holding for the whole of it. Both handlers ignore pointers they never saw pressed
+   */
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const down = (e: PointerEvent) => onPointerDown(canvas, e);
+    const move = (e: PointerEvent) => onPointerMove(canvas, e);
+    const end = (e: PointerEvent) => onPointerEnd(canvas, e);
+    canvas.addEventListener("pointerdown", down);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
+    return () => {
+      canvas.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+    };
+  }, []);
+
   // Drop any frame still queued at unmount, kept apart from the wheel listener so an
   // early return there could never leave one pending
   useEffect(
@@ -514,9 +542,9 @@ export function FractalViewer() {
     });
   };
 
-  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const onPointerDown = (canvas: HTMLCanvasElement, e: PointerEvent) => {
     const pointers = pointersRef.current;
-    e.currentTarget.setPointerCapture(e.pointerId);
+    canvas.setPointerCapture(e.pointerId);
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 1) {
       dragRef.current = {
@@ -536,7 +564,7 @@ export function FractalViewer() {
     pinchRef.current = pinchState();
   };
 
-  const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const onPointerMove = (canvas: HTMLCanvasElement, e: PointerEvent) => {
     const pointers = pointersRef.current;
     if (!pointers.has(e.pointerId)) return;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -550,7 +578,7 @@ export function FractalViewer() {
       // A factor of one means a pointer outside the measured pair moved, which would
       // otherwise cost a full redraw for no change
       if (!Number.isFinite(factor) || factor === 1) return;
-      const { rect, scale } = canvasFrame(e.currentTarget);
+      const { rect, scale } = canvasFrame(canvas);
       zoomAt(
         optionsRef.current,
         factor,
@@ -571,16 +599,18 @@ export function FractalViewer() {
     drag.moved = true;
     drag.lastX = e.clientX;
     drag.lastY = e.clientY;
-    const { scale } = canvasFrame(e.currentTarget);
+    const { scale } = canvasFrame(canvas);
     panBy(optionsRef.current, dx * scale, dy * scale);
     scheduleCameraFrame();
   };
 
-  const onPointerEnd = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const onPointerEnd = (canvas: HTMLCanvasElement, e: PointerEvent) => {
     const pointers = pointersRef.current;
+    // Listening on the window means most of what arrives belongs to somebody else
+    if (!pointers.has(e.pointerId)) return;
     pointers.delete(e.pointerId);
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId);
+    if (canvas.hasPointerCapture(e.pointerId)) {
+      canvas.releasePointerCapture(e.pointerId);
     }
     if (pointers.size >= 2) {
       // Re-measure from the pointers still down, never against one that has lifted
@@ -691,10 +721,6 @@ export function FractalViewer() {
                 aria-label={canvasLabel}
                 aria-describedby="canvas-hint"
                 onClick={onCanvasClick}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerEnd}
-                onPointerCancel={onPointerEnd}
                 className={cn(
                   "block h-auto max-w-full cursor-crosshair select-none [-webkit-tap-highlight-color:transparent]",
                   hydrated ? "touch-none" : "touch-auto",
