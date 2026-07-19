@@ -17,27 +17,34 @@ function stubCanvas() {
   return ctx;
 }
 
+// The control panel loads lazily, so wait for it before driving any of its inputs
+async function renderViewer() {
+  const utils = render(<FractalViewer />);
+  await screen.findByRole("tab", { name: "Camera" });
+  return utils;
+}
+
 describe("FractalViewer", () => {
   beforeEach(() => {
     stubCanvas();
   });
 
-  it("renders the canvas and both control tabs without crashing", () => {
-    render(<FractalViewer />);
+  it("renders the canvas and both control tabs without crashing", async () => {
+    await renderViewer();
     expect(screen.getByRole("img", { name: /Mandelbrot Set/ })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Camera" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Render" })).toBeInTheDocument();
   });
 
-  it("draws on mount via the stubbed context", () => {
+  it("draws on mount via the stubbed context", async () => {
     const ctx = stubCanvas();
-    render(<FractalViewer />);
+    await renderViewer();
     expect(ctx.putImageData).toHaveBeenCalled();
   });
 
   it("steps the zoom value with the increase button", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     expect(screen.getByLabelText("Zoom")).toHaveValue("1");
     await user.click(screen.getByRole("button", { name: "Increase Zoom" }));
     expect(screen.getByLabelText("Zoom")).toHaveValue("1.15");
@@ -46,7 +53,7 @@ describe("FractalViewer", () => {
   it("commits a directly typed zoom value on blur", async () => {
     const ctx = stubCanvas();
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     const zoom = screen.getByLabelText("Zoom");
     await user.clear(zoom);
     await user.type(zoom, "3");
@@ -65,7 +72,7 @@ describe("FractalViewer", () => {
   it("commits a typed value on Enter", async () => {
     const ctx = stubCanvas();
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     const zoom = screen.getByLabelText("Zoom");
     await user.clear(zoom);
     await user.type(zoom, "3");
@@ -76,7 +83,7 @@ describe("FractalViewer", () => {
 
   it("refuses a zero zoom, which would divide by zero in the coordinate mapping", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     const zoom = screen.getByLabelText("Zoom");
     await user.clear(zoom);
     await user.type(zoom, "0");
@@ -87,7 +94,7 @@ describe("FractalViewer", () => {
 
   it("refuses a value too large for the coordinate mapping", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     const panX = screen.getByLabelText("Pan X");
     await user.click(panX);
     // All digits, so the input accepts the characters, but the number overflows to Infinity
@@ -102,7 +109,7 @@ describe("FractalViewer", () => {
   it("does not redraw when a committed value matches what is already drawn", async () => {
     const ctx = stubCanvas();
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     const panX = screen.getByLabelText("Pan X");
 
     await user.click(panX);
@@ -122,7 +129,7 @@ describe("FractalViewer", () => {
 
   it("refuses a centre zoom that would overflow, as the anchored one does", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     const zoom = screen.getByLabelText("Zoom");
 
     await user.click(zoom);
@@ -138,7 +145,7 @@ describe("FractalViewer", () => {
 
   it("keeps the camera shortcuts alive after a stepper button takes focus", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     await user.click(screen.getByRole("button", { name: "Increase Zoom" }));
     await user.keyboard("d");
     expect(screen.getByLabelText("Pan X")).toHaveValue("25");
@@ -146,7 +153,7 @@ describe("FractalViewer", () => {
 
   it("pans with the x and y steppers", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     await user.click(screen.getByRole("button", { name: "Increase Pan X" }));
     expect(screen.getByLabelText("Pan X")).toHaveValue("25");
     await user.click(screen.getByRole("button", { name: "Decrease Pan Y" }));
@@ -155,7 +162,7 @@ describe("FractalViewer", () => {
 
   it("resets the camera with the Reset button", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     await user.click(screen.getByRole("button", { name: "Increase Pan X" }));
     await user.click(screen.getByRole("button", { name: "Increase Zoom" }));
     await user.click(screen.getByRole("button", { name: "Reset" }));
@@ -166,7 +173,7 @@ describe("FractalViewer", () => {
   it("force-draws when Render is pressed", async () => {
     const ctx = stubCanvas();
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     ctx.putImageData.mockClear();
     await user.click(screen.getByRole("button", { name: "Render" }));
     expect(ctx.putImageData).toHaveBeenCalled();
@@ -174,7 +181,7 @@ describe("FractalViewer", () => {
 
   it("reveals the complex inputs when Julia Set is toggled on and steps them", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     expect(screen.queryByLabelText("Complex Real")).not.toBeInTheDocument();
     await user.click(screen.getByRole("switch", { name: "Julia Set" }));
     const cr = screen.getByLabelText("Complex Real");
@@ -188,7 +195,7 @@ describe("FractalViewer", () => {
 
   it("lets the complex real input overshoot its bound by one step, then stops", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     await user.click(screen.getByRole("switch", { name: "Julia Set" }));
     const decrease = screen.getByRole("button", { name: "Decrease Complex Real" });
 
@@ -201,7 +208,7 @@ describe("FractalViewer", () => {
 
   it("reveals and steps the exponent input for the Multibrot set", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     expect(screen.queryByLabelText("Exponent")).not.toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText("Fractal"), "multibrot");
     expect(screen.getByLabelText("Exponent")).toHaveValue("2");
@@ -211,7 +218,7 @@ describe("FractalViewer", () => {
 
   it("runs every keyboard camera shortcut", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     await user.keyboard("d");
     expect(screen.getByLabelText("Pan X")).toHaveValue("25");
     await user.keyboard("w");
@@ -235,7 +242,7 @@ describe("FractalViewer", () => {
 
   it("zooms toward the clicked point on canvas click", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     await user.click(screen.getByRole("img", { name: /Mandelbrot Set/ }));
     expect(screen.getByLabelText("Zoom")).toHaveValue("1.15");
     // happy-dom reports a zero-size rect, which the backing scale has to survive without
@@ -258,7 +265,7 @@ describe("FractalViewer", () => {
     };
 
     it("pans the camera with a pointer drag", async () => {
-      render(<FractalViewer />);
+      await renderViewer();
       const canvas = getCanvas();
       fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
       fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 140, clientY: 125 });
@@ -272,7 +279,7 @@ describe("FractalViewer", () => {
     });
 
     it("holds a sub-threshold move until the press becomes a drag", async () => {
-      render(<FractalViewer />);
+      await renderViewer();
       const canvas = getCanvas();
       fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
       // Under the threshold, so nothing moves yet and the anchor is not advanced
@@ -285,7 +292,7 @@ describe("FractalViewer", () => {
     });
 
     it("does not zoom on the click that closes a drag", async () => {
-      render(<FractalViewer />);
+      await renderViewer();
       const canvas = getCanvas();
       fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
       fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 140, clientY: 100 });
@@ -296,7 +303,7 @@ describe("FractalViewer", () => {
     });
 
     it("still zooms on a press that never became a drag", async () => {
-      render(<FractalViewer />);
+      await renderViewer();
       const canvas = getCanvas();
       fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
       fireEvent.pointerUp(canvas, { pointerId: 1 });
@@ -308,13 +315,13 @@ describe("FractalViewer", () => {
       ["pixel", 0],
       ["line", 1],
     ])("zooms in on a %s-mode wheel scroll", async (_mode, deltaMode) => {
-      render(<FractalViewer />);
+      await renderViewer();
       wheel(getCanvas(), -100, deltaMode);
       await waitFor(() => expect(zoomValue()).toBeGreaterThan(1));
     });
 
     it("bounds a runaway wheel delta to one step", async () => {
-      render(<FractalViewer />);
+      await renderViewer();
       // Page-mode deltas multiply by the element height, so an unbounded factor here
       // would zoom by many orders of magnitude in a single event
       wheel(getCanvas(), -100000);
@@ -323,13 +330,13 @@ describe("FractalViewer", () => {
     });
 
     it("zooms out on a wheel scroll the other way", async () => {
-      render(<FractalViewer />);
+      await renderViewer();
       wheel(getCanvas(), 100);
       await waitFor(() => expect(zoomValue()).toBeLessThan(1));
     });
 
     it("zooms with a two-pointer pinch", async () => {
-      render(<FractalViewer />);
+      await renderViewer();
       const canvas = getCanvas();
       fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
       fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 120, clientY: 100 });
@@ -342,7 +349,7 @@ describe("FractalViewer", () => {
     });
 
     it("ignores a move from a pointer that never went down", async () => {
-      render(<FractalViewer />);
+      await renderViewer();
       const canvas = getCanvas();
       fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
       // A stray pointer must not register as a second finger nor move the camera
@@ -355,7 +362,7 @@ describe("FractalViewer", () => {
     });
 
     it("survives two pointers meeting at the same spot, which would zoom to zero", async () => {
-      render(<FractalViewer />);
+      await renderViewer();
       const canvas = getCanvas();
       fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
       fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 140, clientY: 100 });
@@ -368,7 +375,7 @@ describe("FractalViewer", () => {
     });
 
     it("re-measures the pinch when a finger lifts, instead of against the lifted one", async () => {
-      render(<FractalViewer />);
+      await renderViewer();
       const canvas = getCanvas();
       fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 100, clientY: 100 });
       fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 300, clientY: 100 });
@@ -383,7 +390,7 @@ describe("FractalViewer", () => {
     it("moves the camera without drawing while auto-render is off", async () => {
       const ctx = stubCanvas();
       const user = userEvent.setup();
-      render(<FractalViewer />);
+      await renderViewer();
       await user.click(screen.getByRole("tab", { name: "Render" }));
       await user.click(screen.getByRole("switch", { name: "Auto-render" }));
       await user.click(screen.getByRole("tab", { name: "Camera" }));
@@ -400,7 +407,7 @@ describe("FractalViewer", () => {
 
   it("changes coloring method, preset, gradient loop and auto-render on the Render tab", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     await user.click(screen.getByRole("tab", { name: "Render" }));
     // clicking the label drives the coloring-method radio
     await user.click(screen.getByText("Smooth"));
@@ -418,7 +425,7 @@ describe("FractalViewer", () => {
 
   it("opens on the Temperature preset, with its gradient loop already on", async () => {
     const user = userEvent.setup();
-    render(<FractalViewer />);
+    await renderViewer();
     await user.click(screen.getByRole("tab", { name: "Render" }));
 
     // The picker leads with the seeded preset, so the two cannot drift apart
@@ -433,7 +440,7 @@ describe("FractalViewer", () => {
     // Base UI keeps slider thumbs role-less until it measures layout, which
     // happy-dom lacks, so count the slider roots by data-slot instead of role
     const user = userEvent.setup();
-    const { container } = render(<FractalViewer />);
+    const { container } = await renderViewer();
     await user.click(screen.getByRole("tab", { name: "Render" }));
     expect(container.querySelectorAll('[data-slot="slider"]')).toHaveLength(3);
     expect(screen.getByLabelText("Color preset")).toBeInTheDocument();

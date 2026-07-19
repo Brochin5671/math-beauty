@@ -1,24 +1,11 @@
-import { CircleHelp } from "lucide-react";
-import { type ComponentProps, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/elements/Button";
-import { ButtonGroup } from "@/components/elements/ButtonGroup";
-import { Card, CardContent, CardHeader } from "@/components/elements/Card";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/elements/Dialog";
-import { Kbd } from "@/components/elements/Kbd";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/elements/Tabs";
-import { Label } from "@/components/forms/Label";
-import { NumberField } from "@/components/forms/NumberField";
-import { RadioGroup, RadioGroupItem } from "@/components/forms/RadioGroup";
-import { Select, SelectOption } from "@/components/forms/Select";
-import { Slider } from "@/components/forms/Slider";
-import { Switch } from "@/components/forms/Switch";
+  FRACTAL_OPTIONS,
+  type FractalControlsApi,
+  type NumericUiKey,
+  type Ui,
+} from "@/components/custom/fractal-ui";
+import { Card, CardContent, CardHeader } from "@/components/elements/Card";
 import { Stack } from "@/components/layouts/Stack";
 import { FRACTALS } from "@/lib/fractals/algorithms";
 import { backingScale, panBy, zoomAt } from "@/lib/fractals/camera";
@@ -33,6 +20,18 @@ import type {
   RGB,
 } from "@/lib/fractals/types";
 import { cn } from "@/lib/utils";
+
+/*
+ * The control panel and help dialog are most of this island's JavaScript. Loading them
+ * apart from the canvas keeps the critical path to the engine and the gestures, so the
+ * canvas responds to a press well before the panel arrives
+ */
+const FractalControls = lazy(() =>
+  import("@/components/custom/FractalControls").then((m) => ({ default: m.FractalControls })),
+);
+const FractalHelp = lazy(() =>
+  import("@/components/custom/FractalControls").then((m) => ({ default: m.FractalHelp })),
+);
 
 const JULIA_CR = -0.70176;
 const JULIA_CI = 0.3842;
@@ -49,68 +48,9 @@ const WHEEL_LINE_HEIGHT = 33;
 const WHEEL_MIN_FACTOR = 0.25;
 const WHEEL_MAX_FACTOR = 4;
 
-const FRACTAL_OPTIONS: { value: FractalKind; label: string }[] = [
-  { value: "mandelbrot", label: "Mandelbrot Set" },
-  { value: "ship", label: "Burning Ship" },
-  { value: "tricorn", label: "Tricorn" },
-  { value: "multibrot", label: "Multibrot Set" },
-];
-
 // Seeds the palette, the gradient-loop switch and the picker, so the three cannot drift
 const DEFAULT_PRESET: PresetKind = "temperature";
 const [DEFAULT_COLOR, DEFAULT_LOOP] = colorPresets[DEFAULT_PRESET];
-
-const PRESET_OPTIONS: { value: PresetKind; label: string }[] = [
-  { value: "temperature", label: "Temperature" },
-  { value: "default", label: "Black & White" },
-  { value: "rainbow", label: "Rainbow" },
-  { value: "whacky", label: "Whacky Gradients" },
-];
-
-const METHOD_OPTIONS: { value: ColorMethodKind; label: string }[] = [
-  { value: "iteration", label: "Iteration" },
-  { value: "smooth", label: "Smooth" },
-];
-
-const RGB_CHANNELS: { key: keyof RGB; label: string }[] = [
-  { key: "r", label: "Red" },
-  { key: "g", label: "Green" },
-  { key: "b", label: "Blue" },
-];
-
-// Base UI renders the value through Intl.NumberFormat, whose default rounds to three
-// decimals and groups thousands, so every field states the precision it needs
-const ZOOM_FORMAT: Intl.NumberFormatOptions = { useGrouping: false, maximumSignificantDigits: 10 };
-const DECIMAL_FORMAT: Intl.NumberFormatOptions = { useGrouping: false, maximumFractionDigits: 4 };
-const COMPLEX_FORMAT: Intl.NumberFormatOptions = { useGrouping: false, maximumFractionDigits: 5 };
-const ITERATIONS_FORMAT: Intl.NumberFormatOptions = {
-  useGrouping: false,
-  maximumFractionDigits: 0,
-};
-
-// Display state for the controlled inputs, never read by the draw path
-interface Ui {
-  fractal: FractalKind;
-  method: ColorMethodKind;
-  preset: PresetKind;
-  gradientLoop: boolean;
-  julia: boolean;
-  autoRender: boolean;
-  rgb: RGB;
-  zoom: number;
-  x: number;
-  y: number;
-  d: number;
-  cr: number;
-  ci: number;
-  iterations: number;
-}
-
-type NumericUiKey = "zoom" | "x" | "y" | "d" | "cr" | "ci" | "iterations";
-
-function sliderValue(value: number | readonly number[]): number {
-  return Array.isArray(value) ? (value[0] ?? 0) : (value as number);
-}
 
 // A value the coordinate mapping can use, so an empty field or an overflowing entry
 // such as 1e999 never reaches the draw state
@@ -137,27 +77,6 @@ function zoomCentre(o: FractalOptions, dir: 1 | -1): void {
   o.zoom = zoom;
   o.offsetX = offsetX;
   o.offsetY = offsetY;
-}
-
-// One labelled camera control, the same shape seven times over
-function CameraField({
-  id,
-  label,
-  ...field
-}: { id: string; label: string } & Omit<ComponentProps<typeof NumberField>, "controlLabel">) {
-  return (
-    <Stack gap="none">
-      <Label htmlFor={id} className="text-xs text-muted-foreground">
-        {label}
-      </Label>
-      <NumberField
-        {...field}
-        id={id}
-        controlLabel={label}
-        className={cn("w-full [&_[data-slot=number-field-input]]:w-full", field.className)}
-      />
-    </Stack>
-  );
 }
 
 export function FractalViewer() {
@@ -682,58 +601,44 @@ export function FractalViewer() {
   const activeFractal = FRACTAL_OPTIONS.find((f) => f.value === ui.fractal)?.label ?? "Fractal";
   const canvasLabel = `${activeFractal}${ui.julia ? " Julia set" : ""}, ${ui.iterations} iterations`;
 
+  // Everything the panel drives, gathered so the lazy boundary stays one prop
+  const api: FractalControlsApi = {
+    ui,
+    paletteCanvasRef,
+    showValue,
+    commitZoom,
+    commitX,
+    commitY,
+    commitD,
+    commitCr,
+    commitCi,
+    commitIterations,
+    stepZoom,
+    stepX,
+    stepY,
+    stepD,
+    stepCr,
+    stepCi,
+    stepIterations,
+    changeFractal,
+    changeMethod,
+    changePreset,
+    toggleJulia,
+    toggleLoop,
+    toggleAutoRender,
+    onRgbLive,
+    onReset,
+    drawNow,
+    requestRender,
+  };
+
   return (
     <Card className="mx-auto w-fit max-w-full gap-2 pt-4">
       <CardHeader>
         <Stack direction="horizontal" justify="end" align="center">
-          <Dialog>
-            <DialogTrigger
-              render={
-                <Button variant="ghost" size="icon" aria-label="Help and keyboard shortcuts" />
-              }>
-              <CircleHelp className="size-5" />
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>How to use</DialogTitle>
-                <DialogDescription>Controls and keyboard shortcuts</DialogDescription>
-              </DialogHeader>
-              <Stack gap="sm" className="text-sm">
-                <p>
-                  Press to zoom toward a point, drag to move and scroll to zoom. Right-click or
-                  long-press to save the render.
-                </p>
-                {/* Raw dl: Grid renders a div and cannot express the auto column these need */}
-                <dl className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2">
-                  <dt className="flex gap-1">
-                    <Kbd>Q</Kbd>
-                    <Kbd>E</Kbd>
-                  </dt>
-                  <dd className="text-muted-foreground">Zoom in and out</dd>
-                  <dt className="flex gap-1">
-                    <Kbd>W</Kbd>
-                    <Kbd>A</Kbd>
-                    <Kbd>S</Kbd>
-                    <Kbd>D</Kbd>
-                  </dt>
-                  <dd className="text-muted-foreground">Pan</dd>
-                  <dt className="flex gap-1">
-                    <Kbd>Z</Kbd>
-                    <Kbd>X</Kbd>
-                  </dt>
-                  <dd className="text-muted-foreground">Increase and decrease iterations</dd>
-                  <dt className="flex gap-1">
-                    <Kbd>R</Kbd>
-                  </dt>
-                  <dd className="text-muted-foreground">Reset the camera</dd>
-                </dl>
-                <Stack gap="xs">
-                  <p className="font-medium">Mobile</p>
-                  <p className="text-muted-foreground">Drag to move, pinch to zoom.</p>
-                </Stack>
-              </Stack>
-            </DialogContent>
-          </Dialog>
+          <Suspense fallback={<div aria-hidden="true" className="size-9" />}>
+            <FractalHelp />
+          </Suspense>
         </Stack>
       </CardHeader>
       <CardContent>
@@ -743,211 +648,11 @@ export function FractalViewer() {
           align="start"
           className="md:gap-40">
           <Stack gap="default" className="w-full md:w-72">
-            <Stack gap="xs">
-              <Label htmlFor="fractal-select">Fractal</Label>
-              <Select
-                id="fractal-select"
-                value={ui.fractal}
-                onChange={(e) => changeFractal(e.currentTarget.value as FractalKind)}
-                className="w-full">
-                {FRACTAL_OPTIONS.map(({ value, label }) => (
-                  <SelectOption key={value} value={value}>
-                    {label}
-                  </SelectOption>
-                ))}
-              </Select>
-            </Stack>
-
-            <Tabs defaultValue="camera">
-              <TabsList className="w-full">
-                <TabsTrigger value="camera">Camera</TabsTrigger>
-                <TabsTrigger value="render">Render</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="camera">
-                <Stack gap="default">
-                  <CameraField
-                    id="zoom-input"
-                    label="Zoom"
-                    value={ui.zoom}
-                    format={ZOOM_FORMAT}
-                    onValueChange={(v) => showValue("zoom", v)}
-                    onValueCommitted={commitZoom}
-                    onStep={stepZoom}
-                  />
-                  {ui.fractal === "multibrot" && (
-                    <CameraField
-                      id="d-input"
-                      label="Exponent"
-                      value={ui.d}
-                      step={0.25}
-                      format={DECIMAL_FORMAT}
-                      onValueChange={(v) => showValue("d", v)}
-                      onValueCommitted={commitD}
-                      onStep={stepD}
-                    />
-                  )}
-                  {ui.julia ? (
-                    <>
-                      <CameraField
-                        id="cr-input"
-                        label="Complex Real"
-                        value={ui.cr}
-                        step={0.25}
-                        min={-2}
-                        max={2}
-                        format={COMPLEX_FORMAT}
-                        onValueChange={(v) => showValue("cr", v)}
-                        onValueCommitted={commitCr}
-                        onStep={stepCr}
-                      />
-                      <CameraField
-                        id="ci-input"
-                        label="Complex Imaginary"
-                        value={ui.ci}
-                        step={0.05}
-                        min={-2}
-                        max={2}
-                        format={COMPLEX_FORMAT}
-                        onValueChange={(v) => showValue("ci", v)}
-                        onValueCommitted={commitCi}
-                        onStep={stepCi}
-                      />
-                    </>
-                  ) : null}
-                  <CameraField
-                    id="x-input"
-                    label="Pan X"
-                    value={ui.x}
-                    step={25}
-                    format={DECIMAL_FORMAT}
-                    onValueChange={(v) => showValue("x", v)}
-                    onValueCommitted={commitX}
-                    onStep={stepX}
-                  />
-                  <CameraField
-                    id="y-input"
-                    label="Pan Y"
-                    value={ui.y}
-                    step={25}
-                    format={DECIMAL_FORMAT}
-                    onValueChange={(v) => showValue("y", v)}
-                    onValueCommitted={commitY}
-                    onStep={stepY}
-                  />
-                  <CameraField
-                    id="iterations-input"
-                    label="Iterations"
-                    value={ui.iterations}
-                    step={100}
-                    min={100}
-                    max={10000}
-                    format={ITERATIONS_FORMAT}
-                    onValueChange={(v) => showValue("iterations", v)}
-                    onValueCommitted={commitIterations}
-                    onStep={stepIterations}
-                  />
-                  <Stack direction="horizontal" gap="sm" justify="between" align="center">
-                    <ButtonGroup>
-                      <Button type="button" onClick={drawNow}>
-                        Render
-                      </Button>
-                      <Button type="button" variant="outline" onClick={onReset}>
-                        Reset
-                      </Button>
-                    </ButtonGroup>
-                    <Stack direction="horizontal" gap="sm" align="center">
-                      <Switch id="julia-toggle" checked={ui.julia} onCheckedChange={toggleJulia} />
-                      <Label htmlFor="julia-toggle">Julia Set</Label>
-                    </Stack>
-                  </Stack>
-                </Stack>
-              </TabsContent>
-
-              <TabsContent value="render">
-                <Stack gap="default">
-                  <Stack gap="xs">
-                    <span className="text-sm font-medium">Coloring method</span>
-                    <RadioGroup
-                      aria-label="Coloring method"
-                      value={ui.method}
-                      onValueChange={(value) => changeMethod(value as ColorMethodKind)}>
-                      <Stack direction="horizontal" gap="lg">
-                        {METHOD_OPTIONS.map(({ value, label }) => (
-                          <Stack key={value} direction="horizontal" gap="sm" align="center">
-                            <RadioGroupItem value={value} id={`method-${value}`} />
-                            <Label htmlFor={`method-${value}`}>{label}</Label>
-                          </Stack>
-                        ))}
-                      </Stack>
-                    </RadioGroup>
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <Label htmlFor="preset-select">Color preset</Label>
-                    <Select
-                      id="preset-select"
-                      value={ui.preset}
-                      onChange={(e) => changePreset(e.currentTarget.value as PresetKind)}
-                      className="w-full">
-                      {PRESET_OPTIONS.map(({ value, label }) => (
-                        <SelectOption key={value} value={value}>
-                          {label}
-                        </SelectOption>
-                      ))}
-                    </Select>
-                  </Stack>
-
-                  <Stack direction="horizontal" gap="sm" align="center">
-                    <Switch
-                      id="loop-toggle"
-                      checked={ui.gradientLoop}
-                      onCheckedChange={toggleLoop}
-                    />
-                    <Label htmlFor="loop-toggle">Gradient Loop</Label>
-                  </Stack>
-
-                  <Stack gap="sm">
-                    <span className="text-sm font-medium">Color factors and shifts</span>
-                    {RGB_CHANNELS.map(({ key, label }) => (
-                      <Stack key={key} gap="xs">
-                        <span className="text-xs text-muted-foreground">{label}</span>
-                        <Slider
-                          min={0}
-                          max={30}
-                          step={1}
-                          value={[ui.rgb[key]]}
-                          thumbLabels={[`${label} factor or shift`]}
-                          onValueChange={(value) => onRgbLive(key, sliderValue(value))}
-                          onValueCommitted={() => requestRender()}
-                        />
-                      </Stack>
-                    ))}
-                  </Stack>
-
-                  <Stack gap="xs">
-                    <span className="text-xs text-muted-foreground">Palette preview</span>
-                    <canvas
-                      ref={paletteCanvasRef}
-                      width={256}
-                      height={20}
-                      role="img"
-                      aria-label="Current color palette"
-                      className="block h-5 w-full rounded-sm"
-                    />
-                  </Stack>
-
-                  <Stack direction="horizontal" gap="sm" align="center">
-                    <Switch
-                      id="auto-render-toggle"
-                      checked={ui.autoRender}
-                      onCheckedChange={toggleAutoRender}
-                    />
-                    <Label htmlFor="auto-render-toggle">Auto-render</Label>
-                  </Stack>
-                </Stack>
-              </TabsContent>
-            </Tabs>
+            {/* Reserves the panel's rendered height so mounting it does not shove the
+                canvas down on mobile, where the controls sit above it */}
+            <Suspense fallback={<div aria-hidden="true" className="min-h-[426px]" />}>
+              <FractalControls api={api} />
+            </Suspense>
           </Stack>
 
           <Stack gap="sm" align="center" className="w-full md:w-auto md:shrink-0">
