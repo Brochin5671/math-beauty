@@ -728,7 +728,7 @@ export function FractalViewer() {
           direction={{ base: "vertical", md: "horizontal" }}
           gap="lg"
           align="start"
-          className="md:gap-32">
+          className="md:gap-40">
           <Stack gap="default" className="w-full md:w-72">
             <Stack gap="xs">
               <Label htmlFor="fractal-select">Fractal</Label>
