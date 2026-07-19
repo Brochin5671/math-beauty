@@ -134,6 +134,10 @@ describe("FractalViewer", () => {
     render(<FractalViewer />);
     await user.click(screen.getByRole("img", { name: /Mandelbrot Set/ }));
     expect(screen.getByLabelText("Zoom")).toHaveValue(1.15);
+    // happy-dom reports a zero-size rect, which the backing scale has to survive without
+    // poisoning the offsets
+    expect(screen.getByLabelText("Pan X")).toHaveValue(0);
+    expect(screen.getByLabelText("Pan Y")).toHaveValue(0);
   });
 
   it("changes coloring method, preset, gradient loop and auto-render on the Render tab", async () => {
