@@ -756,3 +756,22 @@ html[data-font="serif"] body {
 :root h6 {
   @apply font-medium;
 }
+
+/*
+ * Astro styles islands display:contents, and React 19 attaches its delegated listeners to
+ * the <astro-island> hydration root. iOS Safari delivers no pointer events to a boxless
+ * listener target, so every gesture and every Base UI control inside an island is dead on
+ * load. Opening any dialog unsticks it for the rest of the session
+ * https://github.com/facebook/react/issues/29890
+ * https://github.com/withastro/astro/issues/13321
+ *
+ * :root raises specificity to 0-1-1 because Astro's own astro-island rule is unlayered
+ * and comes later in the document, so a bare selector ties at 0-0-1 and loses on order
+ *
+ * The island now becomes the flex or grid item its children used to be. Restore
+ * display:contents locally on any island whose children must be items in their own right,
+ * which today would be HeaderMobileCollapse if a page ever rendered the Header
+ */
+:root astro-island {
+  display: block;
+}
