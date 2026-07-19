@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.1.2](https://github.com/Brochin5671/math-beauty/compare/v2.1.1...v2.1.2) (2026-07-19)
+
+### Fixes
+
+* **viewer:** give touch the slop a finger actually needs ([8b704c7](https://github.com/Brochin5671/math-beauty/commit/8b704c70347f4ad45528ee781395ebb946a6c537))
+
 ## [2.1.1](https://github.com/Brochin5671/math-beauty/compare/v2.1.0...v2.1.1) (2026-07-19)
 
 ### Fixes
