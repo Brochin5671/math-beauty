@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.1.3](https://github.com/Brochin5671/math-beauty/compare/v2.1.2...v2.1.3) (2026-07-19)
+
+### Fixes
+
+* **ci:** deploy on a merged pull request as well as a push ([29d5411](https://github.com/Brochin5671/math-beauty/commit/29d54113b7b73fe1d859fd0e21910050baa0be6c))
+* **library:** keep a minus key reachable on software keyboards ([35ab0bf](https://github.com/Brochin5671/math-beauty/commit/35ab0bf6d73379f76a6caed13a77dedb4449d67c))
+
 ## [2.1.2](https://github.com/Brochin5671/math-beauty/compare/v2.1.1...v2.1.2) (2026-07-19)
 
 ### Fixes
