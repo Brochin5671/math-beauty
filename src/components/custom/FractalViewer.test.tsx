@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FractalViewer } from "./FractalViewer";
@@ -72,6 +72,31 @@ describe("FractalViewer", () => {
     ctx.putImageData.mockClear();
     await user.keyboard("{Enter}");
     expect(ctx.putImageData).toHaveBeenCalled();
+  });
+
+  it("refuses a zero zoom, which would divide by zero in the coordinate mapping", async () => {
+    const user = userEvent.setup();
+    render(<FractalViewer />);
+    const zoom = screen.getByLabelText("Zoom");
+    await user.clear(zoom);
+    await user.type(zoom, "0");
+    await user.tab();
+    // The camera keeps the last drawable value and the field is put back to match
+    expect(zoom).toHaveValue("1");
+  });
+
+  it("refuses a value too large for the coordinate mapping", async () => {
+    const user = userEvent.setup();
+    render(<FractalViewer />);
+    const panX = screen.getByLabelText("Pan X");
+    await user.click(panX);
+    // All digits, so the input accepts the characters, but the number overflows to Infinity
+    fireEvent.change(panX, { target: { value: "9".repeat(320) } });
+    await user.tab();
+
+    // The camera kept its drawable value, so panning still steps from zero
+    await user.keyboard("d");
+    expect(screen.getByLabelText("Pan X")).toHaveValue("25");
   });
 
   it("does not redraw when a field is focused and left unchanged", async () => {

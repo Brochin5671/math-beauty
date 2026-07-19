@@ -96,6 +96,17 @@ function sliderValue(value: number | readonly number[]): number {
   return Array.isArray(value) ? (value[0] ?? 0) : (value as number);
 }
 
+// A value the coordinate mapping can use, so an empty field or an overflowing entry
+// such as 1e999 never reaches the draw state
+function drawable(value: number | null): value is number {
+  return value !== null && Number.isFinite(value);
+}
+
+// seed() divides by zoom, so a zero would map every pixel to infinity and blank the canvas
+function drawableZoom(value: number | null): value is number {
+  return drawable(value) && value !== 0;
+}
+
 // One labelled camera control, the same shape seven times over
 function CameraField({
   id,
@@ -245,7 +256,7 @@ export function FractalViewer() {
 
   // Typing only moves the display, so a keystroke never triggers a render
   const showValue = (key: NumericUiKey, value: number | null) => {
-    if (value === null) return;
+    if (!drawable(value)) return;
     setUi((u) => ({ ...u, [key]: value }));
   };
 
@@ -253,46 +264,78 @@ export function FractalViewer() {
    * Committing applies the value to the draw state, on blur or Enter. Each guard bails when
    * the value is unchanged: rounding the display back to a committed value means a plain tab
    * through a field would otherwise fire a full synchronous render for no visible difference
+   * A value the mapping cannot use puts the drawn one back, so the field never disagrees
+   * with the canvas
    */
+  const restore = (key: NumericUiKey, value: number) => setUi((u) => ({ ...u, [key]: value }));
+
   const commitZoom = (v: number | null) => {
     const o = optionsRef.current;
-    if (v === null || v === o.zoom) return;
+    if (!drawableZoom(v)) {
+      restore("zoom", o.zoom);
+      return;
+    }
+    if (v === o.zoom) return;
     o.zoom = v;
     requestRender();
   };
   const commitX = (v: number | null) => {
     const o = optionsRef.current;
-    if (v === null || v === o.offsetX) return;
+    if (!drawable(v)) {
+      restore("x", o.offsetX);
+      return;
+    }
+    if (v === o.offsetX) return;
     o.offsetX = v;
     requestRender();
   };
   const commitY = (v: number | null) => {
     const o = optionsRef.current;
-    if (v === null || v === o.offsetY) return;
+    if (!drawable(v)) {
+      restore("y", o.offsetY);
+      return;
+    }
+    if (v === o.offsetY) return;
     o.offsetY = v;
     requestRender();
   };
   const commitD = (v: number | null) => {
     const o = optionsRef.current;
-    if (v === null || v === o.d) return;
+    if (!drawable(v)) {
+      restore("d", o.d);
+      return;
+    }
+    if (v === o.d) return;
     o.d = v;
     requestRender();
   };
   const commitCr = (v: number | null) => {
     const o = optionsRef.current;
-    if (v === null || v === o.cr) return;
+    if (!drawable(v)) {
+      restore("cr", o.cr ?? JULIA_CR);
+      return;
+    }
+    if (v === o.cr) return;
     o.cr = v;
     requestRender();
   };
   const commitCi = (v: number | null) => {
     const o = optionsRef.current;
-    if (v === null || v === o.ci) return;
+    if (!drawable(v)) {
+      restore("ci", o.ci ?? JULIA_CI);
+      return;
+    }
+    if (v === o.ci) return;
     o.ci = v;
     requestRender();
   };
   const commitIterations = (v: number | null) => {
     const o = optionsRef.current;
-    if (v === null || v === o.maxIterations) return;
+    if (!drawable(v)) {
+      restore("iterations", o.maxIterations);
+      return;
+    }
+    if (v === o.maxIterations) return;
     o.maxIterations = v;
     requestRender();
   };
