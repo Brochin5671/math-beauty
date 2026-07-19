@@ -25,6 +25,21 @@ test.describe("Smoke tests", () => {
     expect(body).toContain("Sitemap:");
   });
 
+  /*
+   * Guards the cascade behind the display:contents override in global.css, where a bare
+   * selector loses to Astro's own rule and would leave every other check green. The matrix
+   * is Chromium only, so this proves the rule applies, not that iOS behaves
+   */
+  test("the hydration root has a layout box", async ({ page }) => {
+    await page.goto("/");
+    const island = page.locator('astro-island[component-export="FractalViewer"]');
+    await expect(island).toHaveCSS("display", "block");
+    const box = await island.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box?.width).toBeGreaterThan(0);
+    expect(box?.height).toBeGreaterThan(0);
+  });
+
   test("skip-to-content link is keyboard-accessible", async ({ page }) => {
     await page.goto("/");
     await page.keyboard.press("Tab");
