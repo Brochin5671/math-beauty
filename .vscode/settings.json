@@ -1,0 +1,25 @@
+{
+  "[astro]": {
+    "editor.defaultFormatter": "astro-build.astro-vscode"
+  },
+  "biome.lsp.bin": "./node_modules/.bin/biome",
+  "css.validate": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "editor.quickSuggestions": { "strings": "on" },
+  "files.associations": { "*.css": "tailwindcss" },
+  "files.eol": "\n",
+  "search.exclude": {
+    "**/dist": true,
+    "**/.astro": true,
+    "**/.wrangler": true,
+    "**/coverage": true,
+    "**/playwright-report": true,
+    "**/test-results": true,
+    "**/pnpm-lock.yaml": true
+  }
+}

@@ -1,0 +1,9 @@
+# Force every issue through a template; the "Open a blank issue" link is disabled
+# Prevents low-info issues; contributors must pick Bug or Feature
+blank_issues_enabled: false
+
+# GitHub does not accept relative URLs in contact_links
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Brochin5671/math-beauty/security/advisories/new
+    about: For vulnerabilities, open a private GitHub Security Advisory - do NOT open a public issue.

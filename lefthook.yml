@@ -1,0 +1,74 @@
+min_version: 2.1.4
+
+# Pre-commit runs in parallel, gitleaks gets priority 1 so its output
+# leads, every check has a CI counterpart in .github/workflows/ci.yml,
+# these are fast-feedback layers not the authoritative gate
+pre-commit:
+  parallel: true
+  commands:
+    gitleaks:
+      priority: 1
+      run: |
+        if ! command -v gitleaks >/dev/null 2>&1; then
+          echo "ERROR: gitleaks v8.19+ not on PATH. Install (no macOS dependency first):"
+          echo "  Direct binary: https://github.com/gitleaks/gitleaks/releases  (the artifact CI pins)"
+          echo "  go install github.com/gitleaks/gitleaks/v8@latest             (any platform with Go)"
+          echo "  brew install gitleaks                                         (macOS)"
+          echo "  Avoid: apt install gitleaks (Debian stable / Ubuntu LTS ship 8.16, predate the 'git' subcommand)"
+          echo "Alternative (npm-only): secretlint"
+          exit 1
+        fi
+        pnpm run check:secrets:staged
+    lint:
+      priority: 2
+      glob: "*.{ts,tsx,js,jsx,mjs,json,jsonc,css}"
+      run: pnpm run check:staged {staged_files}
+      stage_fixed: true
+    prettier-astro:
+      priority: 2
+      glob: "*.astro"
+      run: pnpm run format:astro:staged {staged_files}
+      stage_fixed: true
+    typecheck:
+      priority: 2
+      run: pnpm run check:types
+
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm commitlint --edit {1}
+
+# Pre-push piped so the no-direct-main gate (~5ms) runs first and a push
+# to main fails fast, then the preflight stages run in CI order (~60-90s
+# total) and stop at the first failure. Each stage calls a preflight:*
+# script so the stage membership lives in package.json (single source of
+# truth) and `pnpm preflight` runs the identical chain. Splitting into
+# named commands makes lefthook print a per-stage header and a pass/fail
+# summary, so a failure points at the exact stage. Bypass the whole hook
+# with `git push --no-verify` (e.g. emergency rollback)
+pre-push:
+  piped: true
+  commands:
+    no-direct-main:
+      priority: 1
+      run: |
+        if git rev-parse --abbrev-ref HEAD | grep -qx main; then
+          echo "ERROR: direct push to main is blocked. Branch + PR required."
+          echo "Bypass: git push --no-verify"
+          exit 1
+        fi
+    security-check:
+      priority: 2
+      run: pnpm run preflight:security
+    quality-check:
+      priority: 3
+      run: pnpm run preflight:quality
+    unit-component-tests:
+      priority: 4
+      run: pnpm run preflight:unit
+    build:
+      priority: 5
+      run: pnpm run preflight:build
+    e2e-tests:
+      priority: 6
+      run: pnpm run preflight:e2e

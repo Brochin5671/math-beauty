@@ -1,0 +1,108 @@
+---
+import { buildAbsoluteURL, buildCanonicalURL, buildMetaTitle } from "@/lib/seo";
+import { site, siteSeo } from "@/lib/site-config";
+
+export interface Props {
+  canonical?: string;
+  description?: string;
+  image?: string;
+  /** Alt text for the social image; defaults to "Site logo". */
+  imageAlt?: string;
+  noindex?: boolean;
+  title?: string;
+  /** Brand shown in the <title> and og:site_name; defaults to brand.name. */
+  siteName?: string;
+  /** Homepage title suffix (used when there is no `title`); defaults to siteSeo.tagline. Pass "" to omit. */
+  tagline?: string;
+  twitterCard?: "summary" | "summary_large_image";
+  /** Open Graph type; set to "article" on blog posts to emit article:* tags. */
+  ogType?: "website" | "article";
+  /** ISO date string; emitted as article:published_time when ogType="article". */
+  publishedTime?: string;
+  /** ISO date string; emitted as article:modified_time when ogType="article". */
+  modifiedTime?: string;
+  /** Author name; emitted as article:author when ogType="article". */
+  author?: string;
+  /** Topic tags; each emitted as an article:tag when ogType="article". */
+  tags?: string[];
+}
+
+/*
+ * CONFIGURE: `image` defaults to `/og-logo.png` (in public/), shipped at
+ * 1200x630 to render cleanly on LinkedIn, Slack, Discord, Facebook, and
+ * Twitter's `summary_large_image` card. `twitterCard` defaults to
+ * `summary_large_image` so the asset renders as a wide banner; pass `summary`
+ * for a square thumbnail. Override `image` per-page for a route-specific card.
+ *
+ * CONFIGURE: `description` below is the site-wide fallback for any page that
+ * does not pass its own. Set a specific description per page (via the Layout
+ * `seoProps`) for the best search and social results.
+ */
+const {
+  title,
+  description = "Welcome to our site. Learn more about what we do and get in touch.",
+  image = "/og-logo.png",
+  imageAlt = "Site logo",
+  canonical,
+  noindex = false,
+  twitterCard = "summary_large_image",
+  ogType = "website",
+  publishedTime,
+  modifiedTime,
+  author,
+  tags = [],
+  siteName = site.name,
+  tagline = site.tagline,
+} = Astro.props;
+
+// Brand suffix for inner pages; brand + tagline for the homepage (no title)
+// `siteName`/`tagline` let a surface (e.g. the playground) override the brand
+const metaTitle = buildMetaTitle(title, siteName, tagline);
+const canonicalURL = canonical ?? buildCanonicalURL(Astro.url.pathname, Astro.site);
+// Social images must be absolute: crawlers (Facebook, X, Slack, LinkedIn) fetch
+// the page from their own servers and cannot resolve a relative path
+const imageURL = buildAbsoluteURL(image, Astro.site);
+---
+
+<title>{metaTitle}</title>
+<meta name="description" content={description} />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- Robots -->
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<!-- Open Graph -->
+<meta property="og:site_name" content={siteName} />
+<meta property="og:locale" content={siteSeo.locale} />
+<meta property="og:title" content={metaTitle} />
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={imageURL} />
+<meta property="og:image:alt" content={imageAlt} />
+<meta property="og:image:width" content={String(siteSeo.ogImage.width)} />
+<meta property="og:image:height" content={String(siteSeo.ogImage.height)} />
+<meta property="og:image:type" content={siteSeo.ogImage.type} />
+{
+  ogType === "article" && publishedTime && (
+    <meta property="article:published_time" content={publishedTime} />
+  )
+}
+{
+  ogType === "article" && modifiedTime && (
+    <meta property="article:modified_time" content={modifiedTime} />
+  )
+}
+{ogType === "article" && author && <meta property="article:author" content={author} />}
+{ogType === "article" && tags.map((tag) => <meta property="article:tag" content={tag} />)}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content={twitterCard} />
+{siteSeo.twitterHandle && <meta name="twitter:site" content={siteSeo.twitterHandle} />}
+{siteSeo.twitterHandle && <meta name="twitter:creator" content={siteSeo.twitterHandle} />}
+<meta name="twitter:title" content={metaTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageURL} />
+<meta name="twitter:image:alt" content={imageAlt} />

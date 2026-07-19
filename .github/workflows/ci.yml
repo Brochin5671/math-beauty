@@ -1,0 +1,246 @@
+# Setup boilerplate lives in .github/actions/setup (composite)
+
+name: CI
+
+# CI is PR-ONLY. Pushes to main never re-trigger CI: the PR's CI run already
+# validated the same code (squash and rebase merges reproduce the same tree
+# that was tested), and direct pushes to main are blocked by the lefthook
+# pre-push hook (no-direct-main + the preflight stages). cd.yml triggers directly on
+# push to main; it does not depend on CI completion
+#
+# No `branches:` filter on pull_request: stacked PRs (e.g. fix/* -> feat/*)
+# need full CI coverage too. Without this, only PRs targeting main run CI
+# and stacked work relies entirely on local `pnpm preflight`
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# timeout-minutes is the ceiling on hung runs (GitHub default is 6 hours).
+# All jobs use 10m for a uniform cap; real runs finish well under that
+
+jobs:
+  # PR title is the squash commit subject; semantic-release reads it
+  # Same commitlint config as the per-commit hook so rules can't drift
+  pr-title:
+    name: Validate PR title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      # `env: PR_TITLE` indirection prevents shell injection from a
+      # malicious title; never interpolate `${{ github.event.* }}` directly
+      # into a `run:` command. The `check:pr-title` script reads PR_TITLE
+      # from env so CI runs the same command preflight could (CI-only
+      # context: PR_TITLE only exists on `pull_request` events)
+      - name: Lint title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: pnpm run check:pr-title
+
+  # Per-commit gate; authoritative since the local `commit-msg` hook
+  # is bypassable via `--no-verify`
+  commitlint:
+    name: Lint PR commit messages
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Full history so commitlint can compare PR base..head
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+
+      # Lint commits against the PR's actual base branch (not hardcoded
+      # `main`) so stacked PRs (head -> feature base) lint only their
+      # own commits, not the parent branch's. `BASE_REF` env feeds the
+      # `check:commitlint` script, which defaults to `main` locally
+      # when the env var isn't set
+      - name: Lint commits
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # Full fetch (no --depth): a shallow base graft truncates the base's
+          # ancestry, so `origin/<base>..HEAD` can't exclude the base history and
+          # the range balloons to the whole tree (re-linting old commits). The
+          # checkout already pulled full history, so this is cheap.
+          git fetch origin "$BASE_REF"
+          pnpm run check:commitlint
+
+  # Authoritative gate; pre-commit hook is bypassable via `--no-verify`
+  # PRs scope to base..head commit range (faster, ~1s); main pushes scan
+  # full history (catches anything that bypassed pre-commit via --no-verify)
+  secrets:
+    name: Scan for secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Full history so `gitleaks git --log-opts` can resolve the
+          # base..head range (PRs) or scan all commits (main pushes)
+          fetch-depth: 0
+
+      # gitleaks-action@v2 is paid for org-owned private repos; direct
+      # binary install avoids the license check. Group fold keeps the
+      # tarball + extract output collapsed by default in the run UI
+      - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: 8.30.1
+        run: |
+          echo "::group::Install gitleaks v${GITLEAKS_VERSION}"
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | sudo tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+          echo "::endgroup::"
+
+      # Match the script invoked by lefthook + preflight, single source of truth
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+
+      # Scope to the PR's commit range (base..head). ci.yml is PR-only,
+      # so PR_BASE_SHA/PR_HEAD_SHA are always set; no fallback branch
+      # needed. Env-var indirection (never interpolated into run:)
+      # follows the GitHub Actions injection hardening guideline
+      - name: Scan
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: pnpm run check:secrets:pr
+
+  # Pre-commit hooks don't cover SAST; CI is the only layer. `.astro`
+  # is NOT parsed (no Semgrep grammar). OSS-only mode (no
+  # SEMGREP_APP_TOKEN); suppress via `.semgrepignore` or `// nosem:`
+  sast:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v7
+
+      # Rule sets matched to our stack (registry packs):
+      # p/javascript + p/typescript + p/react = language coverage
+      # p/security-audit = baseline security patterns
+      # p/owasp-top-ten = broader OWASP-aligned rules (some overlap
+      #   with security-audit; net-additive coverage)
+      #
+      # --exclude-rule github-actions-mutable-action-tag: we standardize on
+      # major-version action tags (@v7) kept current by Dependabot with a
+      # 7-day cooldown to dodge yanked/compromised releases (see
+      # .github/dependabot.yml), rather than full-SHA pins; the rule does
+      # not fit that deliberate policy
+      - name: Scan
+        run: semgrep ci --config p/javascript --config p/typescript --config p/react --config p/security-audit --config p/owasp-top-ten --exclude-rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag
+
+  # Dependency vulnerabilities via Trivy. Gate-only: fails on HIGH/CRITICAL,
+  # informational MEDIUM/LOW findings still print in the table output. Native
+  # Trivy install (apt repo, Trivy-team maintained) mirrors the local path
+  # exactly so CI + dev stay in lockstep. Future-proof: when a Dockerfile
+  # lands, add a `trivy image <ref>` step in this same job. SARIF + GitHub
+  # Security tab integration intentionally skipped: GitHub Advanced Security
+  # is required for private-repo code scanning, which we don't carry. CI
+  # logs are the source of truth for findings
+  deps:
+    name: Vulnerabilities (Trivy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      # Trivy's apt repo serves only the latest release and does not support
+      # version pinning (older versions are pruned when a new one ships), so we
+      # install latest - and run latest locally too, keeping CI + dev in lockstep
+      # on the current release; see https://github.com/aquasecurity/trivy/discussions/10775
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+          trivy --version
+
+      # Match the script invoked by preflight, single source of truth
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+
+      - name: Trivy fs scan (HIGH+CRITICAL)
+        run: pnpm run check:deps
+
+  # Biome (JS/TS/JSON/CSS) + Prettier (.astro). Biome's .astro support
+  # is experimental, so Prettier owns Astro formatting
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Biome
+        run: pnpm check:ci
+      - name: Prettier (.astro)
+        run: pnpm check:astro
+
+  types:
+    name: Type check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Run tsc
+        run: pnpm check:types
+
+  # Vitest unit (.test.ts) + React component (.test.tsx) tests, run with v8
+  # coverage so the floor in vitest.config.ts (coverage.thresholds) gates the
+  # PR: a drop below the locked baseline fails this job. Local `pnpm test` stays
+  # coverage-free for a fast loop; CI is the authoritative coverage gate.
+  # Gated on `pr-title`: a bad title blocks the merge, so don't spend the
+  # heaviest jobs until the cheap title check passes. `build` needs `tests`,
+  # so it is gated transitively. The fast metadata/lint/scan jobs stay parallel
+  # (they finish before this would, so gating them would only add latency).
+  tests:
+    name: Unit + component tests
+    needs: [pr-title]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Run Vitest (with coverage gate)
+        run: pnpm test:coverage
+
+  # Build + Cheerio snapshot tests on dist/*.html (test:build vitest project)
+  # needs: all Stage 1 quality jobs so a lint/type/test failure
+  # short-circuits before paying the build cost. Build and snapshots
+  # share one runner so dist/ stays in-process; no artifact passing
+  build:
+    name: Build + Cheerio snapshot tests
+    needs: [deps, lint, types, tests, secrets, sast]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - name: Astro build
+        run: pnpm build
+      - name: Snapshot tests
+        run: pnpm test:build

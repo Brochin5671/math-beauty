@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "astro-build.astro-vscode",
+    "biomejs.biome",
+    "bradlc.vscode-tailwindcss",
+    "wix.vscode-import-cost",
+    "bierner.github-markdown-preview",
+    "ms-playwright.playwright",
+    "vitest.explorer",
+    "github.vscode-github-actions",
+    "redhat.vscode-yaml"
+  ],
+  "unwantedRecommendations": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+}

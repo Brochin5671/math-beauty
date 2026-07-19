@@ -1,0 +1,217 @@
+# CD: fires on push to main only. CI is PR-only and does NOT re-run on
+# main; squash and rebase merges reproduce the tree CI tested.
+#
+# Safety boundary: pushes to main happen via squash or rebase merge. Direct
+# pushes are blocked by lefthook's pre-push hook (no-direct-main +
+# the preflight stages)
+
+name: CD
+
+on:
+  # Direct push trigger; fires on every push to main, which is only
+  # ever a squash or rebase merge in normal operation
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# This site builds with its real identity from src/lib/site-config.ts;
+# no PUBLIC_SITE_* build env is set.
+
+# Concurrency: granular per-job. The latest commit on main is the
+# source of truth, so e2e + accessibility (idempotent test stages)
+# can be cancelled mid-flight if a newer push to main arrives
+# deploy + release are protected (cancel-in-progress: false): once
+# wrangler is uploading or semantic-release is creating a tag +
+# GitHub Release + version-bump commit, we let it finish to avoid
+# half-states (orphaned tags, half-promoted Worker versions). The
+# next push then runs cleanly on top
+#
+# No workflow-level `concurrency:` block: that would force a single
+# policy across all jobs. Per-job concurrency lets each job pick
+
+jobs:
+  e2e:
+    name: E2E Tests
+    # Idempotent stage: cancel a previous run if a newer main push arrives
+    concurrency:
+      group: ${{ github.workflow }}-e2e-${{ github.ref }}
+      cancel-in-progress: true
+    # Bare runner (not the Playwright Docker image) because the
+    # @astrojs/cloudflare adapter's prerender helper spawns workerd on a
+    # random localhost port, which silently fails to bind inside hardened
+    # containers. The 2-4 min `playwright install --with-deps` cost is
+    # the trade-off for that guarantee
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      - name: Build
+        run: pnpm build
+
+      # Pinned via @playwright/test in package.json; --with-deps installs the
+      # apt system libs Chromium needs to launch headless
+      - name: Install Playwright browsers + system deps
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: pnpm test:e2e:functional
+
+      # always(): keep the report on green runs too, so per-test timings
+      # and any flaky markers stay inspectable without a re-run.
+      # `retention-days: 1` + `overwrite: true` keep free-tier storage bounded
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 1
+          overwrite: true
+
+      - name: E2E report summary
+        if: always()
+        run: |
+          {
+            echo "## E2E test report"
+            echo ""
+            echo "Live progress: the **Run E2E tests** step log (\`list\` reporter) + \`github\` annotations (pass count, flaky, slowest spec)."
+            echo ""
+            echo "Full report: the **playwright-report** artifact (1-day retention) has per-test timings + trace zips. Open with \`pnpm exec playwright show-report\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Parallel with e2e. Runs only the a11y subset (Playwright --grep
+  # "Accessibility"). Separate job so a11y pass/fail is visible independently.
+  # Single job with workers=2 (the suite is all-chromium), no sharding needed
+  accessibility:
+    name: Accessibility Tests
+    # Idempotent stage: cancel a previous run if a newer main push arrives
+    concurrency:
+      group: ${{ github.workflow }}-a11y-${{ github.ref }}
+      cancel-in-progress: true
+    # See e2e job for the bare-runner rationale
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      - name: Build
+        run: pnpm build
+
+      # Chromium only: page a11y is chromium + mobile-chromium (both chromium)
+      - name: Install Playwright browsers + system deps
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run accessibility tests
+        run: pnpm exec playwright test --grep "Accessibility" --reporter=html,list
+
+      - name: Upload accessibility report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: accessibility-report
+          path: playwright-report/
+          retention-days: 1
+          overwrite: true
+
+      - name: Accessibility report summary
+        if: always()
+        run: |
+          {
+            echo "## Accessibility test report"
+            echo ""
+            echo "Live progress: the **Run accessibility tests** step log (\`list\` reporter)."
+            echo ""
+            echo "Full report: the **accessibility-report** artifact (1-day retention). Open with \`pnpm exec playwright show-report\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Deploy to Cloudflare Workers
+    needs: [e2e, accessibility]
+    # Protected stage: serialize so a newer main push doesn't kill an
+    # in-flight wrangler upload + version promote (no rollback if cut
+    # mid-run). Subsequent push queues until this finishes
+    concurrency:
+      group: ${{ github.workflow }}-deploy-${{ github.ref }}
+      cancel-in-progress: false
+    # Plan-gated approval. Inert on private + GitHub Free + org-owned
+    # (default); activates on public or paid plan via Settings ->
+    # Environments.
+    environment: production
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+
+      - name: Build
+        run: pnpm build
+
+      # fail the deploy if a scaffold placeholder survived into the built output (security.txt
+      # is the one intentional placeholder, excluded)
+      - name: Guard against placeholder leak
+        run: |
+          if grep -rIlE 'example\.com|Site Name|hello@example|Tag Line|your-org' dist/client \
+               --include='*.html' --include='*.xml' --include='*.txt' | grep -v '.well-known/security.txt'; then
+            echo "::error::placeholder tells in built output - finish configuring site-config.ts"
+            exit 1
+          fi
+
+      # CI gates production. Cloudflare's Git integration handles
+      # preview URLs per branch (dashboard: prod DISABLED, preview
+      # ENABLED) so they don't race with `wrangler deploy`
+      - name: Deploy
+        run: pnpm exec wrangler deploy
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+  release:
+    name: Release
+    needs: deploy
+    # Protected stage: serialize so a newer main push doesn't kill
+    # semantic-release mid-flight (orphaned tag without a release, or
+    # release without the [skip ci] commit back to main). Subsequent
+    # push queues until this finishes
+    concurrency:
+      group: ${{ github.workflow }}-release-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # semantic-release needs write access to create tags, releases, and
+    # issue comments. Scoped to this job only; other jobs retain the
+    # workflow-level read-only default
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Full history so commit-analyzer can determine the next version
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+
+      # 9-step release lifecycle. Auto-commit
+      # carries `[skip ci]` so it doesn't trigger another run
+      #
+      # LEFTHOOK=0 skips the local commit hooks (gitleaks, biome, tsc)
+      # when @semantic-release/git commits CHANGELOG.md + package.json
+      # back to main. The bot's commit only bumps versions and prepends
+      # release notes; nothing to scan that wasn't already scanned by
+      # the `secrets`/`lint`/`types` ci.yml jobs for the same SHA. And
+      # gitleaks isn't installed on this runner anyway (only the
+      # `secrets` ci.yml job curl-installs it), so without this the
+      # commit hook fails: "gitleaks not on PATH"
+      - name: Run semantic-release
+        run: pnpm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LEFTHOOK: 0

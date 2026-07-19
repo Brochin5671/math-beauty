@@ -1,0 +1,50 @@
+name: Bug report
+description: Report something that does not work as expected
+title: "fix: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug. Please fill in the fields below so the issue can be reproduced and fixed.
+  - type: textarea
+    id: what
+    attributes:
+      label: What is broken?
+      description: A clear, concise description of the bug.
+      placeholder: When I do X, Y happens instead of Z.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run `pnpm dev`
+        2. Navigate to /contact
+        3. Click "Send"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, Node version (`node --version`), pnpm version (`pnpm --version`).
+      placeholder: e.g., Chrome 130, macOS 14.5, Node 22.21.0, pnpm 10.33.0
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Console output, screenshots, or network errors that help triage.

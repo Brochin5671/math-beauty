@@ -1,0 +1,16 @@
+---
+import { Hero } from "@/components/blocks/Hero";
+import { Link } from "@/components/elements/Link";
+import { Main } from "@/components/layouts/Main";
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout seoProps={{ title: "404: Page Not Found" }}>
+  <Main>
+    <Hero size="fullscreen">
+      <h1>Not Found</h1>
+      <p class="text-lg text-muted-foreground">The page you're looking for doesn't exist.</p>
+      <Link href="/" variant="default" className="mt-4"> Go Home </Link>
+    </Hero>
+  </Main>
+</Layout>

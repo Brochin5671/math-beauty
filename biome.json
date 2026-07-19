@@ -1,0 +1,68 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.2/schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on",
+        "useSortedInterfaceMembers": "off",
+        "useSortedKeys": "off"
+      }
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!!**/dist",
+      "!!**/coverage",
+      "!!**/playwright-report",
+      "!!**/test-results",
+      "!!**/.wrangler",
+      "!!**/*.svg"
+    ]
+  },
+  "formatter": {
+    "indentStyle": "space",
+    "lineWidth": 100,
+    "bracketSameLine": true
+  },
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noFloatingPromises": "warn"
+      },
+      "suspicious": {
+        "noDoubleEquals": "error",
+        "noLeakedRender": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.astro"],
+      "formatter": {
+        "enabled": false
+      },
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedImports": "off",
+            "noUnusedVariables": "off"
+          },
+          "style": {
+            "useImportType": "off"
+          }
+        }
+      }
+    }
+  ],
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
+  }
+}
