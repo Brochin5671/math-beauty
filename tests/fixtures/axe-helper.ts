@@ -90,15 +90,18 @@ export async function waitForHydration(page: Page) {
   const hasIslands = await page.evaluate(() => document.querySelector("astro-island") !== null);
   if (!hasIslands) return;
   /*
-   * Two signals composed: Astro island lifecycle complete (`ssr` attr cleared)
+   * Three signals composed: Astro island lifecycle complete (`ssr` attr cleared),
+   * every lazy boundary resolved (no `data-pending` placeholder left standing),
    * AND React useEffect has fired (no `<form>` button left disabled by the
    * hydration gate). Webkit's runtime can clear the island ssr attribute before
    * React's useEffect runs, so polling only on `[ssr]` is insufficient on
-   * mobile-webkit
+   * mobile-webkit, and a lazily imported panel lands later still, which would
+   * otherwise let a scan pass over markup that has not rendered yet
    */
   await page.waitForFunction(
     () => {
       if (document.querySelector("astro-island[ssr]")) return false;
+      if (document.querySelector("[data-pending]")) return false;
       const formBtns = Array.from(document.querySelectorAll("form button"));
       return formBtns.every((btn) => !(btn as HTMLButtonElement).disabled);
     },

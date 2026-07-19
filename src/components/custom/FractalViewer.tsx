@@ -692,7 +692,8 @@ export function FractalViewer() {
     <Card className="mx-auto w-fit max-w-full gap-2 pt-4">
       <CardHeader>
         <Stack direction="horizontal" justify="end" align="center">
-          <Suspense fallback={<div aria-hidden="true" className="size-9" />}>
+          {/* Reserves the help button's box so the header does not jump when the chunk lands */}
+          <Suspense fallback={<div aria-hidden="true" data-pending="help" className="h-9 w-20" />}>
             <FractalHelp />
           </Suspense>
         </Stack>
@@ -706,7 +707,10 @@ export function FractalViewer() {
           <Stack gap="default" className="w-full md:w-72">
             {/* Reserves the panel's rendered height so mounting it does not shove the
                 canvas down on mobile, where the controls sit above it */}
-            <Suspense fallback={<div aria-hidden="true" className="min-h-[426px]" />}>
+            <Suspense
+              fallback={
+                <div aria-hidden="true" data-pending="controls" className="min-h-[426px]" />
+              }>
               <FractalControls api={api} />
             </Suspense>
           </Stack>

@@ -67,9 +67,9 @@ function CameraField({
 export function FractalHelp() {
   return (
     <Dialog>
-      <DialogTrigger
-        render={<Button variant="ghost" size="icon" aria-label="Help and keyboard shortcuts" />}>
+      <DialogTrigger render={<Button variant="ghost" />}>
         <CircleHelp className="size-5" />
+        Help
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

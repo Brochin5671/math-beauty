@@ -36,6 +36,12 @@ describe("FractalViewer", () => {
     expect(screen.getByRole("tab", { name: "Render" })).toBeInTheDocument();
   });
 
+  // The icon carries aria-hidden, so the visible text is the whole accessible name
+  it("names the help trigger from its visible label", async () => {
+    await renderViewer();
+    expect(screen.getByRole("button", { name: "Help" })).toBeInTheDocument();
+  });
+
   it("draws on mount via the stubbed context", async () => {
     const ctx = stubCanvas();
     await renderViewer();
