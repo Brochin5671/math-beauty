@@ -79,9 +79,23 @@ describe("NumberField", () => {
     expect(screen.getByRole("textbox", { name: "Quantity" })).toBeInTheDocument();
   });
 
-  it("asks for a decimal keypad so a point and a minus stay typeable on mobile", () => {
+  it("asks for a full keyboard when the value can go negative", () => {
+    // Software keypads have no minus key, so a numeric one would make the value untypeable
     const { container } = render(<NumberField defaultValue={1} />);
+    expect(input(container)).toHaveAttribute("inputmode", "text");
+
+    const bounded = render(<NumberField defaultValue={1} min={-2} />);
+    expect(input(bounded.container)).toHaveAttribute("inputmode", "text");
+  });
+
+  it("asks for a decimal keypad when the value cannot go negative", () => {
+    const { container } = render(<NumberField defaultValue={1} min={0} />);
     expect(input(container)).toHaveAttribute("inputmode", "decimal");
+  });
+
+  it("lets a caller state the keypad explicitly", () => {
+    const { container } = render(<NumberField defaultValue={1} min={0} inputMode="numeric" />);
+    expect(input(container)).toHaveAttribute("inputmode", "numeric");
   });
 
   it("commits on Enter by blurring, which Base UI treats as a navigation key", async () => {
