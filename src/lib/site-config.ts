@@ -45,7 +45,7 @@ export const siteSeo = {
   tagline: "View several escape fractals!",
   locale: "en_US",
   twitterHandle: "",
-  ogImage: { width: 1200, height: 630, type: "image/png" },
+  ogImage: { width: 512, height: 512, type: "image/png" },
   defaultAuthor: brand.founder,
 } as const;
 

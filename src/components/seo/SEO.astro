@@ -28,11 +28,10 @@ export interface Props {
 }
 
 /*
- * CONFIGURE: `image` defaults to `/og-logo.png` (in public/), shipped at
- * 1200x630 to render cleanly on LinkedIn, Slack, Discord, Facebook, and
- * Twitter's `summary_large_image` card. `twitterCard` defaults to
- * `summary_large_image` so the asset renders as a wide banner; pass `summary`
- * for a square thumbnail. Override `image` per-page for a route-specific card.
+ * `image` defaults to `/og-logo.png` (in public/), a 512x512 square, so
+ * `twitterCard` defaults to `summary` (square thumbnail). Pass a wider image
+ * and `summary_large_image` for a banner card. Override `image` per-page for a
+ * route-specific card.
  *
  * CONFIGURE: `description` below is the site-wide fallback for any page that
  * does not pass its own. Set a specific description per page (via the Layout
@@ -42,10 +41,10 @@ const {
   title,
   description = "Welcome to our site. Learn more about what we do and get in touch.",
   image = "/og-logo.png",
-  imageAlt = "Site logo",
+  imageAlt = "Fractal Viewer",
   canonical,
   noindex = false,
-  twitterCard = "summary_large_image",
+  twitterCard = "summary",
   ogType = "website",
   publishedTime,
   modifiedTime,
