@@ -686,20 +686,37 @@ export function FractalViewer() {
                 <DialogDescription>Controls and keyboard shortcuts</DialogDescription>
               </DialogHeader>
               <Stack gap="sm" className="text-sm">
-                <p>Click the canvas to zoom toward a point. Right-click to save the render.</p>
+                <p>
+                  Tap to zoom toward a point, drag to move and scroll to zoom. Right-click to save
+                  the render.
+                </p>
+                {/* Raw dl: Grid renders a div and cannot express the auto column these need */}
+                <dl className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2">
+                  <dt className="flex gap-1">
+                    <Kbd>Q</Kbd>
+                    <Kbd>E</Kbd>
+                  </dt>
+                  <dd className="text-muted-foreground">Zoom in and out</dd>
+                  <dt className="flex gap-1">
+                    <Kbd>W</Kbd>
+                    <Kbd>A</Kbd>
+                    <Kbd>S</Kbd>
+                    <Kbd>D</Kbd>
+                  </dt>
+                  <dd className="text-muted-foreground">Pan</dd>
+                  <dt className="flex gap-1">
+                    <Kbd>Z</Kbd>
+                    <Kbd>X</Kbd>
+                  </dt>
+                  <dd className="text-muted-foreground">Increase and decrease iterations</dd>
+                  <dt className="flex gap-1">
+                    <Kbd>R</Kbd>
+                  </dt>
+                  <dd className="text-muted-foreground">Reset the camera</dd>
+                </dl>
                 <Stack gap="xs">
-                  <p>
-                    <Kbd>Q</Kbd> <Kbd>E</Kbd> zoom in and out
-                  </p>
-                  <p>
-                    <Kbd>W</Kbd> <Kbd>A</Kbd> <Kbd>S</Kbd> <Kbd>D</Kbd> pan
-                  </p>
-                  <p>
-                    <Kbd>Z</Kbd> <Kbd>X</Kbd> increase and decrease iterations
-                  </p>
-                  <p>
-                    <Kbd>R</Kbd> reset the camera
-                  </p>
+                  <p className="font-medium">Mobile</p>
+                  <p className="text-muted-foreground">Drag to move, pinch to zoom.</p>
                 </Stack>
               </Stack>
             </DialogContent>
@@ -937,9 +954,23 @@ export function FractalViewer() {
                 className="block h-auto max-w-full cursor-crosshair touch-none select-none [-webkit-tap-highlight-color:transparent]"
               />
             </div>
-            <p id="canvas-hint" className="max-w-[320px] text-center text-xs text-muted-foreground">
-              Click to zoom toward a point. Use Q and E to zoom, W A S D to pan.
-            </p>
+            <Stack gap="xs" align="center" className="max-w-[320px] text-xs text-muted-foreground">
+              <p id="canvas-hint" className="text-center">
+                Tap to zoom toward a point.
+              </p>
+              {/* The keys repeat what the dialog already describes, so keep them out of the
+                  canvas description rather than announcing them twice */}
+              <p aria-hidden="true" className="flex flex-wrap items-center justify-center gap-1">
+                <Kbd size="sm">Q</Kbd>
+                <Kbd size="sm">E</Kbd>
+                <span>zoom</span>
+                <Kbd size="sm">W</Kbd>
+                <Kbd size="sm">A</Kbd>
+                <Kbd size="sm">S</Kbd>
+                <Kbd size="sm">D</Kbd>
+                <span>pan</span>
+              </p>
+            </Stack>
           </Stack>
         </Stack>
       </CardContent>
