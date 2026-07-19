@@ -99,14 +99,41 @@ describe("FractalViewer", () => {
     expect(screen.getByLabelText("Pan X")).toHaveValue("25");
   });
 
-  it("does not redraw when a field is focused and left unchanged", async () => {
+  it("does not redraw when a committed value matches what is already drawn", async () => {
     const ctx = stubCanvas();
     const user = userEvent.setup();
     render(<FractalViewer />);
-    await user.click(screen.getByLabelText("Pan X"));
+    const panX = screen.getByLabelText("Pan X");
+
+    await user.click(panX);
+    await user.clear(panX);
+    await user.type(panX, "25");
+    await user.tab();
+    expect(ctx.putImageData).toHaveBeenCalled();
+
+    // Retyping the same value commits again, but nothing about the camera changed
     ctx.putImageData.mockClear();
+    await user.click(panX);
+    await user.clear(panX);
+    await user.type(panX, "25");
     await user.tab();
     expect(ctx.putImageData).not.toHaveBeenCalled();
+  });
+
+  it("refuses a centre zoom that would overflow, as the anchored one does", async () => {
+    const user = userEvent.setup();
+    render(<FractalViewer />);
+    const zoom = screen.getByLabelText("Zoom");
+
+    await user.click(zoom);
+    // Large but finite, so the commit accepts it and repeated steps can overflow
+    fireEvent.change(zoom, { target: { value: "9".repeat(308) } });
+    await user.tab();
+
+    await user.keyboard("qqqqq");
+    const value = Number((zoom as HTMLInputElement).value);
+    expect(Number.isFinite(value)).toBe(true);
+    expect(value).toBeGreaterThan(0);
   });
 
   it("keeps the camera shortcuts alive after a stepper button takes focus", async () => {
