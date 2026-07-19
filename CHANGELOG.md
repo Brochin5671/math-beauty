@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.1.0](https://github.com/Brochin5671/math-beauty/compare/v2.0.2...v2.1.0) (2026-07-19)
+
+### Features
+
+* **library:** add NumberField with parent-controlled stepping ([d321eba](https://github.com/Brochin5671/math-beauty/commit/d321eba452e27237d8eaa018d795bbd25898cd10))
+* **viewer:** add drag, wheel and pinch gestures to the canvas ([a52f805](https://github.com/Brochin5671/math-beauty/commit/a52f805a8f9c2a0b01755a79b3c34078d429fec1))
+* **viewer:** default the color preset to Temperature ([37499fb](https://github.com/Brochin5671/math-beauty/commit/37499fbed83900456fcd39ccb30f09089788f7e8))
+* **viewer:** format the equations and restructure the help dialog ([1005546](https://github.com/Brochin5671/math-beauty/commit/1005546c7cda7b945e415c74dad73cdcc0512859))
+
+### Fixes
+
+* **viewer:** anchor canvas zoom instead of a fixed pan factor ([02f4ca4](https://github.com/Brochin5671/math-beauty/commit/02f4ca4542711a508eff82ccdd693030ff7a9b00))
+* **viewer:** guard the centre zoom the same way the anchored one is guarded ([933ff55](https://github.com/Brochin5671/math-beauty/commit/933ff5515be4aabe743ee59fda70a4684938178a))
+* **viewer:** reject camera values that break the coordinate mapping ([2f4a33b](https://github.com/Brochin5671/math-beauty/commit/2f4a33bca210be91d7de921bc21697a0392a9c44))
+
+### Documentation
+
+* describe the library as this project's own and refresh the controls ([0bcd03c](https://github.com/Brochin5671/math-beauty/commit/0bcd03c8ab363c1a8a9182483d4672f9874b0d50))
+
+### Changed
+
+* **fractals:** add a camera module for anchored zoom and pan ([57938d3](https://github.com/Brochin5671/math-beauty/commit/57938d374037b44edfc721012c4236d5e3d98258))
+* **viewer:** replace NumberStepper with NumberField ([fda7b21](https://github.com/Brochin5671/math-beauty/commit/fda7b217235fe986c4b2d9f993f7f8dc2cb0a63b))
+
 ## [2.0.2](https://github.com/Brochin5671/math-beauty/compare/v2.0.1...v2.0.2) (2026-07-19)
 
 ### Fixes
