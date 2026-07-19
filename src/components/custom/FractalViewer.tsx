@@ -21,7 +21,7 @@ import { Slider } from "@/components/forms/Slider";
 import { Switch } from "@/components/forms/Switch";
 import { Stack } from "@/components/layouts/Stack";
 import { FRACTALS } from "@/lib/fractals/algorithms";
-import { backingScale, zoomAt } from "@/lib/fractals/camera";
+import { backingScale, panBy, zoomAt } from "@/lib/fractals/camera";
 import { COLOR_METHODS, colorPresets, createPalette } from "@/lib/fractals/coloring";
 import { drawEscapeFractal, drawPalettePreview } from "@/lib/fractals/render";
 import type {
@@ -36,6 +36,18 @@ import { cn } from "@/lib/utils";
 
 const JULIA_CR = -0.70176;
 const JULIA_CI = 0.3842;
+
+// CSS pixels a press may wander before it counts as a drag instead of a tap
+const DRAG_THRESHOLD = 4;
+// Wheel deltas are continuous, so zoom exponentially rather than by a fixed step, which a
+// trackpad would apply dozens of times per flick. A 100px pixel-mode notch lands near the
+// 1.15 the keyboard and tap use
+const WHEEL_ZOOM_RATE = 0.0015;
+// Pixels per line, matching what pixel-mode browsers report for one notch
+const WHEEL_LINE_HEIGHT = 33;
+// Page-mode deltas and runaway trackpads can report enormous values, so bound one event
+const WHEEL_MIN_FACTOR = 0.25;
+const WHEEL_MAX_FACTOR = 4;
 
 const FRACTAL_OPTIONS: { value: FractalKind; label: string }[] = [
   { value: "mandelbrot", label: "Mandelbrot Set" },
@@ -147,6 +159,12 @@ export function FractalViewer() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const paletteCanvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Gesture state, all refs so a pointer stream never re-renders on its own
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const dragRef = useRef({ active: false, moved: false, lastX: 0, lastY: 0 });
+  const pinchRef = useRef<{ dist: number; cx: number; cy: number } | null>(null);
+  const frameRef = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
+
   const [ui, setUi] = useState<Ui>({
     fractal: "mandelbrot",
     method: "iteration",
@@ -253,6 +271,47 @@ export function FractalViewer() {
     document.addEventListener("keydown", onKey, true);
     return () => document.removeEventListener("keydown", onKey, true);
   }, []);
+
+  // Scroll to zoom, registered by hand because React attaches wheel listeners passively
+  // and so could not stop the page scrolling underneath
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const scale = backingScale(canvas.width, rect.width);
+      // Normalise line and page deltas so every device reports in pixels
+      const delta =
+        e.deltaMode === 1
+          ? e.deltaY * WHEEL_LINE_HEIGHT
+          : e.deltaMode === 2
+            ? e.deltaY * rect.height
+            : e.deltaY;
+      const factor = Math.min(
+        Math.max(Math.exp(-delta * WHEEL_ZOOM_RATE), WHEEL_MIN_FACTOR),
+        WHEEL_MAX_FACTOR,
+      );
+      zoomAt(
+        optionsRef.current,
+        factor,
+        (e.clientX - rect.left - rect.width / 2) * scale,
+        (e.clientY - rect.top - rect.height / 2) * scale,
+      );
+      scheduleCameraFrame();
+    };
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", onWheel);
+  }, []);
+
+  // Drop any frame still queued at unmount, kept apart from the wheel listener so an
+  // early return there could never leave one pending
+  useEffect(
+    () => () => {
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+    },
+    [],
+  );
 
   // Typing only moves the display, so a keystroke never triggers a render
   const showValue = (key: NumericUiKey, value: number | null) => {
@@ -479,8 +538,117 @@ export function FractalViewer() {
     requestRender();
   };
 
+  // Reads the canvas rect once per gesture step, since offsets are in backing pixels
+  const canvasFrame = (canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    return { rect, scale: backingScale(canvas.width, rect.width) };
+  };
+
+  // Distance and midpoint between the two active pointers, in CSS pixels
+  const pinchState = () => {
+    const [a, b] = [...pointersRef.current.values()];
+    if (!a || !b) return null;
+    return { dist: Math.hypot(b.x - a.x, b.y - a.y), cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
+  };
+
+  /*
+   * A gesture can outpace the synchronous render, so collapse a burst into one camera sync
+   * and at most one draw per frame. Respects auto-render like the steppers do
+   */
+  const scheduleCameraFrame = () => {
+    if (frameRef.current !== null) return;
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = null;
+      const o = optionsRef.current;
+      setUi((u) => ({ ...u, zoom: o.zoom, x: o.offsetX, y: o.offsetY }));
+      if (autoRenderRef.current) drawNow();
+    });
+  };
+
+  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const pointers = pointersRef.current;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 1) {
+      dragRef.current = { active: true, moved: false, lastX: e.clientX, lastY: e.clientY };
+      return;
+    }
+    // Any further pointer restarts the pinch from the spread as it stands, so a stale
+    // measurement can never survive into the next move
+    dragRef.current.active = false;
+    // A pinch is never a tap, so the click that closes it must not zoom again
+    dragRef.current.moved = true;
+    pinchRef.current = pinchState();
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const pointers = pointersRef.current;
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.size >= 2) {
+      const previous = pinchRef.current;
+      const next = pinchState();
+      pinchRef.current = next;
+      if (!previous || !next) return;
+      const factor = next.dist / previous.dist;
+      // A factor of one means a pointer outside the measured pair moved, which would
+      // otherwise cost a full redraw for no change
+      if (!Number.isFinite(factor) || factor === 1) return;
+      const { rect, scale } = canvasFrame(e.currentTarget);
+      zoomAt(
+        optionsRef.current,
+        factor,
+        (next.cx - rect.left - rect.width / 2) * scale,
+        (next.cy - rect.top - rect.height / 2) * scale,
+      );
+      scheduleCameraFrame();
+      return;
+    }
+
+    const drag = dragRef.current;
+    if (!drag.active) return;
+    const dx = e.clientX - drag.lastX;
+    const dy = e.clientY - drag.lastY;
+    // Keep the whole delta until the threshold clears, so the first accepted move
+    // does not have a dead zone to jump back over
+    if (!drag.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+    drag.moved = true;
+    drag.lastX = e.clientX;
+    drag.lastY = e.clientY;
+    const { scale } = canvasFrame(e.currentTarget);
+    panBy(optionsRef.current, dx * scale, dy * scale);
+    scheduleCameraFrame();
+  };
+
+  const onPointerEnd = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const pointers = pointersRef.current;
+    pointers.delete(e.pointerId);
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    if (pointers.size >= 2) {
+      // Re-measure from the pointers still down, never against one that has lifted
+      pinchRef.current = pinchState();
+      return;
+    }
+    pinchRef.current = null;
+    const [remaining] = [...pointers.values()];
+    if (remaining) {
+      // Carry on panning with the finger still down rather than going dead until it lifts
+      dragRef.current = { active: true, moved: true, lastX: remaining.x, lastY: remaining.y };
+      return;
+    }
+    dragRef.current.active = false;
+  };
+
   // Zooms toward the tapped point, which stays put instead of drifting toward the centre
   const onCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    // A drag finishes with a click, which must not zoom on top of the pan
+    if (dragRef.current.moved) {
+      dragRef.current.moved = false;
+      return;
+    }
     const canvas = e.currentTarget;
     const rect = canvas.getBoundingClientRect();
     const scale = backingScale(canvas.width, rect.width);
@@ -759,7 +927,11 @@ export function FractalViewer() {
                 aria-label={canvasLabel}
                 aria-describedby="canvas-hint"
                 onClick={onCanvasClick}
-                className="block h-auto max-w-full cursor-crosshair touch-manipulation select-none [-webkit-tap-highlight-color:transparent]"
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={onPointerEnd}
+                onPointerCancel={onPointerEnd}
+                className="block h-auto max-w-full cursor-crosshair touch-none select-none [-webkit-tap-highlight-color:transparent]"
               />
             </div>
             <p id="canvas-hint" className="max-w-[320px] text-center text-xs text-muted-foreground">

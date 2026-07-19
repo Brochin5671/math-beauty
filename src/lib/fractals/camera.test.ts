@@ -73,6 +73,18 @@ describe("zoomAt", () => {
     expect(c.offsetY).toBe(-100);
   });
 
+  test.each`
+    factor        | reason
+    ${0}          | ${"a pinch collapsing to zero distance"}
+    ${Number.NaN} | ${"a distance ratio of zero over zero"}
+    ${Infinity}   | ${"a ratio measured against zero distance"}
+    ${1e308}      | ${"a step that overflows the zoom"}
+  `("refuses $reason and leaves the camera untouched", ({ factor }) => {
+    const c = camera(2, 40, -15);
+    zoomAt(c, factor, 96, 96);
+    expect(c).toStrictEqual({ zoom: 2, offsetX: 40, offsetY: -15 });
+  });
+
   test("zooming out then back in returns the camera to its start", () => {
     const c = camera(1, 12, -8);
     zoomAt(c, 1.15, 40, 25);
