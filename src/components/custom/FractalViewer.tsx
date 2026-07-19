@@ -1,6 +1,5 @@
 import { CircleHelp } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { NumberStepper } from "@/components/custom/NumberStepper";
+import { type ComponentProps, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/elements/Button";
 import { ButtonGroup } from "@/components/elements/ButtonGroup";
 import { Card, CardContent, CardHeader } from "@/components/elements/Card";
@@ -15,6 +14,7 @@ import {
 import { Kbd } from "@/components/elements/Kbd";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/elements/Tabs";
 import { Label } from "@/components/forms/Label";
+import { NumberField } from "@/components/forms/NumberField";
 import { RadioGroup, RadioGroupItem } from "@/components/forms/RadioGroup";
 import { Select, SelectOption } from "@/components/forms/Select";
 import { Slider } from "@/components/forms/Slider";
@@ -32,6 +32,7 @@ import type {
   PresetKind,
   RGB,
 } from "@/lib/fractals/types";
+import { cn } from "@/lib/utils";
 
 const JULIA_CR = -0.70176;
 const JULIA_CI = 0.3842;
@@ -61,6 +62,16 @@ const RGB_CHANNELS: { key: keyof RGB; label: string }[] = [
   { key: "b", label: "Blue" },
 ];
 
+// Base UI renders the value through Intl.NumberFormat, whose default rounds to three
+// decimals and groups thousands, so every field states the precision it needs
+const ZOOM_FORMAT: Intl.NumberFormatOptions = { useGrouping: false, maximumSignificantDigits: 10 };
+const DECIMAL_FORMAT: Intl.NumberFormatOptions = { useGrouping: false, maximumFractionDigits: 4 };
+const COMPLEX_FORMAT: Intl.NumberFormatOptions = { useGrouping: false, maximumFractionDigits: 5 };
+const ITERATIONS_FORMAT: Intl.NumberFormatOptions = {
+  useGrouping: false,
+  maximumFractionDigits: 0,
+};
+
 // Display state for the controlled inputs, never read by the draw path
 interface Ui {
   fractal: FractalKind;
@@ -70,17 +81,40 @@ interface Ui {
   julia: boolean;
   autoRender: boolean;
   rgb: RGB;
-  zoom: string;
-  x: string;
-  y: string;
-  d: string;
-  cr: string;
-  ci: string;
-  iterations: string;
+  zoom: number;
+  x: number;
+  y: number;
+  d: number;
+  cr: number;
+  ci: number;
+  iterations: number;
 }
+
+type NumericUiKey = "zoom" | "x" | "y" | "d" | "cr" | "ci" | "iterations";
 
 function sliderValue(value: number | readonly number[]): number {
   return Array.isArray(value) ? (value[0] ?? 0) : (value as number);
+}
+
+// One labelled camera control, the same shape seven times over
+function CameraField({
+  id,
+  label,
+  ...field
+}: { id: string; label: string } & Omit<ComponentProps<typeof NumberField>, "controlLabel">) {
+  return (
+    <Stack gap="none">
+      <Label htmlFor={id} className="text-xs text-muted-foreground">
+        {label}
+      </Label>
+      <NumberField
+        {...field}
+        id={id}
+        controlLabel={label}
+        className={cn("w-full [&_[data-slot=number-field-input]]:w-full", field.className)}
+      />
+    </Stack>
+  );
 }
 
 export function FractalViewer() {
@@ -110,13 +144,13 @@ export function FractalViewer() {
     julia: false,
     autoRender: true,
     rgb: { r: 1, g: 1, b: 1 },
-    zoom: "1",
-    x: "0",
-    y: "0",
-    d: "2",
-    cr: String(JULIA_CR),
-    ci: String(JULIA_CI),
-    iterations: "100",
+    zoom: 1,
+    x: 0,
+    y: 0,
+    d: 2,
+    cr: JULIA_CR,
+    ci: JULIA_CI,
+    iterations: 100,
   });
 
   const drawNow = () =>
@@ -140,7 +174,10 @@ export function FractalViewer() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
-      if (target?.closest("input, textarea, [contenteditable='true'], [role='dialog']")) {
+      const typing = target?.closest("input, textarea, [contenteditable='true'], [role='dialog']");
+      // Number inputs swallow letters, so the camera shortcuts stay live while one holds
+      // focus, which matters because clicking a stepper button moves focus into its input
+      if (typing && !typing.matches("[data-slot='number-field-input']")) {
         return;
       }
       const o = optionsRef.current;
@@ -191,55 +228,72 @@ export function FractalViewer() {
       if (!handled) return;
       setUi((u) => ({
         ...u,
-        zoom: String(o.zoom),
-        x: String(o.offsetX),
-        y: String(o.offsetY),
-        d: String(o.d),
-        iterations: String(o.maxIterations),
-        cr: o.cr != null ? String(o.cr) : u.cr,
-        ci: o.ci != null ? String(o.ci) : u.ci,
+        zoom: o.zoom,
+        x: o.offsetX,
+        y: o.offsetY,
+        d: o.d,
+        iterations: o.maxIterations,
+        cr: o.cr ?? u.cr,
+        ci: o.ci ?? u.ci,
       }));
       drawEscapeFractal(canvasRef.current, optionsRef.current, paletteRef.current);
     };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    // Capture phase, because the number inputs stop propagation on the keys they reject
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
   }, []);
 
-  const setBuffer = (key: keyof Ui, raw: string) => setUi((u) => ({ ...u, [key]: raw }));
+  // Typing only moves the display, so a keystroke never triggers a render
+  const showValue = (key: NumericUiKey, value: number | null) => {
+    if (value === null) return;
+    setUi((u) => ({ ...u, [key]: value }));
+  };
 
-  const commitZoom = (raw: string) => {
-    const v = Number.parseFloat(raw);
-    if (!Number.isNaN(v)) optionsRef.current.zoom = v;
+  /*
+   * Committing applies the value to the draw state, on blur or Enter. Each guard bails when
+   * the value is unchanged: rounding the display back to a committed value means a plain tab
+   * through a field would otherwise fire a full synchronous render for no visible difference
+   */
+  const commitZoom = (v: number | null) => {
+    const o = optionsRef.current;
+    if (v === null || v === o.zoom) return;
+    o.zoom = v;
     requestRender();
   };
-  const commitX = (raw: string) => {
-    const v = Number.parseFloat(raw);
-    if (!Number.isNaN(v)) optionsRef.current.offsetX = v;
+  const commitX = (v: number | null) => {
+    const o = optionsRef.current;
+    if (v === null || v === o.offsetX) return;
+    o.offsetX = v;
     requestRender();
   };
-  const commitY = (raw: string) => {
-    const v = Number.parseFloat(raw);
-    if (!Number.isNaN(v)) optionsRef.current.offsetY = v;
+  const commitY = (v: number | null) => {
+    const o = optionsRef.current;
+    if (v === null || v === o.offsetY) return;
+    o.offsetY = v;
     requestRender();
   };
-  const commitD = (raw: string) => {
-    const v = Number.parseFloat(raw);
-    if (!Number.isNaN(v)) optionsRef.current.d = v;
+  const commitD = (v: number | null) => {
+    const o = optionsRef.current;
+    if (v === null || v === o.d) return;
+    o.d = v;
     requestRender();
   };
-  const commitCr = (raw: string) => {
-    const v = Number.parseFloat(raw);
-    if (!Number.isNaN(v) && v <= 2 && v >= -2) optionsRef.current.cr = v;
+  const commitCr = (v: number | null) => {
+    const o = optionsRef.current;
+    if (v === null || v === o.cr) return;
+    o.cr = v;
     requestRender();
   };
-  const commitCi = (raw: string) => {
-    const v = Number.parseFloat(raw);
-    if (!Number.isNaN(v) && v <= 2 && v >= -2) optionsRef.current.ci = v;
+  const commitCi = (v: number | null) => {
+    const o = optionsRef.current;
+    if (v === null || v === o.ci) return;
+    o.ci = v;
     requestRender();
   };
-  const commitIterations = (raw: string) => {
-    const v = Number.parseFloat(raw);
-    if (!Number.isNaN(v) && v <= 10000 && v >= 100) optionsRef.current.maxIterations = v;
+  const commitIterations = (v: number | null) => {
+    const o = optionsRef.current;
+    if (v === null || v === o.maxIterations) return;
+    o.maxIterations = v;
     requestRender();
   };
 
@@ -254,22 +308,22 @@ export function FractalViewer() {
       o.offsetX /= 1.15;
       o.offsetY /= 1.15;
     }
-    setUi((u) => ({ ...u, zoom: String(o.zoom), x: String(o.offsetX), y: String(o.offsetY) }));
+    setUi((u) => ({ ...u, zoom: o.zoom, x: o.offsetX, y: o.offsetY }));
     requestRender();
   };
   const stepX = (dir: 1 | -1) => {
     optionsRef.current.offsetX += dir * 25;
-    setBuffer("x", String(optionsRef.current.offsetX));
+    showValue("x", optionsRef.current.offsetX);
     requestRender();
   };
   const stepY = (dir: 1 | -1) => {
     optionsRef.current.offsetY += dir * 25;
-    setBuffer("y", String(optionsRef.current.offsetY));
+    showValue("y", optionsRef.current.offsetY);
     requestRender();
   };
   const stepD = (dir: 1 | -1) => {
     optionsRef.current.d += dir * 0.25;
-    setBuffer("d", String(optionsRef.current.d));
+    showValue("d", optionsRef.current.d);
     requestRender();
   };
   const stepCr = (dir: 1 | -1) => {
@@ -280,7 +334,7 @@ export function FractalViewer() {
     } else if (o.cr < 2) {
       o.cr += 0.25;
     }
-    setBuffer("cr", String(o.cr));
+    showValue("cr", o.cr);
     requestRender();
   };
   const stepCi = (dir: 1 | -1) => {
@@ -291,7 +345,7 @@ export function FractalViewer() {
     } else if (o.ci < 2) {
       o.ci += 0.05;
     }
-    setBuffer("ci", String(o.ci));
+    showValue("ci", o.ci);
     requestRender();
   };
   const stepIterations = (dir: 1 | -1) => {
@@ -301,7 +355,7 @@ export function FractalViewer() {
     } else if (o.maxIterations > 100) {
       o.maxIterations -= 100;
     }
-    setBuffer("iterations", String(o.maxIterations));
+    showValue("iterations", o.maxIterations);
     requestRender();
   };
 
@@ -322,8 +376,8 @@ export function FractalViewer() {
     setUi((u) => ({
       ...u,
       julia: checked,
-      cr: checked ? String(JULIA_CR) : u.cr,
-      ci: checked ? String(JULIA_CI) : u.ci,
+      cr: checked ? JULIA_CR : u.cr,
+      ci: checked ? JULIA_CI : u.ci,
     }));
     requestRender();
   };
@@ -341,13 +395,13 @@ export function FractalViewer() {
     }
     setUi((u) => ({
       ...u,
-      zoom: "1",
-      x: "0",
-      y: "0",
-      d: "2",
-      iterations: "100",
-      cr: reseed ? String(JULIA_CR) : u.cr,
-      ci: reseed ? String(JULIA_CI) : u.ci,
+      zoom: 1,
+      x: 0,
+      y: 0,
+      d: 2,
+      iterations: 100,
+      cr: reseed ? JULIA_CR : u.cr,
+      ci: reseed ? JULIA_CI : u.ci,
     }));
     requestRender();
   };
@@ -394,7 +448,7 @@ export function FractalViewer() {
       (e.clientX - rect.left - rect.width / 2) * scale,
       (e.clientY - rect.top - rect.height / 2) * scale,
     );
-    setUi((u) => ({ ...u, zoom: String(o.zoom), x: String(o.offsetX), y: String(o.offsetY) }));
+    setUi((u) => ({ ...u, zoom: o.zoom, x: o.offsetX, y: o.offsetY }));
     requestRender();
   };
 
@@ -468,78 +522,85 @@ export function FractalViewer() {
 
               <TabsContent value="camera">
                 <Stack gap="default">
-                  <NumberStepper
+                  <CameraField
                     id="zoom-input"
                     label="Zoom"
                     value={ui.zoom}
-                    onValueChange={(raw) => setBuffer("zoom", raw)}
-                    onCommit={commitZoom}
+                    format={ZOOM_FORMAT}
+                    onValueChange={(v) => showValue("zoom", v)}
+                    onValueCommitted={commitZoom}
                     onStep={stepZoom}
                   />
                   {ui.fractal === "multibrot" && (
-                    <NumberStepper
+                    <CameraField
                       id="d-input"
                       label="Exponent"
                       value={ui.d}
                       step={0.25}
-                      onValueChange={(raw) => setBuffer("d", raw)}
-                      onCommit={commitD}
+                      format={DECIMAL_FORMAT}
+                      onValueChange={(v) => showValue("d", v)}
+                      onValueCommitted={commitD}
                       onStep={stepD}
                     />
                   )}
                   {ui.julia ? (
                     <>
-                      <NumberStepper
+                      <CameraField
                         id="cr-input"
                         label="Complex Real"
                         value={ui.cr}
                         step={0.25}
                         min={-2}
                         max={2}
-                        onValueChange={(raw) => setBuffer("cr", raw)}
-                        onCommit={commitCr}
+                        format={COMPLEX_FORMAT}
+                        onValueChange={(v) => showValue("cr", v)}
+                        onValueCommitted={commitCr}
                         onStep={stepCr}
                       />
-                      <NumberStepper
+                      <CameraField
                         id="ci-input"
                         label="Complex Imaginary"
                         value={ui.ci}
                         step={0.05}
                         min={-2}
                         max={2}
-                        onValueChange={(raw) => setBuffer("ci", raw)}
-                        onCommit={commitCi}
+                        format={COMPLEX_FORMAT}
+                        onValueChange={(v) => showValue("ci", v)}
+                        onValueCommitted={commitCi}
                         onStep={stepCi}
                       />
                     </>
                   ) : null}
-                  <NumberStepper
+                  <CameraField
                     id="x-input"
                     label="Pan X"
                     value={ui.x}
                     step={25}
-                    onValueChange={(raw) => setBuffer("x", raw)}
-                    onCommit={commitX}
+                    format={DECIMAL_FORMAT}
+                    onValueChange={(v) => showValue("x", v)}
+                    onValueCommitted={commitX}
                     onStep={stepX}
                   />
-                  <NumberStepper
+                  <CameraField
                     id="y-input"
                     label="Pan Y"
                     value={ui.y}
                     step={25}
-                    onValueChange={(raw) => setBuffer("y", raw)}
-                    onCommit={commitY}
+                    format={DECIMAL_FORMAT}
+                    onValueChange={(v) => showValue("y", v)}
+                    onValueCommitted={commitY}
                     onStep={stepY}
                   />
-                  <NumberStepper
+                  <CameraField
                     id="iterations-input"
                     label="Iterations"
                     value={ui.iterations}
                     step={100}
                     min={100}
                     max={10000}
-                    onValueChange={(raw) => setBuffer("iterations", raw)}
-                    onCommit={commitIterations}
+                    format={ITERATIONS_FORMAT}
+                    onValueChange={(v) => showValue("iterations", v)}
+                    onValueCommitted={commitIterations}
                     onStep={stepIterations}
                   />
                   <Stack direction="horizontal" gap="sm" justify="between" align="center">
