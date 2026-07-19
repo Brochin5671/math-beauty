@@ -123,6 +123,22 @@ function drawableZoom(value: number | null): value is number {
   return drawable(value) && value !== 0;
 }
 
+/*
+ * Zoom about the canvas centre, which the keyboard and the zoom stepper share
+ * Kept apart from zoomAt so the arithmetic stays a multiply going in and a divide coming
+ * out: those disagree in the last bit for about 15% of doubles, and this path predates the
+ * anchored one. Refuses a step it cannot draw, the same way zoomAt does
+ */
+function zoomCentre(o: FractalOptions, dir: 1 | -1): void {
+  const zoom = dir === 1 ? o.zoom * 1.15 : o.zoom / 1.15;
+  const offsetX = dir === 1 ? o.offsetX * 1.15 : o.offsetX / 1.15;
+  const offsetY = dir === 1 ? o.offsetY * 1.15 : o.offsetY / 1.15;
+  if (!drawableZoom(zoom) || !drawable(offsetX) || !drawable(offsetY)) return;
+  o.zoom = zoom;
+  o.offsetX = offsetX;
+  o.offsetY = offsetY;
+}
+
 // One labelled camera control, the same shape seven times over
 function CameraField({
   id,
@@ -228,14 +244,10 @@ export function FractalViewer() {
           o.offsetX += 25;
           break;
         case "q":
-          o.zoom *= 1.15;
-          o.offsetX *= 1.15;
-          o.offsetY *= 1.15;
+          zoomCentre(o, 1);
           break;
         case "e":
-          o.zoom /= 1.15;
-          o.offsetX /= 1.15;
-          o.offsetY /= 1.15;
+          zoomCentre(o, -1);
           break;
         case "z":
           if (o.maxIterations < 10000) o.maxIterations += 100;
@@ -268,7 +280,7 @@ export function FractalViewer() {
         cr: o.cr ?? u.cr,
         ci: o.ci ?? u.ci,
       }));
-      drawEscapeFractal(canvasRef.current, optionsRef.current, paletteRef.current);
+      drawNow();
     };
     // Capture phase, because the number inputs stop propagation on the keys they reject
     document.addEventListener("keydown", onKey, true);
@@ -404,15 +416,7 @@ export function FractalViewer() {
 
   const stepZoom = (dir: 1 | -1) => {
     const o = optionsRef.current;
-    if (dir === 1) {
-      o.zoom *= 1.15;
-      o.offsetX *= 1.15;
-      o.offsetY *= 1.15;
-    } else {
-      o.zoom /= 1.15;
-      o.offsetX /= 1.15;
-      o.offsetY /= 1.15;
-    }
+    zoomCentre(o, dir);
     setUi((u) => ({ ...u, zoom: o.zoom, x: o.offsetX, y: o.offsetY }));
     requestRender();
   };
@@ -687,8 +691,8 @@ export function FractalViewer() {
               </DialogHeader>
               <Stack gap="sm" className="text-sm">
                 <p>
-                  Tap to zoom toward a point, drag to move and scroll to zoom. Right-click to save
-                  the render.
+                  Tap to zoom toward a point, drag to move and scroll to zoom. Right-click or
+                  long-press to save the render.
                 </p>
                 {/* Raw dl: Grid renders a div and cannot express the auto column these need */}
                 <dl className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2">
