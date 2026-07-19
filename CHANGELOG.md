@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.2.0](https://github.com/Brochin5671/math-beauty/compare/v2.1.3...v2.2.0) (2026-07-19)
+
+### Features
+
+* **viewer:** label the help button ([f6eedd1](https://github.com/Brochin5671/math-beauty/commit/f6eedd13d8a213ff9fe81c2d811c3dce9a5aa2b5))
+
+### Fixes
+
+* set an explicit initial viewport scale ([91d9619](https://github.com/Brochin5671/math-beauty/commit/91d9619cdaaa4623365356dff02c5daeb49f0a95))
+* **viewer:** deliver pointer events to the island on iOS Safari ([caffa76](https://github.com/Brochin5671/math-beauty/commit/caffa768c5197bed266724a3fee2204ac08da7ee))
+* **viewer:** drive canvas gestures from native pointer events ([1203be9](https://github.com/Brochin5671/math-beauty/commit/1203be93c504373a333e7232d472dc63aed7a7bb))
+
 ## [2.1.3](https://github.com/Brochin5671/math-beauty/compare/v2.1.2...v2.1.3) (2026-07-19)
 
 ### Fixes
