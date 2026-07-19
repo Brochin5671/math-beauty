@@ -657,7 +657,7 @@ export function FractalViewer() {
                 aria-label={canvasLabel}
                 aria-describedby="canvas-hint"
                 onClick={onCanvasClick}
-                className="block h-auto max-w-full cursor-crosshair"
+                className="block h-auto max-w-full cursor-crosshair touch-manipulation select-none [-webkit-tap-highlight-color:transparent]"
               />
             </div>
             <p id="canvas-hint" className="max-w-[320px] text-center text-xs text-muted-foreground">
