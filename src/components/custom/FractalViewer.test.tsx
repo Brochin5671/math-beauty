@@ -377,8 +377,9 @@ describe("FractalViewer", () => {
     await user.click(screen.getByRole("tab", { name: "Render" }));
     // clicking the label drives the coloring-method radio
     await user.click(screen.getByText("Smooth"));
-    await user.selectOptions(screen.getByLabelText("Color preset"), "temperature");
-    expect(screen.getByLabelText("Color preset")).toHaveValue("temperature");
+    // Away from the default, so the assertion still says something
+    await user.selectOptions(screen.getByLabelText("Color preset"), "whacky");
+    expect(screen.getByLabelText("Color preset")).toHaveValue("whacky");
     const loop = screen.getByRole("switch", { name: "Gradient Loop" });
     const loopBefore = loop.getAttribute("aria-checked");
     await user.click(loop);
@@ -386,6 +387,19 @@ describe("FractalViewer", () => {
     const auto = screen.getByRole("switch", { name: "Auto-render" });
     await user.click(auto);
     expect(auto).not.toBeChecked();
+  });
+
+  it("opens on the Temperature preset, with its gradient loop already on", async () => {
+    const user = userEvent.setup();
+    render(<FractalViewer />);
+    await user.click(screen.getByRole("tab", { name: "Render" }));
+
+    // The picker leads with the seeded preset, so the two cannot drift apart
+    const preset = screen.getByLabelText("Color preset") as unknown as HTMLSelectElement;
+    expect(preset).toHaveValue("temperature");
+    expect(preset.options[0]?.value).toBe("temperature");
+    // Temperature carries the loop flag, so the switch follows the preset
+    expect(screen.getByRole("switch", { name: "Gradient Loop" })).toBeChecked();
   });
 
   it("exposes the three color sliders and preset picker on the Render tab", async () => {

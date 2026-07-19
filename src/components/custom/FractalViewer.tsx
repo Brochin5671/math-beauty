@@ -56,10 +56,14 @@ const FRACTAL_OPTIONS: { value: FractalKind; label: string }[] = [
   { value: "multibrot", label: "Multibrot Set" },
 ];
 
+// Seeds the palette, the gradient-loop switch and the picker, so the three cannot drift
+const DEFAULT_PRESET: PresetKind = "temperature";
+const [DEFAULT_COLOR, DEFAULT_LOOP] = colorPresets[DEFAULT_PRESET];
+
 const PRESET_OPTIONS: { value: PresetKind; label: string }[] = [
+  { value: "temperature", label: "Temperature" },
   { value: "default", label: "Black & White" },
   { value: "rainbow", label: "Rainbow" },
-  { value: "temperature", label: "Temperature" },
   { value: "whacky", label: "Whacky Gradients" },
 ];
 
@@ -152,7 +156,7 @@ export function FractalViewer() {
     d: 2,
     cr: undefined,
     ci: undefined,
-    color: { r: 1, g: 1, b: 1 },
+    color: { ...DEFAULT_COLOR },
   });
   const paletteRef = useRef<Palette>([]);
   const autoRenderRef = useRef(true);
@@ -168,11 +172,11 @@ export function FractalViewer() {
   const [ui, setUi] = useState<Ui>({
     fractal: "mandelbrot",
     method: "iteration",
-    preset: "default",
-    gradientLoop: false,
+    preset: DEFAULT_PRESET,
+    gradientLoop: DEFAULT_LOOP,
     julia: false,
     autoRender: true,
-    rgb: { r: 1, g: 1, b: 1 },
+    rgb: { ...DEFAULT_COLOR },
     zoom: 1,
     x: 0,
     y: 0,
@@ -194,9 +198,8 @@ export function FractalViewer() {
 
   // Initial palette, preview and draw, client only
   useEffect(() => {
-    paletteRef.current = createPalette(optionsRef.current.color, false);
-    drawPalettePreview(paletteCanvasRef.current, paletteRef.current);
-    drawEscapeFractal(canvasRef.current, optionsRef.current, paletteRef.current);
+    rebuildPalette(optionsRef.current.color, DEFAULT_LOOP);
+    drawNow();
   }, []);
 
   // Global keyboard controls, always redraw even when auto-render is off
