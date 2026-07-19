@@ -2,9 +2,7 @@
 
 ## Overview
 
-A website for viewing escape fractals such as the [Mandelbrot Set](https://en.wikipedia.org/wiki/Mandelbrot_set), [Burning Ship fractal](https://en.wikipedia.org/wiki/Burning_Ship_fractal), [Tricorn Set](<https://en.wikipedia.org/wiki/Tricorn_(mathematics)>) and the [Multibrot Set](https://en.wikipedia.org/wiki/Multibrot_set) along with a [Julia Set](https://en.wikipedia.org/wiki/Julia_set) variant for each. Camera and render controls adjust position, zoom, iterations, the exponent, the Julia constant and the coloring. Unit tests guard the fractal algorithms against regressions.
-
-This is a modernization of the original onto a current stack: Astro 7 with React 19 islands, TypeScript, Tailwind CSS 4 and a shadcn / Base UI component library, deployed to Cloudflare Workers. The fractal engine renders per pixel on a 2D canvas in the browser.
+A website for viewing escape fractals such as the [Mandelbrot Set](https://en.wikipedia.org/wiki/Mandelbrot_set), [Burning Ship fractal](https://en.wikipedia.org/wiki/Burning_Ship_fractal), [Tricorn Set](<https://en.wikipedia.org/wiki/Tricorn_(mathematics)>) and the [Multibrot Set](https://en.wikipedia.org/wiki/Multibrot_set) along with a [Julia Set](https://en.wikipedia.org/wiki/Julia_set) variant for each. Camera and render controls adjust position, zoom, iterations, the exponent, the Julia constant and the coloring. Built with Astro 7, React 19 islands, TypeScript and Tailwind CSS 4 with a shadcn / Base UI component library, deployed to Cloudflare Workers; the fractal engine renders per pixel on a 2D canvas in the browser. Unit tests guard the fractal algorithms against regressions.
 
 ## Controls
 
