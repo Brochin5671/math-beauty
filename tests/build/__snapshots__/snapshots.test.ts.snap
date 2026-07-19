@@ -12,7 +12,7 @@ exports[`SEO meta snapshots > 404 meta tags 1`] = `
   "ogUrl": "[configurable]",
   "robots": "not set",
   "title": "[configurable]",
-  "twitterCard": "summary_large_image",
+  "twitterCard": "summary",
   "twitterImage": "[configurable]",
 }
 `;
@@ -29,7 +29,7 @@ exports[`SEO meta snapshots > Fractal Viewer meta tags 1`] = `
   "ogUrl": "[configurable]",
   "robots": "not set",
   "title": "[configurable]",
-  "twitterCard": "summary_large_image",
+  "twitterCard": "summary",
   "twitterImage": "[configurable]",
 }
 `;
