@@ -6,8 +6,10 @@ Project-specific components for the Fractal Viewer, not designed for reuse acros
 
 | Component | Purpose |
 | --- | --- |
-| `FractalViewer.tsx` | The interactive viewer island: a 320x320 canvas plus camera and render controls, hydrated on the home page. Drives the fractal engine in `src/lib/fractals/`. |
-| `NumberStepper.tsx` | A labelled `[-] [number] [+]` control used by the viewer's camera inputs, composed from library Button, Input, Label and Stack. |
+| `FractalViewer.tsx` | The interactive viewer island: a 320x320 canvas plus camera and render controls, hydrated on the home page. Handles tap, drag, wheel and pinch gestures, and drives the fractal engine in `src/lib/fractals/`. |
+
+The camera inputs use the library `NumberField`, and the camera math lives in
+`src/lib/fractals/camera.ts`.
 
 ## What does NOT live here
 

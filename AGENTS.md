@@ -22,10 +22,9 @@ This is the Fractal Viewer web app. The fractal engine (escape-time
 algorithms, coloring, coordinate math, canvas render loop) lives in
 `src/lib/fractals/`, and the interactive UI is the `FractalViewer` island in
 `src/components/custom/`. The rest of
-`src/components/{elements,composites,forms,layouts,blocks,seo}/` is a reusable
-component library carried from the mps-web-starter; treat it as stable and
-prefer additive changes over modifying it unless a change is a genuine library
-improvement.
+`src/components/{elements,composites,forms,layouts,blocks,seo}/` is this
+project's reusable component library; treat it as stable and prefer additive
+changes over modifying it unless a change is a genuine library improvement.
 
 ## WHAT
 - **Framework**: Astro 7 + React 19 islands (interactive components only)
@@ -42,10 +41,10 @@ improvement.
 - React components (`.tsx`) - browser interactivity only. Prefer `client:visible` over `client:load` for below-the-fold.
 - Elements (`src/components/elements/`) - foundational primitives that are modular, accessible, and fully customizable (Button, Badge, Card, Dialog, Tabs, ...). shadcn/ui pattern, PascalCase files, named exports.
 - Composites (`src/components/composites/`) - pre-composed patterns built from elements, more opinionated because they wrap larger external libraries (`react-day-picker`, `embla-carousel`, `cmdk`, `@tanstack/react-table`, `sonner`, `shiki`, `astro-embed`) or compose multiple parts into a single behavior (Calendar, Carousel, CodeBlock, Command, DataTable, Embed, Stepper + MobileStepper, Toast). `Embed.astro` is server-rendered (no React island), the one composite that is `.astro`.
-- Forms (`src/components/forms/`) - data-entry controls and form composition primitives (Input, Textarea, Switch, Label, Field family). Same shadcn/ui pattern; separated by domain because forms span scales (atomic Input + compound Field + future block-level form sections) and have unique deps (react-hook-form, zod).
+- Forms (`src/components/forms/`) - data-entry controls and form composition primitives (Input, Textarea, Switch, Label, NumberField, Field family). Same shadcn/ui pattern; separated by domain because forms span scales (atomic Input + compound Field + future block-level form sections) and have unique deps (react-hook-form, zod).
 - Layouts (`src/components/layouts/`) - page structure (Container, Grid, Stack, Section, Header, Footer, Breadcrumb, ScrollArea).
 - Block components (`src/components/blocks/`) - pre-composed page sections.
-- Custom components (`src/components/custom/`) - project-specific. This app ships `FractalViewer` (the canvas viewer island) and `NumberStepper` (its labelled +/- number input).
+- Custom components (`src/components/custom/`) - project-specific. This app ships `FractalViewer`, the canvas viewer island.
 - Fractal engine (`src/lib/fractals/`) - pure escape-time algorithms, coloring, coordinate utils and the canvas render loop. Framework-agnostic and unit-tested; the `FractalViewer` island drives it. Preserve the exact math when changing it.
 - SEO components (`src/components/seo/`) - SEO meta-tag wrapper (title, canonical, Open Graph, Twitter card) and JsonLd primitive (typed structured-data wrapper).
 - Content collections (`src/content/`) - none shipped; define one in `src/content.config.ts` with a glob loader when you add Markdown/MDX content.
@@ -160,7 +159,7 @@ Only reference skills, rules, hooks, or doc pointers that actually exist.
 
 ### Library vs Consumer Boundary (IMPORTANT)
 - Library code: `src/components/{elements,composites,forms,layouts,blocks,seo}/`, `src/lib/{utils,seo,structured-data}.ts`, `src/styles/global.css` (the layer + tokens part). Treat as stable; modify with care.
-- App code: `src/pages/`, `src/components/custom/` (FractalViewer, NumberStepper), `src/lib/fractals/`, `src/lib/site-config.ts`, brand parameterization points. Edit freely.
+- App code: `src/pages/`, `src/components/custom/` (FractalViewer), `src/lib/fractals/`, `src/lib/site-config.ts`, brand parameterization points. Edit freely.
 
 When asked for changes, default to app code. Modify library code
 only when the change is genuinely a library improvement (and document it

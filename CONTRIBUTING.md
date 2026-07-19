@@ -257,7 +257,7 @@ The `deploy` job is wired to a GitHub Environment named `production`
 via `environment: production` in the workflow. When the gate is
 available (public repo, or private repo on Pro / Team / Enterprise),
 adding required reviewers in repo Settings activates a manual approval
-prompt before each main deploy. On the starter's default (private +
+prompt before each main deploy. On the default setup (private +
 GitHub Free + org-owned), the line is inert and deploys run without
 pause; the Environment shows up only as a deployment label. The line
 stays so the gate is one UI config away on a plan or visibility
