@@ -37,11 +37,11 @@ import { cn } from "@/lib/utils";
 const JULIA_CR = -0.70176;
 const JULIA_CI = 0.3842;
 
-// CSS pixels a press may wander before it counts as a drag instead of a tap
+// CSS pixels a press may wander before it counts as a drag rather than a zoom
 const DRAG_THRESHOLD = 4;
 // Wheel deltas are continuous, so zoom exponentially rather than by a fixed step, which a
 // trackpad would apply dozens of times per flick. A 100px pixel-mode notch lands near the
-// 1.15 the keyboard and tap use
+// 1.15 the keyboard and a press use
 const WHEEL_ZOOM_RATE = 0.0015;
 // Pixels per line, matching what pixel-mode browsers report for one notch
 const WHEEL_LINE_HEIGHT = 33;
@@ -583,7 +583,7 @@ export function FractalViewer() {
     // Any further pointer restarts the pinch from the spread as it stands, so a stale
     // measurement can never survive into the next move
     dragRef.current.active = false;
-    // A pinch is never a tap, so the click that closes it must not zoom again
+    // A pinch is never a press, so the click that closes it must not zoom again
     dragRef.current.moved = true;
     pinchRef.current = pinchState();
   };
@@ -680,9 +680,9 @@ export function FractalViewer() {
           <Dialog>
             <DialogTrigger
               render={
-                <Button variant="ghost" size="icon-sm" aria-label="Help and keyboard shortcuts" />
+                <Button variant="ghost" size="icon" aria-label="Help and keyboard shortcuts" />
               }>
-              <CircleHelp />
+              <CircleHelp className="size-5" />
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -691,7 +691,7 @@ export function FractalViewer() {
               </DialogHeader>
               <Stack gap="sm" className="text-sm">
                 <p>
-                  Tap to zoom toward a point, drag to move and scroll to zoom. Right-click or
+                  Press to zoom toward a point, drag to move and scroll to zoom. Right-click or
                   long-press to save the render.
                 </p>
                 {/* Raw dl: Grid renders a div and cannot express the auto column these need */}
@@ -958,23 +958,9 @@ export function FractalViewer() {
                 className="block h-auto max-w-full cursor-crosshair touch-none select-none [-webkit-tap-highlight-color:transparent]"
               />
             </div>
-            <Stack gap="xs" align="center" className="max-w-[320px] text-xs text-muted-foreground">
-              <p id="canvas-hint" className="text-center">
-                Tap to zoom toward a point.
-              </p>
-              {/* The keys repeat what the dialog already describes, so keep them out of the
-                  canvas description rather than announcing them twice */}
-              <p aria-hidden="true" className="flex flex-wrap items-center justify-center gap-1">
-                <Kbd size="sm">Q</Kbd>
-                <Kbd size="sm">E</Kbd>
-                <span>zoom</span>
-                <Kbd size="sm">W</Kbd>
-                <Kbd size="sm">A</Kbd>
-                <Kbd size="sm">S</Kbd>
-                <Kbd size="sm">D</Kbd>
-                <span>pan</span>
-              </p>
-            </Stack>
+            <p id="canvas-hint" className="max-w-[320px] text-center text-xs text-muted-foreground">
+              Press to zoom toward a point.
+            </p>
           </Stack>
         </Stack>
       </CardContent>

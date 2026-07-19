@@ -6,7 +6,7 @@ Project-specific components for the Fractal Viewer, not designed for reuse acros
 
 | Component | Purpose |
 | --- | --- |
-| `FractalViewer.tsx` | The interactive viewer island: a 320x320 canvas plus camera and render controls, hydrated on the home page. Handles tap, drag, wheel and pinch gestures, and drives the fractal engine in `src/lib/fractals/`. |
+| `FractalViewer.tsx` | The interactive viewer island: a 320x320 canvas plus camera and render controls, hydrated on the home page. Handles press, drag, wheel and pinch gestures, and drives the fractal engine in `src/lib/fractals/`. |
 
 The camera inputs use the library `NumberField`, and the camera math lives in
 `src/lib/fractals/camera.ts`.
