@@ -212,6 +212,15 @@ export function FractalViewer() {
     drawPalettePreview(paletteCanvasRef.current, paletteRef.current);
   };
 
+  /*
+   * The prerendered markup arrives long before the island hydrates, and until it does there
+   * is no gesture handler. Claiming touch-action up front would let the canvas swallow every
+   * touch in that window, so it reads as broken rather than as not ready: no pan, no pinch,
+   * and the page will not even scroll from there. Take it over only once handlers exist
+   */
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
   // Initial palette, preview and draw, client only
   useEffect(() => {
     rebuildPalette(optionsRef.current.color, DEFAULT_LOOP);
@@ -955,7 +964,10 @@ export function FractalViewer() {
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerEnd}
                 onPointerCancel={onPointerEnd}
-                className="block h-auto max-w-full cursor-crosshair touch-none select-none [-webkit-tap-highlight-color:transparent]"
+                className={cn(
+                  "block h-auto max-w-full cursor-crosshair select-none [-webkit-tap-highlight-color:transparent]",
+                  hydrated ? "touch-none" : "touch-auto",
+                )}
               />
             </div>
             <p id="canvas-hint" className="max-w-[320px] text-center text-xs text-muted-foreground">
