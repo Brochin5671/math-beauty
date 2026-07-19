@@ -12,6 +12,10 @@
 allowBuilds:
   esbuild: true
   lefthook: true
+  # msw is pulled in transitively as a vitest optional peer and is unused here;
+  # its postinstall (browser service worker) must not run, and pnpm needs this
+  # explicit entry so the ignored build does not error the install
+  msw: false
   sharp: true
   workerd: true
 engineStrict: true
