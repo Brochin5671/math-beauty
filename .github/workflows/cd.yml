@@ -12,6 +12,9 @@ on:
   # ever a squash or rebase merge in normal operation
   push:
     branches: [main]
+  # Manual trigger, for when a push to main lands without starting a run
+  # and main is left built but undeployed
+  workflow_dispatch:
 
 permissions:
   contents: read
