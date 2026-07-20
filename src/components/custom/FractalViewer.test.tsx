@@ -36,6 +36,29 @@ describe("FractalViewer", () => {
     expect(screen.getByRole("tab", { name: "Render" })).toBeInTheDocument();
   });
 
+  it("describes the canvas with the pointer wording a mouse expects", async () => {
+    await renderViewer();
+    expect(screen.getByRole("img", { name: /Mandelbrot Set/ })).toHaveAccessibleDescription(
+      "Drag to move, press or scroll to zoom.",
+    );
+  });
+
+  it("switches the description to touch wording on a coarse pointer", async () => {
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (query) =>
+        ({
+          matches: query === "(pointer: coarse)",
+          media: query,
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+        }) as unknown as MediaQueryList,
+    );
+    await renderViewer();
+    expect(screen.getByRole("img", { name: /Mandelbrot Set/ })).toHaveAccessibleDescription(
+      "Drag to move, pinch or tap to zoom.",
+    );
+  });
+
   // The icon carries aria-hidden, so the visible text is the whole accessible name
   it("names the help trigger from its visible label", async () => {
     await renderViewer();
