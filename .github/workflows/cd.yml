@@ -8,16 +8,16 @@
 name: CD
 
 on:
-  # Direct push trigger; fires on every push to main, which is only
-  # ever a squash or rebase merge in normal operation
+  # Push is the only automatic trigger, and it is deliberately the only one.
+  # A `pull_request: [closed]` trigger looks like useful redundancy and is not:
+  # it races the push run for the same merge, the two cannot cancel each other
+  # because their concurrency groups key on github.ref, and semantic-release
+  # refuses to publish from a pull request context. So whenever the PR run won,
+  # main deployed with no tag, no version and no changelog, and the run went
+  # green. Reach for workflow_dispatch instead if a push ever goes undelivered
   push:
     branches: [main]
-  # A merged PR is a second, independent signal that main moved. Push events for
-  # PR merges have been observed to go undelivered, which leaves main deployed
-  # behind its own HEAD with nothing failing anywhere to say so
-  pull_request:
-    types: [closed]
-  # Manual trigger, for when neither of the above starts a run
+  # Manual trigger, for when a push does not start a run
   workflow_dispatch:
 
 permissions:
@@ -41,7 +41,6 @@ permissions:
 jobs:
   e2e:
     name: E2E Tests
-    if: github.event_name != 'pull_request' || github.event.pull_request.merged
     # Idempotent stage: cancel a previous run if a newer main push arrives
     concurrency:
       group: ${{ github.workflow }}-e2e-${{ github.ref }}
@@ -56,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref }}
+          ref: ${{ github.ref }}
       - uses: ./.github/actions/setup
 
       - name: Build
@@ -100,7 +99,6 @@ jobs:
   # Single job with workers=2 (the suite is all-chromium), no sharding needed
   accessibility:
     name: Accessibility Tests
-    if: github.event_name != 'pull_request' || github.event.pull_request.merged
     # Idempotent stage: cancel a previous run if a newer main push arrives
     concurrency:
       group: ${{ github.workflow }}-a11y-${{ github.ref }}
@@ -111,7 +109,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref }}
+          ref: ${{ github.ref }}
       - uses: ./.github/actions/setup
 
       - name: Build
@@ -162,7 +160,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref }}
+          ref: ${{ github.ref }}
       - uses: ./.github/actions/setup
 
       - name: Build
@@ -209,7 +207,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref || github.ref }}
+          ref: ${{ github.ref }}
           # Full history so commit-analyzer can determine the next version
           fetch-depth: 0
           persist-credentials: false
