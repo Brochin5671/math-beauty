@@ -7,6 +7,7 @@ import {
 } from "@/components/custom/fractal-ui";
 import { Card, CardContent, CardHeader } from "@/components/elements/Card";
 import { Stack } from "@/components/layouts/Stack";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { FRACTALS } from "@/lib/fractals/algorithms";
 import { backingScale, panBy, zoomAt } from "@/lib/fractals/camera";
 import { COLOR_METHODS, colorPresets, createPalette } from "@/lib/fractals/coloring";
@@ -153,6 +154,13 @@ export function FractalViewer() {
    */
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
+
+  /*
+   * Touch and mouse want different wording, and the server cannot tell which is coming.
+   * Reads the primary pointer rather than a breakpoint, so a touch laptop is judged by its
+   * input and not its width, and follows a keyboard being attached to a tablet mid-session
+   */
+  const coarsePointer = useMediaQuery("(pointer: coarse)");
 
   // Initial palette, preview and draw, client only
   useEffect(() => {
@@ -732,7 +740,9 @@ export function FractalViewer() {
               />
             </div>
             <p id="canvas-hint" className="max-w-[320px] text-center text-xs text-muted-foreground">
-              Press to zoom toward a point.
+              {coarsePointer
+                ? "Drag to move, pinch or tap to zoom."
+                : "Drag to move, press or scroll to zoom."}
             </p>
           </Stack>
         </Stack>

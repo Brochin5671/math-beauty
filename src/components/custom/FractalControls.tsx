@@ -77,10 +77,7 @@ export function FractalHelp() {
           <DialogDescription>Controls and keyboard shortcuts</DialogDescription>
         </DialogHeader>
         <Stack gap="sm" className="text-sm">
-          <p>
-            Press to zoom toward a point, drag to move and scroll to zoom. Right-click or long-press
-            to save the render.
-          </p>
+          <p>Drag to move, press or scroll to zoom.</p>
           {/* Raw dl: Grid renders a div and cannot express the auto column these need */}
           <dl className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2">
             <dt className="flex gap-1">
@@ -107,7 +104,7 @@ export function FractalHelp() {
           </dl>
           <Stack gap="xs">
             <p className="font-medium">Mobile</p>
-            <p className="text-muted-foreground">Drag to move, pinch to zoom.</p>
+            <p className="text-muted-foreground">Drag to move, pinch or tap to zoom.</p>
           </Stack>
         </Stack>
       </DialogContent>
