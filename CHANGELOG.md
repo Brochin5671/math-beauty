@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.3.0](https://github.com/Brochin5671/math-beauty/compare/v2.2.1...v2.3.0) (2026-07-20)
+
+### Features
+
+* **viewer:** match the canvas copy to the pointer in use ([8b73428](https://github.com/Brochin5671/math-beauty/commit/8b73428473834f9b5d8b4b9a9c512829c8e14af4))
+
 ## [2.2.1](https://github.com/Brochin5671/math-beauty/compare/v2.2.0...v2.2.1) (2026-07-20)
 
 ### Fixes
