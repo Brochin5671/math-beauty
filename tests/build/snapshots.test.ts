@@ -3,13 +3,11 @@ import { load } from "cheerio";
 import { describe, expect, it } from "vitest";
 import { distPath, sitePages } from "../fixtures/site-pages";
 
-// Routable pages from sitePages (single source of truth) plus the special
-// 404 fallback which is built but not a routable URL
+// Routable pages from sitePages (single source of truth). The 404/500 error
+// pages are SSR routes now, not static build artifacts, so the E2E suite covers
+// them (status code + noindex) instead
 // Regenerate snapshots via `pnpm test:build -u` after intentional changes
-const pages = [
-  ...sitePages.map((p) => ({ name: p.name, path: distPath(p.path) })),
-  { name: "404", path: "dist/client/404.html" },
-];
+const pages = sitePages.map((p) => ({ name: p.name, path: distPath(p.path) }));
 
 // Extract only SEO-relevant head tags (stable across content changes)
 function extractHeadMeta(html: string) {

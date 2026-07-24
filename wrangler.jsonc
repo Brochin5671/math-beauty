@@ -12,7 +12,9 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "not_found_handling": "404-page"
+    // "none": an asset miss falls through to the Worker, which renders the SSR
+    // 404 page (404.astro is prerender=false); no static 404.html is emitted now
+    "not_found_handling": "none"
   },
   "observability": {
     "enabled": true

@@ -3,6 +3,9 @@ import { Hero } from "@/components/blocks/Hero";
 import { Link } from "@/components/elements/Link";
 import { Main } from "@/components/layouts/Main";
 import Layout from "@/layouts/Layout.astro";
+import { previewErrorPages } from "@/lib/site-config";
+
+export const prerender = false;
 
 interface Props {
   error: unknown;
@@ -10,10 +13,15 @@ interface Props {
 
 const { error } = Astro.props;
 
+// A real server error routes here with `error` set; a direct visit has none
+// When gated, a direct production hit 404s instead of serving the page
+if (!previewErrorPages && !error) return new Response(null, { status: 404 });
+
+Astro.response.status = 500;
 if (import.meta.env.DEV) console.error(error);
 ---
 
-<Layout seoProps={{ title: "500: Something Went Wrong" }}>
+<Layout seoProps={{ title: "500: Something Went Wrong", noindex: true }}>
   <Main>
     <Hero size="fullscreen">
       <h1>Sorry</h1>

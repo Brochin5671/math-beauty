@@ -16,6 +16,11 @@ export interface FooterSocial {
   label: string;
 }
 
+// CONFIGURE: error pages are gated to dev; a direct production /404 or /500 hit
+// 404s while real 404/500 errors still render their page. Set to `true` to make
+// the designs viewable in production
+export const previewErrorPages = import.meta.env.DEV;
+
 export const brand = {
   name: "Fractal Viewer",
   shortName: "Fractal Viewer",

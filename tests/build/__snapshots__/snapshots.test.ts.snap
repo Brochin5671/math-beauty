@@ -1,22 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SEO meta snapshots > 404 meta tags 1`] = `
-{
-  "canonical": "[configurable]",
-  "description": "[configurable]",
-  "ogImage": "[configurable]",
-  "ogLocale": "en_US",
-  "ogSiteName": "[configurable]",
-  "ogTitle": "[configurable]",
-  "ogType": "website",
-  "ogUrl": "[configurable]",
-  "robots": "not set",
-  "title": "[configurable]",
-  "twitterCard": "summary",
-  "twitterImage": "[configurable]",
-}
-`;
-
 exports[`SEO meta snapshots > Fractal Viewer meta tags 1`] = `
 {
   "canonical": "[configurable]",
@@ -32,13 +15,6 @@ exports[`SEO meta snapshots > Fractal Viewer meta tags 1`] = `
   "twitterCard": "summary",
   "twitterImage": "[configurable]",
 }
-`;
-
-exports[`Structured data (JSON-LD) > 404 schema types 1`] = `
-[
-  "Organization",
-  "WebSite",
-]
 `;
 
 exports[`Structured data (JSON-LD) > Fractal Viewer schema types 1`] = `
