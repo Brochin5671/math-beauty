@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.3.1](https://github.com/Brochin5671/math-beauty/compare/v2.3.0...v2.3.1) (2026-07-24)
+
+### Fixes
+
+* a direct /404 or /500 hit renders the 404 page instead of an empty response ([e1a0b1e](https://github.com/Brochin5671/math-beauty/commit/e1a0b1e133f5217bc24e8df6359f5a055b956a97))
+* **deploy:** stop provisioning an unused session kv namespace ([c88f49b](https://github.com/Brochin5671/math-beauty/commit/c88f49bea85440b5fbe27c4a5473376d599762d1))
+* **deps:** bump astro, close dev advisories, prune dead deferrals ([214221f](https://github.com/Brochin5671/math-beauty/commit/214221f67842d3cc2a5fa48801dbe3b80d08868c))
+* **library:** sync Slider numeric value and Grid as-prop ([5a7379e](https://github.com/Brochin5671/math-beauty/commit/5a7379ee874d1b4556f0e08ec0938f7b59c6250c))
+* return real status and noindex on 404/500, gate direct access ([8a99c42](https://github.com/Brochin5671/math-beauty/commit/8a99c42535758fb3ed0f54cecc5fc67e4bc5652b))
+* **security:** harden slugify and add CSP object-src ([eb0b8d8](https://github.com/Brochin5671/math-beauty/commit/eb0b8d8e972901e9f5ed5e2c244f11e0a3e51930))
+* **seo:** escape JSON-LD output ([c914394](https://github.com/Brochin5671/math-beauty/commit/c91439474029d04a7278f5ce07486a807a9217bd))
+
 ## [2.3.0](https://github.com/Brochin5671/math-beauty/compare/v2.2.1...v2.3.0) (2026-07-20)
 
 ### Features
