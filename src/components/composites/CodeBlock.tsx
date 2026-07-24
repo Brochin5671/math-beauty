@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 /*
  * Syntax-highlighted code block with an optional title bar and copy button,
  * built on Shiki's sync core (same engine and themes Astro uses for markdown
- * fences, so both stay in sync).
+ * fences, so both stay in sync)
  *
  * Render it WITHOUT a client: directive: highlighting is server-side and the
  * copy button wires through a tiny inline script, so grammars never ship to
@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
  * in the client bundle
  */
 
-// Grammars bundled with the component; anything else falls back to plaintext.
+// Grammars bundled with the component; anything else falls back to plaintext
 // Add more by importing above and listing here plus in the highlighter
 const BUNDLED_LANGS = [
   "astro",
@@ -54,7 +54,7 @@ const highlighter: HighlighterCore = createHighlighterCoreSync({
 
 /*
  * Copy-to-clipboard via event delegation: one document-level listener
- * (guarded so repeated blocks bind once) instead of per-block hydration.
+ * (guarded so repeated blocks bind once) instead of per-block hydration
  * data-copied drives the icon swap and clears after a moment
  */
 const COPY_SCRIPT = `if(!window.__codeBlockCopy){window.__codeBlockCopy=true;document.addEventListener("click",function(e){var btn=e.target&&e.target.closest&&e.target.closest("[data-code-copy]");if(!btn)return;var block=btn.closest('[data-slot="code-block"]');var code=block&&block.querySelector("pre code");if(!code||!navigator.clipboard)return;navigator.clipboard.writeText(code.innerText).then(function(){btn.setAttribute("data-copied","");setTimeout(function(){btn.removeAttribute("data-copied")},2000)})})}`;
@@ -70,7 +70,7 @@ interface CodeBlockProps extends React.ComponentProps<"figure"> {
    * Palette for the whole block. A named theme ("github-dark" by default)
    * bakes that palette into both the code and its frame, independent of the
    * site theme and the device; "system" follows the site's .dark toggle with
-   * the github pair and draws the frame from the site surface.
+   * the github pair and draws the frame from the site surface
    */
   theme?: BundledTheme | "system";
   /** Wrap long lines instead of scrolling horizontally */

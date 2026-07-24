@@ -6,7 +6,7 @@ import { Slider, sliderVariants } from "./Slider";
 // Base UI keeps slider thumbs visibility:hidden until it measures the track,
 // which needs layout happy-dom lacks; the value/keyboard/aria behavior lives in
 // Slider.browser.test.tsx. Here we cover the CVA axes and our thumb-per-value
-// rendering, which need no layout.
+// rendering, which need no layout
 
 function thumbs(container: HTMLElement) {
   return container.querySelectorAll('[data-slot="slider-thumb"]');

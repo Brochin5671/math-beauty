@@ -6,24 +6,24 @@ export interface Props {
   canonical?: string;
   description?: string;
   image?: string;
-  /** Alt text for the social image; defaults to "Site logo". */
+  /** Alt text for the social image; defaults to "Site logo" */
   imageAlt?: string;
   noindex?: boolean;
   title?: string;
-  /** Brand shown in the <title> and og:site_name; defaults to brand.name. */
+  /** Brand shown in the <title> and og:site_name; defaults to brand.name */
   siteName?: string;
-  /** Homepage title suffix (used when there is no `title`); defaults to siteSeo.tagline. Pass "" to omit. */
+  /** Homepage title suffix (used when there is no `title`); defaults to siteSeo.tagline. Pass "" to omit */
   tagline?: string;
   twitterCard?: "summary" | "summary_large_image";
-  /** Open Graph type; set to "article" on blog posts to emit article:* tags. */
+  /** Open Graph type; set to "article" on blog posts to emit article:* tags */
   ogType?: "website" | "article";
-  /** ISO date string; emitted as article:published_time when ogType="article". */
+  /** ISO date string; emitted as article:published_time when ogType="article" */
   publishedTime?: string;
-  /** ISO date string; emitted as article:modified_time when ogType="article". */
+  /** ISO date string; emitted as article:modified_time when ogType="article" */
   modifiedTime?: string;
-  /** Author name; emitted as article:author when ogType="article". */
+  /** Author name; emitted as article:author when ogType="article" */
   author?: string;
-  /** Topic tags; each emitted as an article:tag when ogType="article". */
+  /** Topic tags; each emitted as an article:tag when ogType="article" */
   tags?: string[];
 }
 
@@ -31,11 +31,11 @@ export interface Props {
  * `image` defaults to `/og-logo.png` (in public/), a 512x512 square, so
  * `twitterCard` defaults to `summary` (square thumbnail). Pass a wider image
  * and `summary_large_image` for a banner card. Override `image` per-page for a
- * route-specific card.
+ * route-specific card
  *
  * CONFIGURE: `description` below is the site-wide fallback for any page that
  * does not pass its own. Set a specific description per page (via the Layout
- * `seoProps`) for the best search and social results.
+ * `seoProps`) for the best search and social results
  */
 const {
   title,

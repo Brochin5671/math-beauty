@@ -27,7 +27,7 @@ function ButtonGroup({
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
   return (
-    // biome-ignore lint/a11y/useSemanticElements: div + role=group is shadcn verbatim; <fieldset> would impose a default form-fieldset stack the variant styling is not built around. Consumers can override role (e.g. role=toolbar) via props.
+    // biome-ignore lint/a11y/useSemanticElements: div + role=group is shadcn verbatim; <fieldset> would impose a default form-fieldset stack the variant styling is not built around. Consumers can override role (e.g. role=toolbar) via props
     <div
       role="group"
       data-slot="button-group"

@@ -14,7 +14,7 @@ import {
 } from "./Sidebar";
 
 // sidebarMenuButtonVariants is not exported, so the menu button's size is
-// covered through its observable data-size attribute below.
+// covered through its observable data-size attribute below
 function fixture(providerProps?: Record<string, unknown>, buttonProps?: Record<string, unknown>) {
   return (
     <SidebarProvider {...providerProps}>
@@ -87,7 +87,7 @@ describe("Sidebar", () => {
       const user = userEvent.setup();
       render(fixture());
       // On mobile the sidebar is a closed Sheet (mount-on-open), so the trigger
-      // opens it; the opened dialog is the mobile sidebar surface.
+      // opens it; the opened dialog is the mobile sidebar surface
       await user.click(screen.getByRole("button", { name: "Toggle Sidebar" }));
       const sheet = await screen.findByRole("dialog");
       expect(sheet).toHaveAttribute("data-mobile", "true");

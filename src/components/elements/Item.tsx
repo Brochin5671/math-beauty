@@ -10,7 +10,7 @@ function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
     // A plain styled container, intentionally not role="list": Item rows are
     // interactive (links, action buttons), which are invalid list children
     // (aria-required-children). The variant CSS keys off data-slot and flex,
-    // not the role, so dropping it changes nothing visually.
+    // not the role, so dropping it changes nothing visually
     <div
       data-slot="item-group"
       className={cn(

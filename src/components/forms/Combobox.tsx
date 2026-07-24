@@ -63,7 +63,7 @@ function ComboboxInput({
             size="icon-xs"
             variant="ghost"
             // Icon-only disclosure button; without a label it reads as an
-            // unnamed control to screen readers.
+            // unnamed control to screen readers
             aria-label="Show suggestions"
             render={<ComboboxTrigger />}
             data-slot="input-group-button"
@@ -226,7 +226,7 @@ function ComboboxChip({
       {showRemove ? (
         <ComboboxPrimitive.ChipRemove
           // Base UI ships no default accessible name; without this the icon-only
-          // button reads as an unlabeled control to screen readers.
+          // button reads as an unlabeled control to screen readers
           aria-label="Remove"
           render={<Button variant="ghost" size="icon-xs" />}
           className="-ml-1 opacity-50 hover:opacity-100"

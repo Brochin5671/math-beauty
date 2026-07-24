@@ -7,7 +7,7 @@ import { Grid, GridItem, gridVariants } from "./Grid";
 // auto-fit track counts) is covered in Grid.browser.test.tsx. These happy-dom
 // tests cover the resolveCols branching logic and structural wiring, not the
 // emitted class strings as a stand-in for the layout they produce. The CVA
-// style axes (gap/flow/align/justify) are checked via the factory matrix.
+// style axes (gap/flow/align/justify) are checked via the factory matrix
 describe("gridVariants", () => {
   for (const axis of variantAxes(gridVariants)) {
     it(`wires the ${axis} axis`, () => expectAxisWired(gridVariants, axis));

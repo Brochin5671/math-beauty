@@ -9,12 +9,12 @@ import { cn, cva, type VariantProps } from "@/lib/utils";
  * primitive, so it inherits w-full, the shared gap scale, and responsive
  * tracks. Pairs with BentoCell for individual items with col-span/row-span
  * control. Stacks to a single column on mobile; the cols track count
- * activates at the md breakpoint.
+ * activates at the md breakpoint
  */
 interface BentoGridProps extends React.ComponentProps<"div"> {
-  /** Desktop track count; the grid stacks to one column on small screens. */
+  /** Desktop track count; the grid stacks to one column on small screens */
   cols?: 2 | 3 | 4;
-  /** Gap between cells. */
+  /** Gap between cells */
   gap?: "sm" | "default" | "lg";
 }
 

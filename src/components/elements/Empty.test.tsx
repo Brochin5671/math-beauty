@@ -12,7 +12,7 @@ import {
 } from "./Empty";
 
 // emptyMediaVariants is not exported, so EmptyMedia's variant is covered through
-// its observable data-variant attribute below rather than a CVA-matrix block.
+// its observable data-variant attribute below rather than a CVA-matrix block
 describe("emptyVariants", () => {
   for (const axis of variantAxes(emptyVariants)) {
     it(`wires the ${axis} axis`, () => expectAxisWired(emptyVariants, axis));

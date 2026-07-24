@@ -22,7 +22,7 @@ describe("BlogCard", () => {
 
   it("omits the image wrapper when image is not provided", () => {
     const { container } = render(<BlogCard>excerpt</BlogCard>);
-    // With no image, the first child is the padded content, not an image wrapper.
+    // With no image, the first child is the padded content, not an image wrapper
     const first = container.querySelector('[data-slot="blog-card"] > *:first-child');
     expect(first).toHaveAttribute("data-slot", "card-content");
   });

@@ -4,7 +4,7 @@ import { Combobox, ComboboxInput } from "./Combobox";
 
 // Combobox wraps Base UI's Combobox. These tests cover our composition wiring
 // (the named disclosure button, disabled propagation, the showTrigger toggle),
-// not Base UI's filtering/keyboard internals.
+// not Base UI's filtering/keyboard internals
 
 describe("Combobox", () => {
   it("renders an input with role combobox and a named disclosure button", () => {

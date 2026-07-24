@@ -52,7 +52,7 @@ type StepperVerticalBelow = "sm" | "md";
 type StepperSize = "sm" | "default" | "lg";
 
 // Tailwind sm (640px) / md (768px) cutoffs as max-width queries (one hair below
-// the breakpoint so the flip lines up with Tailwind's own min-width utilities).
+// the breakpoint so the flip lines up with Tailwind's own min-width utilities)
 // The non-matching sentinel keeps the hook call unconditional when the prop is
 // unset (no responsive flip, no extra listener churn)
 const VERTICAL_BELOW_QUERY: Record<StepperVerticalBelow, string> = {
@@ -196,7 +196,7 @@ interface StepperItemProps extends Omit<ComponentProps<"li">, "onClick"> {
 }
 
 // Horizontal line is absolutely positioned at the indicator's vertical
-// center, extending 100% + gap so it reaches the next item's indicator.
+// center, extending 100% + gap so it reaches the next item's indicator
 // Underscores in calc() are required: Tailwind 4 needs whitespace around `+`
 const INDICATOR_TOP_CENTER: Record<StepperSize, string> = {
   sm: "top-3",
@@ -291,7 +291,7 @@ function StepperItem({
           className={cn(
             "flex flex-1 flex-col",
             VERTICAL_TEXT_OFFSET[size],
-            // When connected, the line eats 32px of its own slot (my-4 top + bottom).
+            // When connected, the line eats 32px of its own slot (my-4 top + bottom)
             // Pad the text column so each item is tall enough for that shrink to leave a visible line
             connected ? "pb-12" : "pb-4",
           )}>

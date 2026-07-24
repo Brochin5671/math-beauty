@@ -2,34 +2,34 @@
 /*
  * Embed. Lazy, click-to-play frame for third-party video, built on astro-embed's
  * lite custom elements. The page loads only a thumbnail until the visitor clicks
- * play, so it pays no third-party player JS up front (perf + GDPR friendly).
+ * play, so it pays no third-party player JS up front (perf + GDPR friendly)
  * Framed with the site's card radius + border tokens; the lite element owns the
- * 16:9 ratio.
+ * 16:9 ratio
  *
  * Usage (on any page or .astro surface):
  *   import Embed from "@/components/composites/Embed.astro";
  *   <Embed provider="youtube" id="dQw4w9WgXcQ" title="Product tour" />
  *   <Embed provider="vimeo" id="76979871" title="Showreel" />
- *   `id` accepts a bare video id or a full watch URL.
+ *   `id` accepts a bare video id or a full watch URL
  *
  * Other astro-embed providers (Tweet, BlueskyPost, MastodonPost, Gist,
  * LinkPreview, BaselineStatus) are not framed video, so use them straight from
- * `astro-embed` (e.g. `<Tweet id="..." />`) rather than through this wrapper.
+ * `astro-embed` (e.g. `<Tweet id="..." />`) rather than through this wrapper
  */
 import { Vimeo, YouTube } from "astro-embed";
 
 interface Props {
-  /** Which provider to embed. */
+  /** Which provider to embed */
   provider: "youtube" | "vimeo";
-  /** Video id or full URL. */
+  /** Video id or full URL */
   id: string;
-  /** Accessible title for the player (also the play-button label). */
+  /** Accessible title for the player (also the play-button label) */
   title?: string;
-  /** Poster image resolution. Defaults to the provider's default. */
+  /** Poster image resolution. Defaults to the provider's default */
   posterQuality?: "max" | "high" | "default" | "low";
-  /** Provider player params as a query string (see each provider's docs). */
+  /** Provider player params as a query string (see each provider's docs) */
   params?: string;
-  /** Extra classes merged onto the frame. */
+  /** Extra classes merged onto the frame */
   class?: string;
 }
 

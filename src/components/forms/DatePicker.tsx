@@ -14,19 +14,19 @@ import { cn } from "@/lib/utils";
  * Calendar in `mode="single"` for picking a single day
  */
 interface DatePickerProps {
-  /** Controlled date value. */
+  /** Controlled date value */
   date?: Date | undefined;
-  /** Controlled change handler. */
+  /** Controlled change handler */
   onDateChange?: (date: Date | undefined) => void;
-  /** Placeholder shown when no date is selected. */
+  /** Placeholder shown when no date is selected */
   placeholder?: string;
-  /** date-fns format string for the trigger label. */
+  /** date-fns format string for the trigger label */
   dateFormat?: string;
-  /** Additional Tailwind classes merged onto the trigger button. */
+  /** Additional Tailwind classes merged onto the trigger button */
   className?: string;
-  /** Disable the trigger; the popover cannot open. */
+  /** Disable the trigger; the popover cannot open */
   disabled?: boolean;
-  /** Mark the trigger invalid for form-validation styling. */
+  /** Mark the trigger invalid for form-validation styling */
   "aria-invalid"?: AriaAttributes["aria-invalid"];
 }
 

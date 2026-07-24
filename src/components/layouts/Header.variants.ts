@@ -3,7 +3,7 @@ import { cva } from "@/lib/utils";
 /*
  * Header CVA variants, split out of Header.astro so both the component and
  * the playground tile (which rebuilds the bar in React) share one source of
- * truth for the variant class maps.
+ * truth for the variant class maps
  */
 
 /*
@@ -42,7 +42,7 @@ export const headerVariants = cva("w-full", {
  * Items group alignment controls where the nav items sit between the logo
  * and the CTA. Uses margin-auto tricks to avoid conflicting with the CTA's
  * ml-auto positioning. Item-to-item spacing lives on NavigationMenuList via
- * HeaderDesktopMenu's itemsGap, not here, since this wrapper has one child.
+ * HeaderDesktopMenu's itemsGap, not here, since this wrapper has one child
  */
 export const itemsGroupVariants = cva("hidden md:flex md:items-center", {
   defaultVariants: {

@@ -156,7 +156,7 @@ export function FractalViewer() {
   useEffect(() => setHydrated(true), []);
 
   /*
-   * Touch and mouse want different wording, and the server cannot tell which is coming.
+   * Touch and mouse want different wording, and the server cannot tell which is coming
    * Reads the primary pointer rather than a breakpoint, so a touch laptop is judged by its
    * input and not its width, and follows a keyboard being attached to a tablet mid-session
    */

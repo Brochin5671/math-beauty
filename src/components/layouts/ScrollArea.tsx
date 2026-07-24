@@ -5,7 +5,7 @@ import { cn, cva, type VariantProps } from "@/lib/utils";
 /*
  * Scrollbar visibility. `always` is the discoverable default (bar visible,
  * dimmed thumb); `hover` is a macOS-style overlay for panes where a constant
- * bar is noise.
+ * bar is noise
  *
  * The hover value reveals through three routes because the bar can sit in
  * two places: `peer-focus-visible/viewport` covers the built-in bar (a
@@ -39,7 +39,7 @@ interface ScrollAreaProps extends ScrollAreaPrimitive.Root.Props {
    * it visible with a dimmed thumb; "hover" hides it until pointer hover,
    * keyboard focus on the viewport, or scrolling. With "hover" an idle pane
    * gives no visual cue that it scrolls, so prefer it for panes where a
-   * constant bar is visual noise (chat logs, code blocks).
+   * constant bar is visual noise (chat logs, code blocks)
    */
   scrollbar?: ScrollBarVisibility;
 }
@@ -57,7 +57,7 @@ function ScrollArea({ className, children, scrollbar = "always", ...props }: Scr
        * resolve reliably when the Root sits inside a flex-grown parent
        * (TabsContent, .page-content): the Viewport collapses to content height,
        * no overflow is detected, the scrollbar stays hidden, and wheel scroll
-       * never engages.
+       * never engages
        *
        * `peer/viewport` lets the sibling scrollbar react to the viewport's
        * keyboard focus (the `hover` visibility reveal)
@@ -83,7 +83,7 @@ function ScrollArea({ className, children, scrollbar = "always", ...props }: Scr
 }
 
 interface ScrollBarProps extends ScrollAreaPrimitive.Scrollbar.Props {
-  /** See `ScrollArea`'s `scrollbar` prop. Default "always". */
+  /** See `ScrollArea`'s `scrollbar` prop. Default "always" */
   visibility?: ScrollBarVisibility;
 }
 

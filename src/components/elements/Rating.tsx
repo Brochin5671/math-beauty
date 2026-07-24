@@ -13,11 +13,11 @@ import { cn, cva, type VariantProps } from "@/lib/utils";
  *   accessible label; each icon clips a filled overlay to its fraction
  * - Interactive: set `readOnly={false}` and pass `onValueChange`. Renders a
  *   role="slider" over the icons (focusable, arrow-key navigable); click to set,
- *   hover to preview. `step` sets granularity (1 for whole icons, 0.5 for half).
+ *   hover to preview. `step` sets granularity (1 for whole icons, 0.5 for half)
  *   Supply `value` to control or `defaultValue` to leave it uncontrolled
  *
  * Filled icons use the primary token; empties are muted outlines. Override
- * either via className.
+ * either via className
  */
 const ratingVariants = cva("inline-flex items-center text-primary", {
   variants: {
@@ -51,19 +51,19 @@ interface RatingProps
     VariantProps<typeof ratingVariants> {
   /** Number of icons. Defaults to 5. */
   max?: number;
-  /** Icon set. Defaults to star. */
+  /** Icon set. Defaults to star */
   icon?: RatingIcon;
-  /** Read-only display (the default). Set false for an interactive input. */
+  /** Read-only display (the default). Set false for an interactive input */
   readOnly?: boolean;
-  /** Current score. Read-only allows fractional values. */
+  /** Current score. Read-only allows fractional values */
   value?: number;
-  /** Interactive only: uncontrolled initial value. Defaults to 0 (no selection). */
+  /** Interactive only: uncontrolled initial value. Defaults to 0 (no selection) */
   defaultValue?: number;
   /** Interactive only: selection granularity. 1 for whole icons, 0.5 for half. Defaults to 1. */
   step?: number;
-  /** Interactive only: fires with the chosen value. */
+  /** Interactive only: fires with the chosen value */
   onValueChange?: (value: number) => void;
-  /** Accessible name. Read-only derives one from the value when omitted. */
+  /** Accessible name. Read-only derives one from the value when omitted */
   "aria-label"?: string;
 }
 

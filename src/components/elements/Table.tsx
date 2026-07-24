@@ -181,7 +181,7 @@ interface TableEmptyProps extends React.ComponentProps<"td"> {
   colSpan: number;
 }
 
-/** Empty-state row helper. Renders a centered, fixed-height row that spans every visible column. */
+/** Empty-state row helper. Renders a centered, fixed-height row that spans every visible column */
 function TableEmpty({ className, colSpan, children, ...props }: TableEmptyProps) {
   return (
     <TableRow data-slot="table-empty">

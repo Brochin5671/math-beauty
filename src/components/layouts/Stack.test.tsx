@@ -6,7 +6,7 @@ import { Stack, stackVariants } from "./Stack";
 // Real computed flex-direction and responsive reflow are covered in
 // Stack.browser.test.tsx. The CVA style axes (gap/align/justify/wrap) are
 // checked via the factory matrix; the direction tests below cover the
-// resolveDirection branching logic.
+// resolveDirection branching logic
 describe("stackVariants", () => {
   for (const axis of variantAxes(stackVariants)) {
     it(`wires the ${axis} axis`, () => expectAxisWired(stackVariants, axis));

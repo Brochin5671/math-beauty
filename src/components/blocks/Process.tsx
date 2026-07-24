@@ -11,7 +11,7 @@ type ProcessOrientation = "horizontal" | "vertical";
  * lays the steps out vertically (default) or horizontally; horizontal flips
  * back to vertical below the `sm` breakpoint. The orientation is exposed as a
  * data attribute on a `group/process` so ProcessStep can restyle via CSS (no
- * context, which would not survive Astro rendering each child separately).
+ * context, which would not survive Astro rendering each child separately)
  * Pairs with ProcessStep for individual steps
  */
 interface ProcessProps extends React.ComponentProps<"div"> {

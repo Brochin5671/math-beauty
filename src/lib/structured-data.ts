@@ -2,7 +2,7 @@ import type { BlogPosting, BreadcrumbList, Organization, Service, WebSite } from
 
 // schema-dts types these as a union with string (JSON-LD allows either a full
 // object or a URL reference). Narrow to the object form so consumers can read
-// individual fields without union juggling.
+// individual fields without union juggling
 type OrganizationSchema = Exclude<Organization, string> & {
   "@context": "https://schema.org";
 };
@@ -75,7 +75,7 @@ interface WebSiteInput {
 }
 
 // Site-wide WebSite entity. Emitted on every page alongside Organization; helps
-// search engines associate the brand name with the domain.
+// search engines associate the brand name with the domain
 export function buildWebSiteSchema(input: WebSiteInput): WebSiteSchema {
   return {
     "@context": "https://schema.org",
@@ -89,18 +89,18 @@ export function buildWebSiteSchema(input: WebSiteInput): WebSiteSchema {
 interface ArticleInput {
   headline: string;
   description: string;
-  /** Canonical URL of the post. */
+  /** Canonical URL of the post */
   url: string;
-  /** ISO date strings. */
+  /** ISO date strings */
   datePublished: string;
   dateModified?: string;
   author: string;
-  /** Absolute image URL. */
+  /** Absolute image URL */
   image?: string;
   publisher: { name: string; url: string; logo?: string };
 }
 
-// BlogPosting entity for a blog post. Powers article rich results (author, date).
+// BlogPosting entity for a blog post. Powers article rich results (author, date)
 export function buildArticleSchema(input: ArticleInput): ArticleSchema {
   return {
     "@context": "https://schema.org",
@@ -127,7 +127,7 @@ interface BreadcrumbItem {
   url: string;
 }
 
-// Ordered breadcrumb trail. Powers breadcrumb rich results in search.
+// Ordered breadcrumb trail. Powers breadcrumb rich results in search
 export function buildBreadcrumbSchema(items: BreadcrumbItem[]): BreadcrumbSchema {
   return {
     "@context": "https://schema.org",

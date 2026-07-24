@@ -39,7 +39,7 @@ function ToggleGroup({
       data-orientation={orientation}
       // Base UI sets aria-orientation on its role="group" element, which ARIA
       // does not allow on that role (aria-allowed-attr). The visual orientation
-      // is carried by data-orientation above, so strip the invalid attribute.
+      // is carried by data-orientation above, so strip the invalid attribute
       aria-orientation={undefined}
       style={{ "--gap": spacing } as React.CSSProperties}
       className={cn(

@@ -12,7 +12,7 @@ describe("Rating", () => {
   it("renders one icon pair per step (max)", () => {
     const { container } = render(<Rating value={3} max={7} />);
     // Each pair owns one outline icon; filled overlays add more, so assert the
-    // pair count via the relative wrappers instead of raw svg count.
+    // pair count via the relative wrappers instead of raw svg count
     expect(container.querySelectorAll('[data-slot="rating"] > span.relative')).toHaveLength(7);
   });
 

@@ -6,14 +6,14 @@ import { Stack } from "@/components/layouts/Stack";
 import { cn, cva, type VariantProps } from "@/lib/utils";
 
 /*
- * Content + visual pair in a two-column grid. Composes Grid for the split.
+ * Content + visual pair in a two-column grid. Composes Grid for the split
  * Use `reverse` to swap sides. Stack multiple FeatureSections with
  * alternating `reverse` to create the zig-zag pattern. Content stacks
  * vertically on mobile, splits at lg breakpoint
  */
 
 // Section padding tiers (compact / default / spacious), aligned with the Section
-// layout primitive's padding scale so blocks and sections share one rhythm.
+// layout primitive's padding scale so blocks and sections share one rhythm
 // `default` is the brand baseline; drop to `compact` for dense pages or stacked
 // runs of FeatureSections, lift to `spacious` for marquee marketing sections.
 const featureSectionVariants = cva("", {

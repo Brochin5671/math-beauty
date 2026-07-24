@@ -5,7 +5,7 @@ import { DataTable } from "./DataTable";
 
 // DataTable owns a @tanstack/react-table instance internally. These tests cover
 // our wiring (columns -> headers, data -> rows, empty/filter/caption/pagination),
-// not the library's sorting/filtering internals (fed real columns + data).
+// not the library's sorting/filtering internals (fed real columns + data)
 type Person = { name: string; role: string };
 
 const columns: ColumnDef<Person>[] = [

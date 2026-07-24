@@ -10,7 +10,7 @@ import { cn, cva, type VariantProps } from "@/lib/utils";
  * selectors here use the explicit `data-[orientation=...]` form so the
  * vertical layout actually applies. The shortform `data-active:` and
  * `data-disabled:` stay because those Tab attributes ARE boolean per
- * Base UI's TabsTabDataAttributes contract.
+ * Base UI's TabsTabDataAttributes contract
  */
 
 function Tabs({ className, orientation = "horizontal", ...props }: TabsPrimitive.Root.Props) {

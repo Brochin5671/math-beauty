@@ -3,8 +3,8 @@
  * keyword leads: search engines favor it and it survives SERP truncation. The
  * homepage has no page title, so it leads with the brand plus its tagline (the
  * one place brand-first is recommended). A dash separator is used over a pipe:
- * Google rewrites the pipe more often and dashes test better on click-through.
- * `siteName` + `tagline` come from `siteSeo` / `brand` in site-config.
+ * Google rewrites the pipe more often and dashes test better on click-through
+ * `siteName` + `tagline` come from `siteSeo` / `brand` in site-config
  */
 export function buildMetaTitle(
   title: string | undefined,
@@ -18,7 +18,7 @@ export function buildMetaTitle(
 /**
  * Resolve a path (or already-absolute URL) to an absolute URL against the
  * configured `site`. Used for canonical, og:url, and the social images, which
- * are read by external crawlers that cannot resolve a relative path.
+ * are read by external crawlers that cannot resolve a relative path
  */
 export function buildAbsoluteURL(path: string, site: URL | undefined): string {
   return new URL(path, site).href;
