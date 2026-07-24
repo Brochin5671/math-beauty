@@ -5,6 +5,7 @@ import {
   buildOrganizationSchema,
   buildServiceSchema,
   buildWebSiteSchema,
+  serializeJsonLd,
 } from "./structured-data";
 
 describe("buildOrganizationSchema", () => {
@@ -170,5 +171,36 @@ describe("buildServiceSchema", () => {
     });
     expect(schema.areaServed).toBe("Worldwide");
     expect(schema.serviceType).toBe("Software Maintenance");
+  });
+});
+
+describe("serializeJsonLd", () => {
+  const LS = String.fromCharCode(0x2028);
+  const PS = String.fromCharCode(0x2029);
+
+  it("neutralizes a </script> breakout in a schema value", () => {
+    const schema = {
+      "@context": "https://schema.org",
+      name: "</script><img src=x onerror=alert(1)>",
+    };
+    const out = serializeJsonLd(schema);
+    expect(out).not.toMatch(/<\/script/i);
+    expect(out).not.toMatch(/[<>&]/);
+  });
+
+  it("escapes < > & and the line/paragraph separators", () => {
+    const out = serializeJsonLd({ v: `a<>&${LS}${PS}b` });
+    expect(out).not.toMatch(/[<>&]/);
+    expect(out).not.toContain(LS);
+    expect(out).not.toContain(PS);
+  });
+
+  it("stays byte-for-byte parseable, round-tripping to the original", () => {
+    const schema = {
+      "@context": "https://schema.org",
+      name: "Ben & Jerry </script>",
+      note: `line${LS}break`,
+    };
+    expect(JSON.parse(serializeJsonLd(schema))).toEqual(schema);
   });
 });

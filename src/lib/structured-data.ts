@@ -140,3 +140,17 @@ export function buildBreadcrumbSchema(items: BreadcrumbItem[]): BreadcrumbSchema
     })),
   };
 }
+
+/**
+ * Serialize a JSON-LD schema for embedding in a `<script>` raw-text element
+ *
+ * A `<script>` does not decode HTML entities, so escape `<`, `>`, `&` and the
+ * U+2028 / U+2029 separators as JSON unicode. A schema value containing
+ * `</script>` then cannot break out, and the payload stays parseable by JSON.parse
+ */
+export function serializeJsonLd(schema: unknown): string {
+  return JSON.stringify(schema).replace(
+    /[<>&\u2028\u2029]/g,
+    (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}`,
+  );
+}

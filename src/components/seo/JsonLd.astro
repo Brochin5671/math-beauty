@@ -2,6 +2,8 @@
 // JsonLd renders a schema.org structured-data block. Pass any object that
 // has @context and @type. Builders in @/lib/structured-data return the right
 // shape; pass either a single schema or an array to emit multiple blocks
+import { serializeJsonLd } from "@/lib/structured-data";
+
 type Schema = Record<string, unknown> & {
   "@context": "https://schema.org";
   "@type": string;
@@ -12,7 +14,8 @@ export interface Props {
 }
 
 const { schema } = Astro.props;
-const json = JSON.stringify(schema);
+// Escape as JSON unicode so a schema value cannot break out of the script block
+const json = serializeJsonLd(schema);
 ---
 
 <script type="application/ld+json" set:html={json} is:inline />
