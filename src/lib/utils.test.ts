@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cn } from "./utils";
+import { cn, slugify } from "./utils";
 
 describe("cn", () => {
   it("merges multiple class strings", () => {
@@ -27,5 +27,23 @@ describe("cn", () => {
 
   it("handles array input", () => {
     expect(cn(["a", "b"])).toBe("a b");
+  });
+});
+
+describe("slugify", () => {
+  it("lowercases and hyphenates whitespace", () => {
+    expect(slugify("Hello World")).toBe("hello-world");
+  });
+
+  it("strips path separators and dots so a slug cannot traverse", () => {
+    expect(slugify("a/../b")).toBe("a-b");
+  });
+
+  it("drops other punctuation and collapses runs", () => {
+    expect(slugify("Foo & Bar!")).toBe("foo-bar");
+  });
+
+  it("trims leading and trailing separators", () => {
+    expect(slugify("  --x--  ")).toBe("x");
   });
 });
