@@ -7,7 +7,11 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function slugify(text: string): string {
-  return text.toLowerCase().replace(/\s+/g, "-");
+  // Whitelist [a-z0-9]; drop everything else so separators and dots stay out of slugs
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 /**
