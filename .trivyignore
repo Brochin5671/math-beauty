@@ -1,46 +1,13 @@
 # Trivy CVE allowlist. AGENTS.md policy: each entry needs a rationale + review-by date.
 # When the upstream fix lands (or the review-by date arrives), audit and remove.
 
-# CVE-2026-42570 (HIGH): devalue DoS via sparse array deserialization
-# https://avd.aquasec.com/nvd/cve-2026-42570
-# Affects: devalue 5.7.1 (via @astrojs/react 5.0.4) + devalue 5.8.0 (via astro 6.3.1)
-# Fix: devalue 5.8.1
-# Tried pnpm override `devalue: ^5.8.1` in pnpm-workspace.yaml; pnpm 11's
-# minimumReleaseAge default (1440 min = 1 day) silently refused to apply the
-# bump, leaving transitives pinned. Deferring via this allowlist instead.
-# Review-by: 2026-08-15 (re-check after astro / @astrojs/react release a
-# version that pulls devalue >= 5.8.1; drop this line when upstream bumps).
-CVE-2026-42570
-
-# GHSA-gv7w-rqvm-qjhr (HIGH): esbuild missing binary integrity verification in
-# its Deno module enables RCE. https://github.com/advisories/GHSA-gv7w-rqvm-qjhr
-# Affects: esbuild 0.27.3 (via wrangler) + 0.27.7 (via astro / vite). Fix: 0.28.1.
-# Not applicable here: the vulnerable code path is esbuild's Deno binary loader;
-# this is a Node/pnpm project, so that path is never exercised. A pnpm override
-# to 0.28.1 is also not viable (vite 7 pins esbuild < 0.28, and pnpm 11's
-# minimumReleaseAge blocks the fresh release).
-# Review-by: 2026-09-15 (drop once astro / vite / wrangler pull esbuild >= 0.28.1).
-GHSA-gv7w-rqvm-qjhr
-
-# CVE-2026-48779 (HIGH): ws memory-exhaustion DoS from tiny fragments + data chunks.
-# https://avd.aquasec.com/nvd/cve-2026-48779
-# Affects: ws 8.20.1 via the Cloudflare / wrangler dev tooling (dev-only; the
-# production runtime is workerd, not ws). Fix: 8.21.0, already in the tree via
-# happy-dom / vitest. A pnpm override to 8.21.0 is silently refused by pnpm 11's
-# minimumReleaseAge (the release is < 1 day old), same as the devalue case above.
-# Review-by: 2026-07-15 (re-try the override once the cooldown clears, or drop
-# when the Cloudflare tooling bumps ws >= 8.21.0).
-CVE-2026-48779
-
-# CVE-2026-9697 (HIGH): undici man-in-the-middle via ignored TLS options when a
-# SOCKS5 proxy is configured. https://avd.aquasec.com/nvd/cve-2026-9697
-# Affects: undici 7.24.8, which miniflare 4.x pins EXACTLY (the Cloudflare dev
-# tooling; dev-only, the production runtime is workerd, not undici). The
-# vulnerable path needs undici wired to a SOCKS5 proxy, which the dev server
-# never does. Fix: 7.28.0, already resolved elsewhere in the tree (via
-# @semantic-release/github), but a pnpm override to dedupe miniflare onto it is
-# silently ignored by pnpm 11 in both pnpm-workspace.yaml and
-# package.json#pnpm.overrides (same refusal as the entries above), because
-# miniflare hard-pins the exact 7.24.8.
-# Review-by: 2026-08-15 (drop once miniflare / wrangler bump undici >= 7.28.0).
-CVE-2026-9697
+# GHSA-f88m-g3jw-g9cj (HIGH): sharp inherits libvips CVEs (CVE-2026-33327,
+# CVE-2026-33328, CVE-2026-35590, CVE-2026-35591).
+# https://github.com/advisories/GHSA-f88m-g3jw-g9cj
+# Our direct sharp is 0.35.3 (patched). The flagged copies are dev/build-only
+# transitives: 0.34.5 (miniflare, Cloudflare dev tooling) and 0.33.5 (favilib
+# via astro-favicons, build-time favicon generation). Neither reaches the
+# workerd production runtime. Both are hard-pinned by their parents, so a caret
+# override cannot dedupe them and forcing 0.35.x risks breaking native bindings.
+# Review-by: 2026-09-15 (drop once miniflare + astro-favicons bump sharp >= 0.35.0).
+GHSA-f88m-g3jw-g9cj
