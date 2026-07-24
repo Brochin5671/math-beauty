@@ -13,9 +13,9 @@ interface Props {
 
 const { error } = Astro.props;
 
-// A real server error routes here with `error` set; a direct visit has none
-// When gated, a direct production hit 404s instead of serving the page
-if (!previewErrorPages && !error) return new Response(null, { status: 404 });
+// A real server error routes here with `error` set. A direct visit has none:
+// when gated, /500 is not a public route, so render the 404 like any unknown URL
+if (!previewErrorPages && !error) return Astro.rewrite("/404");
 
 Astro.response.status = 500;
 if (import.meta.env.DEV) console.error(error);

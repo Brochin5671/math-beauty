@@ -19,16 +19,14 @@ test.describe("Smoke tests", () => {
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   });
 
-  // A direct /500 hit is never a soft 200: previewed it renders 500 + noindex;
-  // gated (previewErrorPages off in prod) it 404s
-  test("a direct /500 visit is previewed or gated, never a soft 200", async ({ page }) => {
+  // A direct /500 hit either previews the 500 design or renders the 404 page
+  // (gated). Either way it must return a real error status with a rendered body,
+  // never an empty response
+  test("a direct /500 visit renders an error page, never an empty body", async ({ page }) => {
     const status = (await page.goto("/500"))?.status();
-    if (status === 500) {
-      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
-    } else {
-      expect(status).toBe(404);
-    }
+    expect([404, 500]).toContain(status);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   });
 
   test("robots.txt is served with sitemap reference", async ({ page }) => {
