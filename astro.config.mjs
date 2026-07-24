@@ -70,8 +70,8 @@ export default defineConfig({
     // Playground is an internal design-showcase surface, not a public page;
     // exclude from sitemap so search engines don't crawl it
     sitemap({
-      // Exclude the playground showcase from the sitemap.
-      filter: (page) => !page.includes("/playground"),
+      // Exclude the playground showcase and the /404 + /500 error pages
+      filter: (page) => !page.includes("/playground") && !/\/(404|500)\/?$/.test(page),
       // CONFIGURE: stamp every entry with the build time as a baseline lastmod.
       // For per-page accuracy (e.g. a post's updatedDate), look `item.url` up
       // against your content dates here and fall back to the build date.

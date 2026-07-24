@@ -3,8 +3,8 @@
  * emulation, build snapshots, sitemap sync)
  * CONFIGURE: add an entry here when shipping a new public page; every
  * relevant test will pick it up automatically
- * Note: 404 is excluded - it is not a routable URL, it is the fallback
- * rendered on unknown routes; tests that need it reference it directly
+ * Note: 404/500 are excluded - they are SSR error routes (prerender=false);
+ * the E2E smoke and a11y specs hit them directly
  */
 
 export const sitePages = [{ path: "/", name: "Fractal Viewer" }] as const;

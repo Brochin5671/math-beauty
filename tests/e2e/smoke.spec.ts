@@ -16,6 +16,19 @@ test.describe("Smoke tests", () => {
     expect(response?.status()).toBe(404);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByRole("link", { name: "Go Home" })).toBeVisible();
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  });
+
+  // A direct /500 hit is never a soft 200: previewed it renders 500 + noindex;
+  // gated (previewErrorPages off in prod) it 404s
+  test("a direct /500 visit is previewed or gated, never a soft 200", async ({ page }) => {
+    const status = (await page.goto("/500"))?.status();
+    if (status === 500) {
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    } else {
+      expect(status).toBe(404);
+    }
   });
 
   test("robots.txt is served with sitemap reference", async ({ page }) => {

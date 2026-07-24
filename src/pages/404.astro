@@ -3,9 +3,18 @@ import { Hero } from "@/components/blocks/Hero";
 import { Link } from "@/components/elements/Link";
 import { Main } from "@/components/layouts/Main";
 import Layout from "@/layouts/Layout.astro";
+import { previewErrorPages } from "@/lib/site-config";
+
+export const prerender = false;
+
+// A real miss renders this with the missed pathname; a direct /404 visit does not
+// When gated, a direct production /404 hit 404s instead of serving the page
+if (!previewErrorPages && Astro.url.pathname === "/404") return new Response(null, { status: 404 });
+
+Astro.response.status = 404;
 ---
 
-<Layout seoProps={{ title: "404: Page Not Found" }}>
+<Layout seoProps={{ title: "404: Page Not Found", noindex: true }}>
   <Main>
     <Hero size="fullscreen">
       <h1>Not Found</h1>
