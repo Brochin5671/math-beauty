@@ -24,3 +24,10 @@ engineStrict: true
 # patched undici 7.28.0 (dev-only CVE-2026-12151, CVE-2026-6734).
 overrides:
   '@cloudflare/vite-plugin': ^1.42.1
+  # Dev/build-time audit advisories, no production impact (runtime is workerd)
+  # Caret so pnpm unifies upward without downgrading a healthy copy; drop each
+  # once the flagged transitive bumps past it. Reviewed 2026-07-23
+  js-yaml: ^4.3.0 # GHSA-52cp-r559-cp3m (js-yaml <4.3.0, via astro)
+  svgo: ^4.0.2 # GHSA-2p49-hgcm-8545 (svgo <4.0.2, via the astro build)
+  fast-uri: ^3.1.4 # GHSA-v2hh-gcrm-f6hx + 4c8g-83qw-93j6 (via @astrojs/check, commitlint)
+  yaml: ^2.8.3 # GHSA-48c2-rrv3-qjmp (yaml <2.8.3, via @astrojs/check)
