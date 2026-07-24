@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 /*
  * Container for chronological milestones. Composes Stack for the vertical
- * rhythm and renders a connecting line that TimelineItem dots align to.
+ * rhythm and renders a connecting line that TimelineItem dots align to
  * Pairs with TimelineItem for individual milestones
  */
 interface TimelineProps extends React.ComponentProps<"div"> {}

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { Item, ItemContent, ItemGroup, ItemTitle, itemVariants } from "./Item";
 
 // itemMediaVariants is not exported, so ItemMedia's variant is left to its
-// observable data attributes rather than a CVA-matrix block.
+// observable data attributes rather than a CVA-matrix block
 describe("itemVariants", () => {
   for (const axis of variantAxes(itemVariants)) {
     it(`wires the ${axis} axis`, () => expectAxisWired(itemVariants, axis));

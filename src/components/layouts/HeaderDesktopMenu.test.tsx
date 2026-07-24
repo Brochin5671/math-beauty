@@ -6,7 +6,7 @@ import { HeaderDesktopMenu } from "./HeaderDesktopMenu";
 // Exercises the desktop nav wrapper as a black box: items + currentPath in,
 // link/trigger structure and active state out. The dropdown content is portaled
 // by Base UI only when open, so these assertions cover the closed trigger row;
-// the open-content path is covered in NavigationMenu.test.tsx.
+// the open-content path is covered in NavigationMenu.test.tsx
 describe("HeaderDesktopMenu", () => {
   it("renders flat items as links with their href", () => {
     render(<HeaderDesktopMenu items={nestedItems} currentPath="/" />);

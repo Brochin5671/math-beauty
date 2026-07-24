@@ -32,7 +32,7 @@ describe("Field", () => {
         <input id="email" type="email" />
       </Field>,
     );
-    // Implicit association via id/htmlFor; getByLabelText resolves the input.
+    // Implicit association via id/htmlFor; getByLabelText resolves the input
     expect(screen.getByLabelText("Email")).toHaveAttribute("type", "email");
   });
 
@@ -45,7 +45,7 @@ describe("Field", () => {
 
   it("FieldError accepts an errors array and deduplicates by message", () => {
     render(<FieldError errors={[{ message: "Too short" }, { message: "Too short" }]} />);
-    // Single-message dedupe collapses to a string, not a list.
+    // Single-message dedupe collapses to a string, not a list
     expect(screen.getByRole("alert")).toHaveTextContent("Too short");
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });

@@ -43,7 +43,7 @@ export default defineConfig({
       // the CI `tests` job (which runs `test:coverage`). Re-measure with `pnpm test:coverage`
       // and reset for your own code; a scaffold that drops features starts lower until you add
       // tests. Aggregate-only for now; revisit perFile + raising the floor once the suite
-      // stabilizes.
+      // stabilizes
       thresholds: {
         statements: 78,
         branches: 74,

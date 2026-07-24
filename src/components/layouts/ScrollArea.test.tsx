@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { ScrollArea, scrollBarVariants } from "./ScrollArea";
 
 // Real overflow and scrolling are covered in ScrollArea.browser.test.tsx; these
-// cover the markup structure and the scrollbar visibility axis.
+// cover the markup structure and the scrollbar visibility axis
 describe("scrollBarVariants", () => {
   for (const axis of variantAxes(scrollBarVariants)) {
     it(`wires the ${axis} axis`, () => expectAxisWired(scrollBarVariants, axis));

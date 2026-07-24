@@ -6,15 +6,15 @@ import { cn, cva, type VariantProps } from "@/lib/utils";
 
 /*
  * Compound page-footer primitive. A TSX surface so it can mount from any React
- * context (Astro pages, embedded previews, Storybook-style harnesses).
+ * context (Astro pages, embedded previews, Storybook-style harnesses)
  *
  * Structure: <Footer> wraps a centered container, then composes
  * brand / columns / trust / bottom rows from named parts. Each part is
- * presentation-only; the consumer assembles the shape they want.
+ * presentation-only; the consumer assembles the shape they want
  *
  * The root <footer> is the page's contentinfo landmark (only when scoped to
  * <body>). Inner <FooterLegalLinks> and <FooterSocial> are labeled <nav>
- * regions so screen readers can jump between them.
+ * regions so screen readers can jump between them
  *
  * The sub-parts keep raw flex/grid on purpose: each encodes behavioral CVA
  * variants the primitives do not express (FooterColumns' responsive ramp plus
@@ -47,9 +47,9 @@ const footerVariants = cva("w-full", {
 });
 
 interface FooterProps extends React.ComponentProps<"footer">, VariantProps<typeof footerVariants> {
-  /** Inner content max-width. Matches Container primitive sizes. */
+  /** Inner content max-width. Matches Container primitive sizes */
   containerSize?: ContainerSize;
-  /** Add a top border that separates the footer from page content above it. */
+  /** Add a top border that separates the footer from page content above it */
   borderTop?: boolean;
 }
 
@@ -159,7 +159,7 @@ function FooterColumn({ className, ...props }: React.ComponentProps<"div">) {
 type HeadingTag = "h2" | "h3" | "h4" | "div";
 
 interface FooterColumnTitleProps extends React.ComponentProps<"h2"> {
-  /** Heading level. Default `h2` because AT users scan footer columns by heading. Override to `h3`/`h4` if your page outline conflicts, or to `div` for non-heading visual. */
+  /** Heading level. Default `h2` because AT users scan footer columns by heading. Override to `h3`/`h4` if your page outline conflicts, or to `div` for non-heading visual */
   as?: HeadingTag;
 }
 
@@ -231,9 +231,9 @@ function FooterBottom({
 }
 
 interface FooterCopyrightProps extends React.ComponentProps<"p"> {
-  /** Year to display. Defaults to the current year. */
+  /** Year to display. Defaults to the current year */
   year?: number;
-  /** Append " All rights reserved." after the entity name. Default `true`. */
+  /** Append " All rights reserved." after the entity name. Default `true` */
   rightsReserved?: boolean;
 }
 
@@ -291,7 +291,7 @@ function FooterSocial({ className, ...props }: React.ComponentProps<"nav">) {
 
 interface FooterSocialLinkProps extends Omit<React.ComponentProps<"a">, "aria-label"> {
   href: string;
-  /** Required accessible name for the icon-only link. Becomes `aria-label`. */
+  /** Required accessible name for the icon-only link. Becomes `aria-label` */
   label: string;
 }
 

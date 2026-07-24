@@ -12,7 +12,7 @@ import {
 } from "./NavigationMenu";
 
 // The variant axis is verified through the exported CVA factory rather than the
-// rendered class string, which would echo the Tailwind config.
+// rendered class string, which would echo the Tailwind config
 describe("navigationMenuLinkStyle", () => {
   for (const axis of variantAxes(navigationMenuLinkStyle)) {
     it(`wires the ${axis} axis`, () => expectAxisWired(navigationMenuLinkStyle, axis));
@@ -21,7 +21,7 @@ describe("navigationMenuLinkStyle", () => {
 
 // The <a> render props look empty to the linter because the visible text is
 // passed as NavigationMenuLink children and merged into the anchor by Base UI's
-// useRender, the same reason HeaderDesktopMenu suppresses this rule.
+// useRender, the same reason HeaderDesktopMenu suppresses this rule
 describe("NavigationMenu", () => {
   it("tags the structural parts with data-slot attributes", () => {
     const { container } = render(

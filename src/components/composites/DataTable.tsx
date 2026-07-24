@@ -85,11 +85,11 @@ interface DataTableProps<TData, TValue> {
 /**
  * Monolithic DataTable: takes columns + data, owns the TanStack table instance
  * internally, renders a toolbar (filter Input + column-visibility dropdown), the
- * table itself, and Prev/Next pagination. Mirrors shadcn's docs example.
+ * table itself, and Prev/Next pagination. Mirrors shadcn's docs example
  *
  * For richer pagination (page-size selector, first/last buttons) or a different
  * column-visibility UI, compose with the DataTablePagination + DataTableViewOptions
- * exports against your own useReactTable instance instead of using this wrapper.
+ * exports against your own useReactTable instance instead of using this wrapper
  */
 function DataTable<TData, TValue>({
   columns,

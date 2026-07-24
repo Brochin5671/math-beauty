@@ -13,7 +13,7 @@ export type NavItemsGap = "sm" | "default" | "lg";
 
 /*
  * Gap between desktop nav items, applied as a class on NavigationMenuList
- * whose base is gap-0. twMerge lets the chosen value win over that base.
+ * whose base is gap-0. twMerge lets the chosen value win over that base
  */
 const ITEMS_GAP: Record<NavItemsGap, string> = {
   sm: "gap-4",
@@ -30,7 +30,7 @@ interface HeaderDesktopMenuProps {
 
 /*
  * Desktop nav rendered via the shadcn NavigationMenu primitive (hover-intent
- * dropdowns, shared viewport positioning, roving-focus keyboard a11y).
+ * dropdowns, shared viewport positioning, roving-focus keyboard a11y)
  * Flat items render as NavigationMenuLink. Items with children render as
  * NavigationMenuTrigger + NavigationMenuContent. Active state is computed
  * from currentPath against href / child.href

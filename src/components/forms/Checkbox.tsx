@@ -15,7 +15,7 @@ function Checkbox({ className, ...props }: CheckboxPrimitive.Root.Props) {
         data-slot="checkbox-indicator"
         className="grid place-content-center text-current transition-none [&>svg]:size-3.5"
         render={(indicatorProps, state) => (
-          // Render the dash for the mixed (indeterminate) state, the check otherwise.
+          // Render the dash for the mixed (indeterminate) state, the check otherwise
           <span {...indicatorProps}>{state.indeterminate ? <MinusIcon /> : <CheckIcon />}</span>
         )}
       />

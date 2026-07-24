@@ -1,13 +1,13 @@
 /*
  * Field is intentionally native HTML (div role="group", fieldset, legend,
  * label). It wraps ANY input - Base UI primitives, native inputs, third-
- * party controls - without funneling them through a Field.Control slot.
+ * party controls - without funneling them through a Field.Control slot
  * A Base-UI-backed Field would force every input to be slot-rendered and
- * fight composition with the other primitives in this folder.
+ * fight composition with the other primitives in this folder
  *
  * Consumer wires label-control association manually: `<FieldLabel htmlFor={id}>`
  * paired with `<input id={id}>`. RHF Controllers set `aria-invalid` on the
- * input; `<Field data-invalid>` is author-set as a styling hook.
+ * input; `<Field data-invalid>` is author-set as a styling hook
  */
 
 import { useMemo } from "react";
@@ -80,7 +80,7 @@ function Field({
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
   return (
-    // biome-ignore lint/a11y/useSemanticElements: Field is a single-control labeled wrapper, not a fieldset. FieldSet is a separate primitive for legitimate grouped controls.
+    // biome-ignore lint/a11y/useSemanticElements: Field is a single-control labeled wrapper, not a fieldset. FieldSet is a separate primitive for legitimate grouped controls
     <div
       role="group"
       data-slot="field"

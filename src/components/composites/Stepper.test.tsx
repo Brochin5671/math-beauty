@@ -110,8 +110,8 @@ describe("Stepper", () => {
     const { container } = renderFourStep(2);
     const lines = container.querySelectorAll('[data-slot="stepper-item-line"]');
     // 4 items, 3 lines. activeStep=2 -> lines on items 0, 1, 2.
-    // Lines from items 0 and 1 are between complete items -> data-state=complete.
-    // Line from item 2 is leaving the active item -> data-state=pending.
+    // Lines from items 0 and 1 are between complete items -> data-state=complete
+    // Line from item 2 is leaving the active item -> data-state=pending
     expect(lines[0]).toHaveAttribute("data-state", "complete");
     expect(lines[1]).toHaveAttribute("data-state", "complete");
     expect(lines[2]).toHaveAttribute("data-state", "pending");

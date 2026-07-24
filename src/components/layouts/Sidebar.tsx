@@ -65,12 +65,12 @@ function SidebarProvider({
   /**
    * Cookie key the provider writes open/closed state to. Override when multiple
    * Sidebar surfaces share a domain (e.g. consumer site + an embedded playground)
-   * so they don't toggle each other. Defaults to shadcn's `sidebar_state`.
+   * so they don't toggle each other. Defaults to shadcn's `sidebar_state`
    */
   cookieName?: string;
   /**
-   * Cookie path scope. Pair with `cookieName` to isolate state per route prefix.
-   * Defaults to "/" (whole domain), matching shadcn's verbatim install.
+   * Cookie path scope. Pair with `cookieName` to isolate state per route prefix
+   * Defaults to "/" (whole domain), matching shadcn's verbatim install
    */
   cookiePath?: string;
 }) {

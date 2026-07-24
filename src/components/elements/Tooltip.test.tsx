@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./Tooltip";
 
 // Tooltip is hover/focus-triggered, which happy-dom cannot simulate reliably, so
-// these drive open state through the open/defaultOpen prop.
+// these drive open state through the open/defaultOpen prop
 function fixture(extra?: Record<string, unknown>) {
   return (
     <TooltipProvider>

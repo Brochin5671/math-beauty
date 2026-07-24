@@ -46,8 +46,8 @@ export default defineConfig({
         /*
          * a11y: Expressive Code's <pre> scrolls horizontally for long lines
          * but, unlike Shiki's own output, ships no tabindex, so keyboard
-         * users can't scroll it (axe scrollable-region-focusable, WCAG 2.1.1).
-         * Add tabindex="0" to every rendered <pre>.
+         * users can't scroll it (axe scrollable-region-focusable, WCAG 2.1.1)
+         * Add tabindex="0" to every rendered <pre>
          */
         {
           name: "pre-keyboard-scroll",
@@ -72,9 +72,9 @@ export default defineConfig({
     sitemap({
       // Exclude the playground showcase and the /404 + /500 error pages
       filter: (page) => !page.includes("/playground") && !/\/(404|500)\/?$/.test(page),
-      // CONFIGURE: stamp every entry with the build time as a baseline lastmod.
+      // CONFIGURE: stamp every entry with the build time as a baseline lastmod
       // For per-page accuracy (e.g. a post's updatedDate), look `item.url` up
-      // against your content dates here and fall back to the build date.
+      // against your content dates here and fall back to the build date
       serialize(item) {
         item.lastmod = buildDate;
         return item;
@@ -84,7 +84,7 @@ export default defineConfig({
      * astro-favicons reads `public/favicon.svg` as the source and generates
      * the full icon set (16+ PNG sizes, ICO, manifest) at build time
      *
-     * Brand name + short name come from src/lib/site-config.ts (single source).
+     * Brand name + short name come from src/lib/site-config.ts (single source)
      *
      * CONFIGURE (favicon source): replace `public/favicon.svg` with your
      * brand favicon. The shipped placeholder is a real vector (~4 KB);
@@ -134,7 +134,7 @@ export default defineConfig({
        * properties of null (useContext)" dev errors (dev-only; the production
        * build is prebuilt and unaffected). Keep in sync
        * with the deps imported by React islands under src/components: add a
-       * specifier here when a new island starts importing one.
+       * specifier here when a new island starts importing one
        */
       include: [
         // Astro's env runtime (astro:env/server), pulled in during SSR by
@@ -188,7 +188,7 @@ export default defineConfig({
       ],
     },
     // astro-favicons' virtual module needs the SSR dep optimizer to skip
-    // prebundling its middleware.
+    // prebundling its middleware
     ssr: {
       optimizeDeps: {
         exclude: ["astro-favicons/middleware"],

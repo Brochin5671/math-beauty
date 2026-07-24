@@ -18,11 +18,11 @@ export function slugify(text: string): string {
  * Re-export of class-variance-authority's `cva` that attaches the config
  * object to the returned function as `.config`. Upstream cva captures the
  * config in closure scope and exposes nothing, so the playground's variant
- * picker has no way to read variants without this wrapper.
+ * picker has no way to read variants without this wrapper
  *
  * Component files import `cva` from `@/lib/utils` instead of
  * `class-variance-authority` directly. Variant inference via
- * `VariantProps<typeof xVariants>` is unchanged.
+ * `VariantProps<typeof xVariants>` is unchanged
  */
 export function cva<T>(...args: Parameters<typeof cvaUpstream<T>>): ReturnType<
   typeof cvaUpstream<T>
@@ -33,7 +33,7 @@ export function cva<T>(...args: Parameters<typeof cvaUpstream<T>>): ReturnType<
   const fn = cvaUpstream<T>(...args);
   // Capture both base and config so the playground can scan for hover /
   // focus-visible / active / disabled / aria-invalid signals to auto-
-  // derive supportedStates.
+  // derive supportedStates
   return Object.assign(fn, { config: args[1], base: args[0] });
 }
 

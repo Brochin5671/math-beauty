@@ -11,7 +11,7 @@ describe("LogoCloud", () => {
   it("applies default size and gap", () => {
     const { container } = render(<LogoCloud>logos</LogoCloud>);
     const el = container.querySelector('[data-slot="logo-cloud"]');
-    // Composes Grid: gap is a class, the auto-fit min width is inline style.
+    // Composes Grid: gap is a class, the auto-fit min width is inline style
     expect(el?.className).toContain("gap-8");
     expect(el?.getAttribute("style")).toContain("minmax(120px");
   });

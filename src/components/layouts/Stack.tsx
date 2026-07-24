@@ -102,7 +102,7 @@ interface StackProps extends React.ComponentProps<"div">, VariantProps<typeof st
    * Layout axis. "vertical" stacks children in a column (default),
    * "horizontal" in a row. Pass a mobile-first object for a responsive switch
    * (`direction={{ base: "vertical", md: "horizontal" }}`); an object that
-   * omits `base` still starts vertical so the stack collapses on small screens.
+   * omits `base` still starts vertical so the stack collapses on small screens
    */
   direction?: ResponsiveValue<Direction>;
 }

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 function Label({ className, ...props }: React.ComponentProps<"label">) {
   return (
-    // biome-ignore lint/a11y/noLabelWithoutControl: Label is a styling primitive; consumers pass htmlFor or wrap the input themselves.
+    // biome-ignore lint/a11y/noLabelWithoutControl: Label is a styling primitive; consumers pass htmlFor or wrap the input themselves
     <label
       data-slot="label"
       className={cn(

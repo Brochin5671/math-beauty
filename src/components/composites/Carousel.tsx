@@ -8,7 +8,7 @@ import { cn, cva } from "@/lib/utils";
  * Outer wrapper variants. Orientation is declared so the playground's
  * cvaFactory-driven Appearance picker surfaces it as a visual axis,
  * even though the actual orientation styling lives inside
- * CarouselContent / CarouselPrevious / CarouselNext via useCarousel.
+ * CarouselContent / CarouselPrevious / CarouselNext via useCarousel
  */
 const carouselVariants = cva("relative", {
   variants: {

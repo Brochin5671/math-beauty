@@ -26,9 +26,9 @@ const webSiteSchema = buildWebSiteSchema({
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Favicons, manifest, apple-touch-icon, msapplication tiles are injected by astro-favicons (see astro.config.mjs). -->
+    <!-- Favicons, manifest, apple-touch-icon, msapplication tiles are injected by astro-favicons (see astro.config.mjs) -->
     {
-      /* Google Search Console: set the GOOGLE_SITE_VERIFICATION env var at build time after registering the domain (baked into this static head). */
+      /* Google Search Console: set the GOOGLE_SITE_VERIFICATION env var at build time after registering the domain (baked into this static head) */
     }
     {
       GOOGLE_SITE_VERIFICATION && (
@@ -74,7 +74,7 @@ const webSiteSchema = buildWebSiteSchema({
   );
   document.querySelectorAll(".reveal").forEach((el) => {
     // Index any opt-in stagger children by position so each delays a step
-    // after the parent reveals (the .reveal [data-stagger] CSS reads it).
+    // after the parent reveals (the .reveal [data-stagger] CSS reads it)
     el.querySelectorAll("[data-stagger]").forEach((child, i) => {
       if (child instanceof HTMLElement) child.style.setProperty("--stagger-index", String(i));
     });

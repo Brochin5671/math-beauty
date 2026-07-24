@@ -10,7 +10,7 @@ describe("CodeBlock", () => {
     expect(figure?.tagName).toBe("FIGURE");
     const pre = figure?.querySelector("pre.shiki");
     expect(pre).not.toBeNull();
-    // Forced themes bake one palette in as absolute inline colors.
+    // Forced themes bake one palette in as absolute inline colors
     expect(pre?.getAttribute("class")).toContain("github-dark");
     expect(pre?.getAttribute("style")).toContain("background-color:#");
     expect(pre?.textContent).toContain("const x = 1");
@@ -26,21 +26,21 @@ describe("CodeBlock", () => {
   it("themes the frame from the palette for a forced theme", () => {
     const { container } = render(<CodeBlock code="x" theme="github-dark" />);
     const figure = container.querySelector('[data-slot="code-block"]');
-    // A forced theme bakes the surface in as an inline background color.
+    // A forced theme bakes the surface in as an inline background color
     expect(figure?.getAttribute("style")).toMatch(/background-color/i);
   });
 
   it("keeps the site surface for theme=system", () => {
     const { container } = render(<CodeBlock code="x" theme="system" />);
     const figure = container.querySelector('[data-slot="code-block"]');
-    // System defers to the site surface: no forced inline background color.
+    // System defers to the site surface: no forced inline background color
     expect(figure?.getAttribute("style") ?? "").not.toMatch(/background-color/i);
   });
 
   it("emits both palettes as CSS variables for theme=system", () => {
     const { container } = render(<CodeBlock code="const x = 1" lang="typescript" theme="system" />);
     const pre = container.querySelector("pre.shiki");
-    // Dual-theme output: tokens carry both palettes; global.css picks one.
+    // Dual-theme output: tokens carry both palettes; global.css picks one
     const token = pre?.querySelector("span[style*='--shiki-light']");
     expect(token).not.toBeNull();
     expect(pre?.querySelector("span[style*='--shiki-dark']")).not.toBeNull();
