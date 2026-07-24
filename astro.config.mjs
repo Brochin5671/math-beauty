@@ -27,6 +27,9 @@ export default defineConfig({
   // the Origin header on POST/PUT/PATCH/DELETE to SSR routes (our `/api/contact`)
   // Free CSRF protection on top of the response-direction CSP in `_headers`
   adapter: cloudflare({ imageService: "compile" }),
+  // no Astro sessions here: the memory driver stops the Cloudflare adapter from
+  // provisioning an unused SESSION KV namespace on every deploy
+  session: { driver: { entrypoint: "unstorage/drivers/memory" } },
   integrations: [
     /*
      * Expressive Code renders every markdown/MDX code fence (frames, titles,
