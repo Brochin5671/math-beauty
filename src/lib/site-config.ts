@@ -16,9 +16,9 @@ export interface FooterSocial {
   label: string;
 }
 
-// CONFIGURE: error pages are gated to dev; a direct production /404 or /500 hit
-// 404s while real 404/500 errors still render their page. Set to `true` to make
-// the designs viewable in production
+// CONFIGURE: gates whether a direct /500 hit previews the 500 design. Default
+// dev-only: outside dev a direct /500 renders the 404 page instead. Real 500
+// errors always render, and /404 is unaffected
 export const previewErrorPages = import.meta.env.DEV;
 
 export const brand = {

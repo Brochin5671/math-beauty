@@ -3,14 +3,10 @@ import { Hero } from "@/components/blocks/Hero";
 import { Link } from "@/components/elements/Link";
 import { Main } from "@/components/layouts/Main";
 import Layout from "@/layouts/Layout.astro";
-import { previewErrorPages } from "@/lib/site-config";
-
 export const prerender = false;
 
-// A real miss renders this with the missed pathname; a direct /404 visit does not
-// When gated, a direct production /404 hit 404s instead of serving the page
-if (!previewErrorPages && Astro.url.pathname === "/404") return new Response(null, { status: 404 });
-
+// Rendered for any unknown route and for a direct /404 hit, always with a real
+// 404 status (never a soft 200)
 Astro.response.status = 404;
 ---
 
