@@ -7,14 +7,35 @@ import { cn, cva, type VariantProps } from "@/lib/utils";
  * (`cols={{ base: 1, md: 2, lg: 3 }}`), or intrinsic (`minColWidth`). Pair
  * with GridItem for a 12-column span system. For asymmetric "bento" cards
  * reach for BentoGrid/BentoCell instead; GridItem is the general, unstyled
- * placement primitive.
+ * placement primitive
  *
  * Responsive values resolve through the static lookup maps below so every
  * class is a literal the Tailwind scanner can see. The one dynamic value,
  * `minColWidth`, is applied via inline style, never a class
+ *
+ * `as` retags the grid when the content has its own semantics, the motivating
+ * case being a description list (`<Grid as="dl">` with `<dt>`/`<dd>` children)
+ * Three constraints worth knowing before extending it:
+ *
+ * - It retags the GRID element only. Container mode wraps the grid in a
+ *   `@container` div, and that wrapper is an implementation detail: it stays a
+ *   div so `as="dl"` never puts a stray element inside the list
+ * - The union is deliberately narrow. Props extend `ComponentProps<"div">`, so
+ *   tags with their own attributes (`ol` wants `start`/`reversed`, `li` wants
+ *   `value`) would be advertised and then rejected by the type checker. Only
+ *   tags that add no attributes of their own belong here
+ * - `ref` and event-handler element types stay div-typed. Same trade the `as`
+ *   union in Footer.tsx already makes; the alternative is generic polymorphism,
+ *   which costs inference at every call site for a prop most of them never pass
+ *
+ * An arbitrary track list goes through `className`, not `cols`: `cols` is a
+ * bounded 1-12 lookup precisely so the classes stay statically scannable, and
+ * `cn()` drops the generated `grid-cols-*` in favour of whatever `className`
+ * supplies. So `<Grid as="dl" className="grid-cols-[auto_1fr]">` is the way to
+ * get a hugging term column
  */
 
-/** A static value, or a per-breakpoint responsive object (mobile-first). */
+/** A static value, or a per-breakpoint responsive object (mobile-first) */
 export type ResponsiveValue<T> = T | { base?: T; sm?: T; md?: T; lg?: T; xl?: T };
 
 const BREAKPOINTS = ["base", "sm", "md", "lg", "xl"] as const;
@@ -364,7 +385,7 @@ function clampInt(n: number, min: number, max: number): number {
   return Math.min(Math.max(Math.round(n), min), max);
 }
 
-/** Number/string => `{ base: value }`; object passes through unchanged. */
+/** Number/string => `{ base: value }`; object passes through unchanged */
 function toResponsive<T>(
   value: T | Partial<Record<Breakpoint, T>>,
 ): Partial<Record<Breakpoint, T>> {
@@ -441,9 +462,22 @@ const gridVariants = cva("grid w-full", {
   },
 });
 
+/**
+ * Tags the grid can render as. Restricted to elements that add no attributes of
+ * their own, so `ComponentProps<"div">` stays an honest prop type. See the note
+ * at the top of this file
+ */
+type GridTag = "div" | "dl" | "section";
+
 interface GridProps
   extends Omit<React.ComponentProps<"div">, "cols">,
     VariantProps<typeof gridVariants> {
+  /**
+   * Element to render. Default `div`. Use `dl` for a description list of
+   * `dt`/`dd` pairs, `section` when the grid is a titled region. In container
+   * mode this retags the grid, not the `@container` wrapper
+   */
+  as?: GridTag;
   /**
    * Column tracks. A plain number is a FIXED count at every width
    * (`cols={3}` is exactly 3 tracks). Pass a responsive object for a
@@ -454,24 +488,25 @@ interface GridProps
   /**
    * Intrinsic columns: each track is at least `minColWidth` wide, filling the
    * row with as many equal tracks as fit. Any CSS length ("14rem"). Applied
-   * via inline style and overrides `cols`.
+   * via inline style and overrides `cols`
    */
   minColWidth?: string;
-  /** Track-fill mode when `minColWidth` is set. Default "auto-fit". */
+  /** Track-fill mode when `minColWidth` is set. Default "auto-fit" */
   fill?: "auto-fit" | "auto-fill";
   /**
    * Resolve the responsive `cols` breakpoints against this grid's OWN width
    * (container queries) instead of the viewport. Default false. No effect in
-   * intrinsic (`minColWidth`) mode.
+   * intrinsic (`minColWidth`) mode
    */
   container?: boolean;
-  /** Column-axis gap override; wins over `gap` horizontally. */
+  /** Column-axis gap override; wins over `gap` horizontally */
   gapX?: GapScale;
-  /** Row-axis gap override; wins over `gap` vertically. */
+  /** Row-axis gap override; wins over `gap` vertically */
   gapY?: GapScale;
 }
 
 function Grid({
+  as = "div",
   className,
   style,
   cols = 3,
@@ -487,6 +522,15 @@ function Grid({
   children,
   ...props
 }: GridProps) {
+  /*
+   * Widened for the spread below. Every tag in GridTag accepts the same
+   * attributes, but TS types `ref` per element interface and HTMLDListElement
+   * is not structurally a HTMLDivElement (it has no `align`), so a div-typed
+   * ref will not spread onto a `dl`. Footer.tsx's `as` union avoids this only
+   * because HTMLHeadingElement does carry `align`. The public prop stays the
+   * narrow GridTag; only this render site widens
+   */
+  const As = as as React.ElementType;
   const intrinsic = minColWidth != null && minColWidth !== "";
   const colClasses = intrinsic ? undefined : resolveCols(cols, container);
   const gridStyle = intrinsic
@@ -494,7 +538,7 @@ function Grid({
     : style;
 
   const grid = (
-    <div
+    <As
       data-slot="grid"
       className={cn(
         gridVariants({ gap, flow, align, justify }),
@@ -506,7 +550,7 @@ function Grid({
       style={gridStyle}
       {...props}>
       {children}
-    </div>
+    </As>
   );
 
   // Container mode needs a containment ancestor: container queries apply to a
@@ -528,7 +572,7 @@ interface GridItemProps extends React.ComponentProps<"div"> {
   span?: ResponsiveValue<number | "full">;
   /** Row span. Plain number, bounded 1-6. */
   rowSpan?: number;
-  /** Resolve `span` against the grid's own width (container queries). */
+  /** Resolve `span` against the grid's own width (container queries) */
   container?: boolean;
 }
 
@@ -546,4 +590,4 @@ function GridItem({ className, span, rowSpan, container = false, ...props }: Gri
   );
 }
 
-export { Grid, GridItem, type GridItemProps, type GridProps, gridVariants };
+export { Grid, GridItem, type GridItemProps, type GridProps, type GridTag, gridVariants };

@@ -6,7 +6,7 @@ import { cn, cva, type VariantProps } from "@/lib/utils";
 // scales the thumb while `surface` and `shape` style the track. The
 // orientation-dependent track thickness lives on the track element via
 // `sliderTrackSize` instead, to avoid stacking a descendant selector with the
-// data-orientation variant.
+// data-orientation variant
 const sliderVariants = cva("flex flex-col gap-2 data-horizontal:w-full data-vertical:h-full", {
   variants: {
     size: {
@@ -16,7 +16,7 @@ const sliderVariants = cva("flex flex-col gap-2 data-horizontal:w-full data-vert
     },
     surface: {
       filled: "[&_[data-slot=slider-track]]:bg-muted",
-      // Ring instead of border so the indicator doesn't overlap the outline (border eats into box height with border-box)
+      // Ring not border: with border-box a border eats into box height
       outline:
         "[&_[data-slot=slider-track]]:bg-transparent [&_[data-slot=slider-track]]:ring-1 [&_[data-slot=slider-track]]:ring-inset [&_[data-slot=slider-track]]:ring-border",
       none: "[&_[data-slot=slider-track]]:bg-transparent",
@@ -33,7 +33,7 @@ const sliderVariants = cva("flex flex-col gap-2 data-horizontal:w-full data-vert
   },
 });
 
-// Track thickness is orientation-dependent, so it sits on the track element.
+// Track thickness is orientation-dependent, so it sits on the track element
 const sliderTrackSize = {
   sm: "data-horizontal:h-1 data-vertical:w-1",
   default: "data-horizontal:h-1.5 data-vertical:w-1.5",
@@ -45,10 +45,10 @@ type SliderProps = SliderPrimitive.Root.Props &
     /**
      * Accessible name per thumb, applied by index. Provide one entry per
      * thumb when no visible label is rendered; a range slider needs one
-     * for each end (e.g. ["Minimum", "Maximum"]).
+     * for each end (e.g. ["Minimum", "Maximum"])
      */
     thumbLabels?: string[];
-    /** Display the current value as text above the track. */
+    /** Display the current value as text above the track */
     showValue?: boolean;
   };
 
@@ -65,11 +65,17 @@ function Slider({
   showValue = false,
   ...props
 }: SliderProps) {
+  // Thumb count follows the value: a scalar renders one thumb (Base UI accepts a
+  // scalar too), an array one per entry, and only a bare slider falls back to a range
   const _values = Array.isArray(value)
     ? value
-    : Array.isArray(defaultValue)
-      ? defaultValue
-      : [min, max];
+    : typeof value === "number"
+      ? [value]
+      : Array.isArray(defaultValue)
+        ? defaultValue
+        : typeof defaultValue === "number"
+          ? [defaultValue]
+          : [min, max];
 
   return (
     <SliderPrimitive.Root
@@ -102,7 +108,7 @@ function Slider({
         {Array.from({ length: _values.length }, (_, index) => (
           <SliderPrimitive.Thumb
             data-slot="slider-thumb"
-            // Slider thumbs have stable identity by position (thumb 0 = lower bound, thumb 1 = upper bound); they don't reorder.
+            // Thumbs keep stable identity by position and never reorder, so key by index
             key={index}
             index={index}
             aria-label={thumbLabels?.[index]}
