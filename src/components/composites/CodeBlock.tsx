@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
  *
  * Render it WITHOUT a client: directive: highlighting is server-side and the
  * copy button wires through a tiny inline script, so grammars never ship to
- * the browser. Hydrating works (the playground tile does) but pays for Shiki
+ * the browser. Hydrating works but pays for Shiki
  * in the client bundle
  */
 

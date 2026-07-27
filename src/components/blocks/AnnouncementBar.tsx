@@ -25,7 +25,7 @@ const announcementBarVariants = cva("w-full border-b text-sm", {
       warning: "bg-destructive text-destructive-foreground border-destructive/40",
     },
     // Vertical density of the strip, so a downstream project can tighten or
-    // loosen it without forking the source. `default` is the demo baseline
+    // loosen it without forking the source. `default` is the baseline
     padding: {
       compact: "py-1.5",
       default: "py-2",

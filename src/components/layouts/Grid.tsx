@@ -420,7 +420,7 @@ function resolveSpan(span: ResponsiveValue<number | "full">, container: boolean)
   return out.join(" ");
 }
 
-// Only the finite, enumerable axes live in CVA so the playground can
+// Only the finite, enumerable axes live in CVA so a caller can
 // introspect them. Each axis lists its real default FIRST (the variant
 // picker pre-selects the first value). `cols`, `minColWidth`, `container`,
 // `gapX`, and `gapY` resolve outside CVA

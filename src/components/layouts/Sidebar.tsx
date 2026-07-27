@@ -64,7 +64,7 @@ function SidebarProvider({
   onOpenChange?: (open: boolean) => void;
   /**
    * Cookie key the provider writes open/closed state to. Override when multiple
-   * Sidebar surfaces share a domain (e.g. consumer site + an embedded playground)
+   * Sidebar surfaces can share a domain (two independent sidebars on one origin)
    * so they don't toggle each other. Defaults to shadcn's `sidebar_state`
    */
   cookieName?: string;

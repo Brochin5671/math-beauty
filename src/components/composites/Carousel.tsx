@@ -5,10 +5,10 @@ import { Button } from "@/components/elements/Button";
 import { cn, cva } from "@/lib/utils";
 
 /*
- * Outer wrapper variants. Orientation is declared so the playground's
- * cvaFactory-driven Appearance picker surfaces it as a visual axis,
- * even though the actual orientation styling lives inside
- * CarouselContent / CarouselPrevious / CarouselNext via useCarousel
+ * Outer wrapper variants. Orientation is declared here even though the actual
+ * orientation styling lives inside CarouselContent / CarouselPrevious /
+ * CarouselNext via useCarousel, so the axis is part of the component's declared
+ * variant API rather than an undocumented internal
  */
 const carouselVariants = cva("relative", {
   variants: {

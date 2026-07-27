@@ -9,7 +9,7 @@ import type { ResponsiveValue } from "./Grid";
  *
  * `direction` resolves through the static DIRECTION map (not CVA) so every
  * responsive class is a literal the Tailwind scanner can see; the other axes
- * stay in CVA for playground introspection
+ * stay in CVA so they can be introspected at runtime
  */
 
 const BREAKPOINTS = ["base", "sm", "md", "lg", "xl"] as const;

@@ -2,12 +2,15 @@ import { Switch as SwitchPrimitive } from "@base-ui/react/switch";
 
 import { cn, cva, type VariantProps } from "@/lib/utils";
 
-// `size` is the only visual axis (track + thumb dimensions). Kept as a CVA
-// factory so the variant is introspectable; the thumb reads `data-size` off the
-// root via group-data selectors, so the root keeps that attribute
+/*
+ * `size` is the only visual axis (track + thumb dimensions). Kept as a CVA
+ * factory so the variant is part of the declared API rather than an inline
+ * selector; the thumb reads `data-size` off the root via group-data selectors,
+ * so the root keeps that attribute
+ */
 const switchVariants = cva(
-  // in-data-[state=focus] mirrors the focus ring when the playground picker
-  // writes data-state=focus on the wrapper
+  // in-data-[state=focus] paints the focus ring when an ancestor carries
+  // data-state="focus", so a static render can show the state without real focus
   "peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent shadow-xs transition-all outline-none after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 in-data-[state=focus]:border-ring in-data-[state=focus]:ring-3 in-data-[state=focus]:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 data-checked:bg-primary data-unchecked:bg-input dark:data-unchecked:bg-input/80 data-disabled:cursor-not-allowed data-disabled:opacity-50",
   {
     variants: {
