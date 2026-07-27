@@ -3,7 +3,7 @@ import { load } from "cheerio";
 import { describe, expect, it } from "vitest";
 import { sitePages } from "../fixtures/site-pages";
 
-// Catches the "consumer added a page to src/pages/ but forgot to update
+// Catches the "a page was added to src/pages/ but nobody updated
 // sitePages" failure mode: every URL in the built sitemap must be in the
 // fixture, and vice versa, so all page-driven tests cover every real page
 

@@ -5,8 +5,8 @@ test.describe("SEO metadata", () => {
   test("home page title leads with the brand", async ({ page }) => {
     await page.goto("/");
     // brand-first title: "<brand> - <tagline>" with a tagline, just "<brand>"
-    // without one (the demo clears it); assert it leads with a brand char, not
-    // a specific brand, so any configured brand or the tagline-less demo passes
+    // without one; assert it leads with a brand char rather than a specific brand,
+    // so the title stays checkable when the brand or tagline changes
     await expect(page).toHaveTitle(/^[^\s-]/);
   });
 

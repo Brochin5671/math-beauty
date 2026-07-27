@@ -1,8 +1,8 @@
 /*
  * Single source of truth for every page-driven test (smoke, a11y, SEO,
  * emulation, build snapshots, sitemap sync)
- * CONFIGURE: add an entry here when shipping a new public page; every
- * relevant test will pick it up automatically
+ * Add an entry here when shipping a new public page; every relevant test picks it
+ * up automatically
  * Note: 404/500 are excluded - they are SSR error routes (prerender=false);
  * the E2E smoke and a11y specs hit them directly
  */

@@ -39,10 +39,10 @@ export default defineConfig({
     trace: process.env.CI ? "on-first-retry" : "retain-on-failure",
     screenshot: "only-on-failure",
     actionTimeout: 5_000,
-    // CONFIGURE: pin for reproducible runs; change for non-US/UTC audiences
+    // Pinned for reproducible runs; change for a non-US/UTC audience
     locale: "en-US",
     timezoneId: "UTC",
-    // CONFIGURE: matches site's class="dark"; forward-compat for prefers-color-scheme
+    // Matches the site's class="dark"; forward-compatible with prefers-color-scheme
     colorScheme: "dark",
   },
   // Chromium desktop + mobile only (webkit and firefox dropped to keep CI light)
