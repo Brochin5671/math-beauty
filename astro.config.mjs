@@ -75,9 +75,9 @@ export default defineConfig({
     sitemap({
       // Exclude the playground showcase and the /404 + /500 error pages
       filter: (page) => !page.includes("/playground") && !/\/(404|500)\/?$/.test(page),
-      // CONFIGURE: stamp every entry with the build time as a baseline lastmod
-      // For per-page accuracy (e.g. a post's updatedDate), look `item.url` up
-      // against your content dates here and fall back to the build date
+      // Every entry is stamped with the build time as a baseline lastmod. For
+      // per-page accuracy, look `item.url` up against a content date here and fall
+      // back to the build date
       serialize(item) {
         item.lastmod = buildDate;
         return item;
@@ -89,20 +89,25 @@ export default defineConfig({
      *
      * Brand name + short name come from src/lib/site-config.ts (single source)
      *
-     * CONFIGURE (favicon source): replace `public/favicon.svg` with your
-     * brand favicon. The shipped placeholder is a real vector (~4 KB);
-     * astro-favicons rasterizes downstream PNG variants (16/32/48/180/192/512)
-     * from this source at build time
+     * `public/favicon.svg` is the favicon source, a real vector (~4 KB).
+     * astro-favicons rasterizes the downstream PNG variants
+     * (16/32/48/180/192/512) from it at build time
      */
     favicons({
       name: process.env.PUBLIC_SITE_NAME || brand.name,
       short_name:
         process.env.PUBLIC_SITE_SHORT_NAME || process.env.PUBLIC_SITE_NAME || brand.shortName,
       themes: ["#0a0a0a"],
+      /*
+       * The PWA splash background. Matches the dark default the site ships
+       * (`class="dark"` in Layout.astro); the generator's own default is #fff,
+       * which flashes white before a dark app paints
+       */
+      background: "#0a0a0a",
     }),
   ],
-  // Production URL (sitemap, canonical, OG): brand.url for consumers, or the
-  // PUBLIC_SITE_URL build env for the demo (cd.yml)
+  // Production URL (sitemap, canonical, OG): brand.url, or the PUBLIC_SITE_URL
+  // build env where one is set
   site: process.env.PUBLIC_SITE_URL || brand.url,
 
   // System font stack only, no web font is loaded (see src/styles/global.css)
