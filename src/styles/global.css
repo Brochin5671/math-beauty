@@ -130,7 +130,7 @@
 }
 
 /*
- * Scroller speed. The playground scroller demo sets data-speed on its track
+ * Scroller speed. A track carries data-speed
  * (default "normal" = the 30s utility); these override just the duration so a
  * slower or faster pass is one attribute change. The attribute selector
  * outranks the .animate-scroller utility, so only the duration is replaced.
@@ -152,7 +152,7 @@
  * fallback) and resolution. The plain url() line comes first as the pre-2023
  * fallback; the image-set() line overrides it where supported.
  *
- * CONFIGURE: set the two custom properties where you use the class, e.g.
+ * Set the two custom properties at the call site, e.g.
  *   style="--bg-image-set-fallback: url('/img/hero.jpg');
  *          --bg-image-set: image-set(url('/img/hero.avif') type('image/avif'),
  *                                     url('/img/hero.jpg') type('image/jpeg'))"
@@ -272,6 +272,35 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/*
+ * A focus outline that actually paints on a component whose base sets
+ * `outline-none`.
+ *
+ * Tailwind 4 compiles `outline-none` to `--tw-outline-style: none` as well as
+ * `outline-style: none`, and every `outline-<n>` utility compiles to
+ * `outline-style: var(--tw-outline-style)`. So `outline-none` on a base plus
+ * `focus-visible:outline-1` on the focus variant resolves the focused style
+ * through a variable the element has already pinned to `none`: the width
+ * applies, every class is present in the markup, and no outline is drawn.
+ *
+ * This sets the style itself, so the variable cannot defeat it. Use it wherever
+ * a component suppresses the UA outline and then wants its own back on focus.
+ * The outline matters rather than the `ring-*` box-shadow beside it because
+ * box-shadow is not painted under `forced-colors: active`, so the outline is the
+ * only indicator that survives there.
+ *
+ * Always behind a state variant: `focus-visible:focus-outline`, never a bare
+ * `focus-outline` next to `outline-none`. A variant lifts the specificity above
+ * `.outline-none`, but the unvariated class ties it and Tailwind emits a custom
+ * utility before the core one, so `class="outline-none focus-outline"` paints
+ * nothing
+ */
+@utility focus-outline {
+  --tw-outline-style: solid;
+  outline-style: solid;
+  outline-width: 1px;
 }
 
 @layer base {
@@ -582,10 +611,10 @@
 @media (prefers-reduced-motion: reduce) {
   /*
    * Escape hatch: every suppression selector below is gated on
-   * `html:not([data-force-motion])`. The playground animations showcase sets
-   * `data-force-motion` on the iframe root when the user clicks Play / Replay,
-   * an explicit request to SEE the motion, so that one demo plays at full
-   * duration while all other automatic, decorative motion stays suppressed.
+   * `html:not([data-force-motion])`, so setting that attribute on the root opts a
+   * surface back into full-duration motion. For a control that plays an animation on
+   * request, where the click is itself an explicit request to see it, while all other
+   * automatic decorative motion stays suppressed.
    */
   html:not([data-force-motion]) .reveal {
     opacity: 1;
@@ -636,68 +665,6 @@
 }
 
 /*
- * Playground toolbar `Motion: reduce` override. The toolbar writes
- * `data-motion="reduce"` on <html>; this rule disables animations and
- * transitions site-wide regardless of the OS preference. The 0.001ms
- * trick keeps `animationend` events firing for any code that depends
- * on them while suppressing visible motion
- */
-html[data-motion="reduce"]:not([data-force-motion]) *,
-html[data-motion="reduce"]:not([data-force-motion]) *::before,
-html[data-motion="reduce"]:not([data-force-motion]) *::after {
-  /* biome-ignore lint/complexity/noImportantStyles: intentional cascade reversal, needs to override scoped component animations + transitions */
-  animation-duration: 0.001ms !important;
-  /* biome-ignore lint/complexity/noImportantStyles: see above */
-  animation-iteration-count: 1 !important;
-  /* biome-ignore lint/complexity/noImportantStyles: see above */
-  transition-duration: 0.001ms !important;
-  /* biome-ignore lint/complexity/noImportantStyles: see above */
-  scroll-behavior: auto !important;
-}
-
-/*
- * Theme-switch flicker suppression. ThemeToggle adds `.theme-switching`
- * to <html> for one paint while flipping the dark class, then removes
- * it. Without this, every component with `transition-colors` (links,
- * buttons, form controls, ...) animates from light to dark token values
- * and the user sees the mid-flight grey.
- */
-html.theme-switching,
-html.theme-switching *,
-html.theme-switching *::before,
-html.theme-switching *::after {
-  /* biome-ignore lint/complexity/noImportantStyles: must override scoped component transitions during the flip */
-  transition: none !important;
-}
-
-/* System font stack for html/body */
-html,
-body {
-  font-family: var(--font-sans);
-  font-optical-sizing: auto;
-  margin: 0;
-  width: 100%;
-  /* No `height: 100%`: it would cap body to one viewport, so a `position: sticky`
-     header (whose containing block is body) only sticks for one screen. Body
-     grows with content; the body background still fills the viewport via the
-     canvas background propagation. The playground shell sets its own viewport
-     height (SidebarShell `h-svh`), so it is unaffected. */
-}
-
-/*
- * Playground toolbar font-family override. ToolbarSettings writes
- * data-font on <html>; these rules swap body font without disturbing
- * component-level `font-mono` utilities (which keep their own stack).
- */
-html[data-font="system"] body {
-  font-family: system-ui, sans-serif;
-}
-
-html[data-font="serif"] body {
-  font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
-}
-
-/*
  * Wave gesture. Opt-in class for single-fire or repeated attention
  * animations (e.g. "Hi, I'm X 👋"). Pair with a small inline script that
  * toggles .waving on an element with .wave to trigger the animation
@@ -742,10 +709,8 @@ html[data-font="serif"] body {
 }
 
 /*
- * CONFIGURE: project-level overrides live here, OUTSIDE @layer base, so
- * they take cascade priority over the library defaults. Replace the
- * example below (heading font-medium) with your own typography overrides
- * or delete the block entirely if you don't need any
+ * Site-level overrides live here, OUTSIDE @layer base, so they take cascade
+ * priority over the library defaults
  */
 /* Override outside @layer so it has higher cascade priority than base */
 :root h1,

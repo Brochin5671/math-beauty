@@ -6,12 +6,13 @@ const buttonVariants = cva(
   /*
    * State styles are authored twice: production selectors
    * (`hover:` / `active:` / `focus-visible:`) and mirrors
-   * (`in-data-[state=*]:`) for the StatesPicker. Pointer states are
-   * transient and programmatic `.focus()` does not reliably trigger
-   * `:focus-visible`, so the mirrors keep them inspectable. Disabled
-   * and error pass real `disabled` / `aria-invalid` props instead
+   * (`in-data-[state=*]:`) that paint the same thing when an ancestor carries
+   * `data-state`. Pointer states are transient and programmatic `.focus()` does
+   * not reliably trigger `:focus-visible`, so the mirrors are what let a static
+   * render show a state. Disabled and error pass real `disabled` /
+   * `aria-invalid` props instead
    */
-  "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring in-data-[state=focus]:border-ring focus-visible:ring-3 in-data-[state=focus]:ring-3 focus-visible:ring-ring/50 in-data-[state=focus]:ring-ring/50 active:not-aria-[haspopup]:translate-y-px in-data-[state=active]:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring in-data-[state=focus]:border-ring focus-visible:ring-3 in-data-[state=focus]:ring-3 focus-visible:ring-ring/50 in-data-[state=focus]:ring-ring/50 focus-visible:outline-hidden in-data-[state=focus]:outline-hidden active:not-aria-[haspopup]:translate-y-px in-data-[state=active]:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
