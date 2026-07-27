@@ -5,7 +5,7 @@ import { Stack } from "@/components/layouts/Stack";
 import { cn, cva, type VariantProps } from "@/lib/utils";
 
 // Content padding tier, so a downstream project can dial blog-index density
-// without forking the source. `default` is the baseline used across the demo
+// without forking the source. `default` is the baseline used everywhere else
 const blogCardContentVariants = cva("", {
   defaultVariants: {
     padding: "default",
@@ -45,8 +45,8 @@ function BlogCard({ className, children, image, href, padding, ...props }: BlogC
       data-slot="blog-card"
       className={cn(
         "@container/blog-card gap-0 py-0",
-        // Hover lift. in-data-[state=hover] mirrors real hover so the playground
-        // States picker (which forces data-state on an ancestor) can preview it
+        // Hover lift. in-data-[state=hover] mirrors real hover, so a forced
+        // data-state on an ancestor previews it
         href != null &&
           "transition-shadow group-hover/blog-link:shadow-md in-data-[state=hover]:shadow-md",
         className,

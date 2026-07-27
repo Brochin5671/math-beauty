@@ -17,7 +17,7 @@ const testimonialVariants = cva("@container/testimonial rounded-xl border bg-car
   },
   variants: {
     // Card padding tier, so a downstream project can dial density without
-    // forking the source. `default` is the baseline used across the demo.
+    // forking the source. `default` is the baseline used everywhere else.
     padding: {
       compact: "p-4",
       default: "p-6",

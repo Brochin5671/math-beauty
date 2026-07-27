@@ -3,8 +3,8 @@ import { buttonVariants } from "@/components/elements/Button";
 import { cn, cva, type VariantProps } from "@/lib/utils";
 
 /*
- * Playground-facing CVA factory: declares the size axis Link exposes
- * so the playground Appearance picker can be auto-generated from it
+ * CVA factory declaring the size axis Link exposes, so the variant API is
+ * readable off the factory rather than only from the prop types
  * The class strings are intentionally empty - Link's actual size
  * styling comes from buttonVariants(size) inside the component
  */

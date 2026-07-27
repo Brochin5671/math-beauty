@@ -1,9 +1,9 @@
 import { cva } from "@/lib/utils";
 
 /*
- * Header CVA variants, split out of Header.astro so both the component and
- * the playground tile (which rebuilds the bar in React) share one source of
- * truth for the variant class maps
+ * Header CVA variants, split out of Header.astro so the class maps are importable
+ * on their own. Anything that rebuilds the bar outside the .astro component (a
+ * React equivalent, a visual reference) shares one source of truth with it
  */
 
 /*
