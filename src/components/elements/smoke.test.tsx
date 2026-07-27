@@ -4,14 +4,17 @@ import { describe, expect, it } from "vitest";
  * Element smoke gate. Auto-imports every element module via import.meta.glob so
  * import-time regressions (missing or renamed exports, CVA import drift, peer-dep
  * breakage) fail here the moment a primitive lands - no per-component wiring
- * Scales for free as consumers add elements
+ * Scales for free as elements are added
  *
- * Each module must export at least one function (the component, and usually its
- * CVA variants factory). Rendering with defaults is intentionally NOT attempted:
- * many elements are compound parts that need a parent context or required props,
- * so a blanket render would assert little. The import + export-shape check is the
- * cheap, high-signal guard; per-component behavior lives in each colocated
- * *.test.tsx
+ * Each module must export a component named after its file. Rendering with
+ * defaults is intentionally NOT attempted: many elements are compound parts that
+ * need a parent context or required props, so a blanket render would assert
+ * little. The import + export-shape check is the cheap, high-signal guard;
+ * per-component behavior lives in each colocated *.test.tsx
+ *
+ * The name is what makes this fail on the case worth catching. "exports at least
+ * one function" is satisfied by the CVA variants factory alone, so deleting the
+ * component itself from a module left this green
  */
 
 // Eager glob executes each module's top level (CVA definitions, imports), which
@@ -25,15 +28,25 @@ const modules = import.meta.glob(["./*.tsx", "!./*.test.tsx"], { eager: true }) 
 
 const componentEntries = Object.entries(modules);
 
+/** "./AlertDialog.tsx" -> "AlertDialog" */
+function componentNameFor(path: string): string {
+  return path.replace(/^\.\//, "").replace(/\.tsx$/, "");
+}
+
 describe("elements smoke", () => {
+  /*
+   * A count floor alone cannot fail usefully here: at zero the loop below emits no
+   * tests either, so the file would go quiet rather than red. Naming a module that
+   * must be present is what proves the glob still resolves
+   */
   it("discovers element modules", () => {
-    expect(componentEntries.length).toBeGreaterThan(0);
+    expect(componentEntries.map(([path]) => componentNameFor(path))).toContain("Button");
   });
 
   for (const [path, mod] of componentEntries) {
-    it(`${path} exports at least one function`, () => {
-      const fns = Object.values(mod).filter((value) => typeof value === "function");
-      expect(fns.length).toBeGreaterThan(0);
+    const name = componentNameFor(path);
+    it(`${path} exports ${name}`, () => {
+      expect(typeof mod[name]).toBe("function");
     });
   }
 });
