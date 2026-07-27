@@ -33,9 +33,9 @@ export interface Props {
  * and `summary_large_image` for a banner card. Override `image` per-page for a
  * route-specific card
  *
- * CONFIGURE: `description` below is the site-wide fallback for any page that
- * does not pass its own. Set a specific description per page (via the Layout
- * `seoProps`) for the best search and social results
+ * `description` below is the site-wide fallback for any page that does not pass its
+ * own. A specific description per page (via the Layout `seoProps`) gives the best
+ * search and social results
  */
 const {
   title,
@@ -55,9 +55,14 @@ const {
 } = Astro.props;
 
 // Brand suffix for inner pages; brand + tagline for the homepage (no title)
-// `siteName`/`tagline` let a surface (e.g. the playground) override the brand
+// `siteName`/`tagline` let an individual page override the brand defaults
 const metaTitle = buildMetaTitle(title, siteName, tagline);
-const canonicalURL = canonical ?? buildCanonicalURL(Astro.url.pathname, Astro.site);
+/*
+ * The `canonical` prop goes through the same resolver as the pathname, so an
+ * override is scheme-checked and absolutised too. Used verbatim it bypassed the
+ * guard entirely and landed in both `<link rel="canonical">` and `og:url`
+ */
+const canonicalURL = buildCanonicalURL(canonical ?? Astro.url.pathname, Astro.site);
 // Social images must be absolute: crawlers (Facebook, X, Slack, LinkedIn) fetch
 // the page from their own servers and cannot resolve a relative path
 const imageURL = buildAbsoluteURL(image, Astro.site);

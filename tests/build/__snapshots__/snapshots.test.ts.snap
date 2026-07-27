@@ -4,6 +4,7 @@ exports[`SEO meta snapshots > Fractal Viewer meta tags 1`] = `
 {
   "canonical": "[configurable]",
   "description": "[configurable]",
+  "htmlLang": "en-US",
   "ogImage": "[configurable]",
   "ogLocale": "en_US",
   "ogSiteName": "[configurable]",

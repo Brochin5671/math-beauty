@@ -1,12 +1,10 @@
-/*
- * CONFIGURE: this file holds your brand identity and footer socials. Layout,
- * SEO, JSON-LD schemas, footer, and astro.config.mjs (the `site` URL +
- * favicons name/short-name) all source from here, so changes propagate
- * site-wide. Two exports every consumer must update:
- *   - `brand` (name, shortName, url, logo, email, founder, sameAs)
- *   - `socials` (footer links + brand SVG icons; can also be empty array)
- * Add your own data structures (lists, catalogs, products, posts, projects)
- * as your site requires; this is the single configuration surface for
+/**
+ * @fileoverview Brand identity and footer socials for the site
+ *
+ * Layout, SEO, the JSON-LD schemas, the footer and astro.config.mjs (the `site`
+ * URL plus the favicons name and short-name) all source from here, so a change
+ * propagates site-wide. `brand` carries the identity; `socials` carries the footer
+ * links and their inline SVG icons. This is the single configuration surface for
  * site-wide content
  */
 
@@ -16,9 +14,9 @@ export interface FooterSocial {
   label: string;
 }
 
-// CONFIGURE: gates whether a direct /500 hit previews the 500 design. Default
-// dev-only: outside dev a direct /500 renders the 404 page instead. Real 500
-// errors always render, and /404 is unaffected
+// Gates whether a direct /500 hit previews the 500 design. Dev-only: outside dev a
+// direct /500 renders the 404 page instead. Real 500 errors always render, and /404
+// is unaffected
 export const previewErrorPages = import.meta.env.DEV;
 
 export const brand = {
@@ -33,19 +31,18 @@ export const brand = {
   sameAs: ["https://github.com/Brochin5671"],
 } as const;
 
-// CONFIGURE: per-page meta descriptions (search results + social cards). One
-// source of truth for the copy the SEO component renders. `defaultDescription`
-// is the site-wide fallback any page without its own description inherits
+// Per-page meta descriptions (search results + social cards). One source of truth
+// for the copy the SEO component renders. `defaultDescription` is the site-wide
+// fallback any page without its own description inherits
 export const pageMeta = {
   defaultDescription:
     "Explore escape fractals in your browser with camera controls, live coloring and keyboard shortcuts.",
   home: "View the Mandelbrot, Burning Ship, Tricorn and Multibrot sets and their Julia variants, with camera controls, coloring presets and keyboard shortcuts.",
 } as const;
 
-// CONFIGURE: SEO identity, sourced site-wide by the SEO component, the <title>
-// builder, and the JSON-LD. `tagline` is the homepage title suffix and value
-// prop. Leave `twitterHandle` empty to omit the twitter:site / :creator tags;
-// set it to your @handle to include them. `ogImage` describes /og-logo.png
+// SEO identity, sourced site-wide by the SEO component, the <title> builder and the
+// JSON-LD. `tagline` is the homepage title suffix. An empty `twitterHandle` omits the
+// twitter:site / :creator tags. `ogImage` describes /og-logo.png
 export const siteSeo = {
   tagline: "View several escape fractals!",
   locale: "en_US",
@@ -54,13 +51,21 @@ export const siteSeo = {
   defaultAuthor: brand.founder,
 } as const;
 
+/*
+ * The `<html lang>` value, derived from siteSeo.locale so the two cannot drift.
+ * og:locale wants the underscored form (`en_US`) and `lang` wants a BCP 47 tag
+ * (`en-US`), which is the whole reason they were written separately and then
+ * disagreed
+ */
+export const htmlLang = siteSeo.locale.replace("_", "-");
+
 // drop the shipped placeholder email/socials so the org JSON-LD omits them
 // instead of emitting example.com / your-org until they are configured
 const isPlaceholder = (value: string) =>
   value.includes("example.com") || value.includes("your-org");
 
-// Resolved site identity: `brand`/`siteSeo`, plus PUBLIC_SITE_* build env for the
-// demo; site-wide consumers read `site`, shortName falls back to the name
+// Resolved site identity: `brand`/`siteSeo`, with a PUBLIC_SITE_* build env able to
+// override any of it; read `site` site-wide, shortName falls back to the name
 export const site = {
   name: import.meta.env.PUBLIC_SITE_NAME || brand.name,
   shortName:
@@ -71,12 +76,12 @@ export const site = {
   email: isPlaceholder(brand.email) ? undefined : brand.email,
   founder: brand.founder,
   sameAs: brand.sameAs.filter((url) => !isPlaceholder(url)),
-  // `??` not `||`: an explicit empty tagline (the demo) means no title suffix
+  // `??` not `||`: an explicit empty tagline means no title suffix, which `||` would
+  // fall through instead
   tagline: import.meta.env.PUBLIC_SITE_TAGLINE ?? siteSeo.tagline,
 } as const;
 
-// CONFIGURE: replace SVG paths and href values with your real brand accounts
-// Inline SVG keeps icons lightweight and theme-aware (currentColor)
+// Inline SVG keeps the icons lightweight and theme-aware (currentColor)
 export const socials: FooterSocial[] = [
   {
     href: "https://github.com/Brochin5671",
