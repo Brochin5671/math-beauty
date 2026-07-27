@@ -10,15 +10,26 @@ import { apiEndpoints } from "../fixtures/api-endpoints";
  */
 
 test.describe("API endpoint smoke", () => {
-  for (const { path, method, description } of apiEndpoints) {
+  for (const { path, method, description, emptyPayloadStatus } of apiEndpoints) {
     test(`${method} ${path} responds (${description})`, async ({ request }) => {
-      const response = await request.fetch(path, { method });
-      const status = response.status();
-      // 4xx is acceptable (endpoint received the request and returned a
-      // controlled error like 400 for missing body); 404 means the route
-      // does not exist; 5xx means the handler threw
-      expect(status).not.toBe(404);
-      expect(status).toBeLessThan(500);
+      /*
+       * `data: {}` rather than no body at all, so the request carries a JSON
+       * content-type. Astro's checkOrigin rejects a bodyless POST with 403 before
+       * the route runs, so the previous version of this spec never reached a
+       * handler and passed anyway, because 403 is neither 404 nor a 5xx
+       */
+      const response = await request.fetch(path, {
+        method,
+        data: {},
+        failOnStatusCode: false,
+      });
+      /*
+       * The status the fixture declares, rather than a range. "not 404 and under
+       * 500" is satisfied by 200, 400, 401, 403 and 429 alike, so it could not
+       * tell a working endpoint from one that had started rejecting or silently
+       * accepting everything
+       */
+      expect(response.status()).toBe(emptyPayloadStatus);
     });
   }
 });

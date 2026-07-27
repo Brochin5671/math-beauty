@@ -13,9 +13,10 @@ describe("Calendar", () => {
     expect(container.querySelector("table")).not.toBeNull();
   });
 
-  it("renders weekday headers", () => {
+  it("renders one header cell per weekday", () => {
     const { container } = render(<Calendar />);
-    expect(container.querySelectorAll("th").length).toBeGreaterThan(0);
+    // Seven, not "more than none": a header row short a day still renders headers
+    expect(container.querySelectorAll("th")).toHaveLength(7);
   });
 
   it("merges consumer className", () => {

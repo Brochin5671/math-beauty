@@ -17,10 +17,15 @@ function stubCanvas() {
   return ctx;
 }
 
-// The control panel loads lazily, so wait for it before driving any of its inputs
+/*
+ * The control panel is behind a lazy boundary, so wait for it before driving any of
+ * its inputs. The timeout is raised past the 1000ms default because the first render
+ * in the file pays for resolving that chunk, and under a full-suite run that alone
+ * can exceed it: a bare findByRole here fails on load rather than on behaviour
+ */
 async function renderViewer() {
   const utils = render(<FractalViewer />);
-  await screen.findByRole("tab", { name: "Camera" });
+  await screen.findByRole("tab", { name: "Camera" }, { timeout: 5000 });
   return utils;
 }
 
