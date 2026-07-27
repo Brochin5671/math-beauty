@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.3.2](https://github.com/Brochin5671/math-beauty/compare/v2.3.1...v2.3.2) (2026-07-27)
+
+### Fixes
+
+* **a11y:** drop a line-clamp that a flex row cannot honour ([1c310fd](https://github.com/Brochin5671/math-beauty/commit/1c310fd89b0beffbe7cdc807846d8ab61522a8cd))
+* **a11y:** name the carousel region, overridable by the caller ([24c578a](https://github.com/Brochin5671/math-beauty/commit/24c578af0860dab4e16384907a5ef0011c7cd473))
+* **a11y:** paint a focus indicator under forced colors ([d0a3837](https://github.com/Brochin5671/math-beauty/commit/d0a383768bf04bb29f7a7f5c2031f551664b1d17))
+* **deps:** pin postcss past the source-map path traversal advisory ([7d57f8f](https://github.com/Brochin5671/math-beauty/commit/7d57f8fe3215fa9a1ddbdf0d3431864c69950662))
+* **hooks:** key useIsMobile off the media query rather than innerWidth ([e21b6a9](https://github.com/Brochin5671/math-beauty/commit/e21b6a99c2d7cddb930c873bcd96f549b4e50384))
+* **security:** apply the security headers to server-rendered responses ([8c25811](https://github.com/Brochin5671/math-beauty/commit/8c25811cfeeb00c636d77473831f61458a7af7dc))
+* **seo:** check the URL scheme and derive the html lang from the locale ([7e733dd](https://github.com/Brochin5671/math-beauty/commit/7e733dd3f00e2db248b2a50fa0edb74439bda156))
+* **seo:** link the generated favicons, manifest and theme-color ([4486e9e](https://github.com/Brochin5671/math-beauty/commit/4486e9eb22a43b65608721c88e0c7e98543f0f87))
+* **tests:** stop waitForHydration skipping island-free pages ([0bf6d6e](https://github.com/Brochin5671/math-beauty/commit/0bf6d6ef270292055ef7f7da6b9862a1a26c14ab))
+
+### Performance Improvements
+
+* hydrate only the header island the viewport shows ([c76b0e9](https://github.com/Brochin5671/math-beauty/commit/c76b0e9a61d93e598cc3f0afd7efd29f1163cc95))
+
+### Documentation
+
+* **components:** describe state mirrors and CVA axes without naming a preview surface ([e52d54d](https://github.com/Brochin5671/math-beauty/commit/e52d54dd8dddbd64f78ca9e64d21c2c53ed6b84b))
+* resolve the parameterization markers and describe this repo, not a template ([580a580](https://github.com/Brochin5671/math-beauty/commit/580a58069a551e4bb47cde67a997dae430cc0011))
+
 ## [2.3.1](https://github.com/Brochin5671/math-beauty/compare/v2.3.0...v2.3.1) (2026-07-24)
 
 ### Fixes
