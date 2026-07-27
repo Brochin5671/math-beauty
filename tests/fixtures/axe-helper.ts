@@ -98,7 +98,16 @@ export async function waitForHydration(page: Page) {
    */
   await page.waitForFunction(
     () => {
-      if (document.querySelector("astro-island[ssr]")) return false;
+      /*
+       * Only islands that are actually rendered. A `client:visible` island inside a
+       * `display: none` wrapper never hydrates, by design, so its `ssr` attribute
+       * stays forever and waiting on it never resolves. `offsetParent` is null for
+       * anything in a `display: none` subtree, which is exactly the set to skip
+       */
+      const pendingIslands = Array.from(document.querySelectorAll("astro-island[ssr]")).filter(
+        (el) => (el as HTMLElement).offsetParent !== null,
+      );
+      if (pendingIslands.length > 0) return false;
       if (document.querySelector("[data-pending]")) return false;
       if (!document.querySelector("astro-island")) return true;
       const formBtns = Array.from(document.querySelectorAll("form button"));

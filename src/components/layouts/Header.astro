@@ -47,6 +47,18 @@ const currentPath = Astro.url.pathname;
     --header-height: 4rem;
   }
 </style>
+{
+  /*
+   * `client:visible`, not `client:load`, on all three islands. The desktop menu sits in
+   * a `hidden md:flex` wrapper and the two mobile variants in a `flex md:hidden` one, so
+   * on any given viewport one of them is `display: none`. IntersectionObserver does not
+   * fire for a `display: none` element, so each island hydrates only on the breakpoint
+   * that shows it, and crossing the breakpoint hydrates it then.
+   *
+   * This tracks the same `display` rule the layout already uses rather than repeating the
+   * breakpoint in a `client:media` query, which would be a second place for it to drift
+   */
+}
 <nav data-slot="header" class={cn(headerVariants({ position, variant }), className)}>
   <div class="container mx-auto flex h-16 items-center gap-6 px-4">
     <div class="flex items-center">
@@ -54,7 +66,12 @@ const currentPath = Astro.url.pathname;
     </div>
 
     <div class={itemsGroupVariants({ itemsAlign })}>
-      <HeaderDesktopMenu client:load items={items} currentPath={currentPath} itemsGap={itemsGap} />
+      <HeaderDesktopMenu
+        client:visible
+        items={items}
+        currentPath={currentPath}
+        itemsGap={itemsGap}
+      />
     </div>
 
     <div class="hidden md:flex md:items-center">
@@ -65,7 +82,7 @@ const currentPath = Astro.url.pathname;
       {
         mobileVariant === "drawer" ? (
           <HeaderMobile
-            client:load
+            client:visible
             items={items}
             currentPath={currentPath}
             mobileTriggerLabel={mobileTriggerLabel}>
@@ -88,7 +105,7 @@ const currentPath = Astro.url.pathname;
           </HeaderMobile>
         ) : (
           <HeaderMobileCollapse
-            client:load
+            client:visible
             items={items}
             currentPath={currentPath}
             mobileTriggerLabel={mobileTriggerLabel}>
