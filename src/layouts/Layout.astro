@@ -1,8 +1,9 @@
 ---
 import { GOOGLE_SITE_VERIFICATION } from "astro:env/server";
+import { localizedHTML as faviconTags } from "astro-favicons/middleware";
 import JsonLd from "@/components/seo/JsonLd.astro";
 import SEO, { type Props as SEOProps } from "@/components/seo/SEO.astro";
-import { pageMeta, site } from "@/lib/site-config";
+import { htmlLang, pageMeta, site } from "@/lib/site-config";
 import { buildOrganizationSchema, buildWebSiteSchema } from "@/lib/structured-data";
 import "../styles/global.css";
 
@@ -22,11 +23,24 @@ const webSiteSchema = buildWebSiteSchema({
 
 <!doctype html>
 <!-- Dark mode default; remove `class="dark"` for light, or add a runtime theme toggle (next-themes is installed) -->
-<html lang="en" class="dark">
+<html lang={htmlLang} class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Favicons, manifest, apple-touch-icon, msapplication tiles are injected by astro-favicons (see astro.config.mjs) -->
+    {
+      /* Favicons, manifest, apple-touch-icon and theme-color, emitted from the
+        set astro-favicons generates (configured in astro.config.mjs).
+
+        Injected explicitly rather than left to the integration's middleware,
+        which bails unless the response carries `X-Astro-Route-Type: page`. Astro 7
+        does not set that header, so nothing was injected: the generated files
+        shipped but no page linked them, which left the manifest unreachable and
+        the site with no theme-color. `localizedHTML` is the integration's own
+        documented escape hatch, so this stays in step with its config rather than
+        hardcoding a list of tags.
+        `tests/build/head-icons.test.ts` fails if these stop reaching the HTML */
+    }
+    <Fragment set:html={faviconTags(Astro.currentLocale)} />
     {
       /* Google Search Console: set the GOOGLE_SITE_VERIFICATION env var at build time after registering the domain (baked into this static head) */
     }
