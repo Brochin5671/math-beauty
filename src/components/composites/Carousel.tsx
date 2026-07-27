@@ -134,6 +134,17 @@ function Carousel({
         onKeyDownCapture={handleKeyDown}
         className={cn(carouselVariants({ orientation }), className)}
         role="region"
+        /*
+         * A named region, because an unnamed one is dropped from the accessibility tree
+         * and takes its `aria-roledescription` with it. The default is a fallback, not a
+         * good name: pass `aria-label` (or `aria-labelledby`) describing what the slides
+         * hold, e.g. "Customer testimonials".
+         *
+         * It deliberately does not say "carousel"; the roledescription below already
+         * does, and a reader would announce it twice. Emitted before `{...props}` so a
+         * caller's own label wins, which keeps this from being a breaking API change
+         */
+        aria-label={props["aria-labelledby"] ? undefined : "Slides"}
         aria-roledescription="carousel"
         data-slot="carousel"
         {...props}>
