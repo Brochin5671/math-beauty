@@ -1,10 +1,13 @@
-# CONFIGURE: the Content-Security-Policy below allows
-# `static.cloudflareinsights.com` (script-src) and `cloudflareinsights.com`
-# (connect-src) for Cloudflare Web Analytics' beacon. Web Analytics is
-# cookieless + free; the allowance is preemptive (no banner needed) and
-# covers the common case where consumers enable it in the Cloudflare
-# dashboard. If you have NOT enabled Web Analytics, remove both
-# `cloudflareinsights.com` references to tighten the CSP
+# Security + caching headers for STATIC responses, applied by the Cloudflare
+# adapter: at the edge in production and locally via `astro preview` /
+# `wrangler dev` (workerd). Plain `astro dev` does not apply them.
+# Server-rendered responses never reach the asset server, so src/middleware.ts
+# covers those from the same set in src/lib/security-headers.ts. Edit this file
+# and that one together; src/lib/security-headers.test.ts fails if they diverge.
+#
+# The CSP allows `static.cloudflareinsights.com` (script-src) and
+# `cloudflareinsights.com` (connect-src) for Cloudflare Web Analytics' cookieless
+# beacon; remove both if Web Analytics is disabled.
 #
 # No iframes are used, so framing is denied outright
 /*
