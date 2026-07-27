@@ -10,8 +10,8 @@ import { cn, cva, type VariantProps } from "@/lib/utils";
  * The hover value reveals through three routes because the bar can sit in
  * two places: `peer-focus-visible/viewport` covers the built-in bar (a
  * sibling after the Viewport), `in-focus-visible` covers a consumer-supplied
- * bar nested inside the Viewport, and `in-data-[state=hover]` mirrors the
- * real data-hovering reveal for the playground's forced hover state
+ * bar nested inside the Viewport, and `in-data-[state=hover]` reveals it when an
+ * ancestor carries data-state="hover", without a real pointer
  */
 const scrollBarVariants = cva(
   "group/scrollbar flex touch-none p-px select-none data-horizontal:h-2.5 data-horizontal:flex-col data-horizontal:border-t data-horizontal:border-t-transparent data-vertical:h-full data-vertical:w-2.5 data-vertical:border-l data-vertical:border-l-transparent",
@@ -64,7 +64,7 @@ function ScrollArea({ className, children, scrollbar = "always", ...props }: Scr
        */}
       <ScrollAreaPrimitive.Viewport
         data-slot="scroll-area-viewport"
-        className="peer/viewport min-h-0 w-full flex-1 rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] in-data-[state=focus]:ring-[3px] focus-visible:ring-ring/50 in-data-[state=focus]:ring-ring/50 focus-visible:outline-1 in-data-[state=focus]:outline-1">
+        className="peer/viewport min-h-0 w-full flex-1 rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] in-data-[state=focus]:ring-[3px] focus-visible:ring-ring/50 in-data-[state=focus]:ring-ring/50 focus-visible:focus-outline in-data-[state=focus]:focus-outline">
         {/*
          * Content is the element Base UI watches for size changes. Without it,
          * overflow is only re-measured on scroll or viewport resize, so content
@@ -101,8 +101,8 @@ function ScrollBar({
       className={cn(scrollBarVariants({ visibility }), className)}
       {...props}>
       {/*
-       * in-data-[state=hover] mirrors the real data-hovering brightening for
-       * the playground's forced hover state (the hybrid state model)
+       * in-data-[state=hover] applies the same brightening data-hovering does,
+       * when an ancestor carries data-state="hover" rather than on real hover
        */}
       <ScrollAreaPrimitive.Thumb
         data-slot="scroll-area-thumb"

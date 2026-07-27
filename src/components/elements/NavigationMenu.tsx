@@ -51,7 +51,7 @@ function NavigationMenuItem({
 }
 
 const navigationMenuTriggerStyle = cva(
-  "group/navigation-menu-trigger inline-flex h-9 w-max items-center justify-center px-4 py-2 text-sm font-medium transition-all outline-none focus-visible:ring-3 in-data-[state=focus]:ring-3 focus-visible:ring-ring/50 in-data-[state=focus]:ring-ring/50 focus-visible:outline-1 in-data-[state=focus]:outline-1 disabled:pointer-events-none disabled:opacity-50",
+  "group/navigation-menu-trigger inline-flex h-9 w-max items-center justify-center px-4 py-2 text-sm font-medium transition-all outline-none focus-visible:ring-3 in-data-[state=focus]:ring-3 focus-visible:ring-ring/50 in-data-[state=focus]:ring-ring/50 focus-visible:focus-outline in-data-[state=focus]:focus-outline disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -131,7 +131,7 @@ function NavigationMenuPositioner({
 }
 
 const navigationMenuLinkStyle = cva(
-  "flex items-center gap-1.5 p-2 text-sm transition-all outline-none focus-visible:ring-3 in-data-[state=focus]:ring-3 focus-visible:ring-ring/50 in-data-[state=focus]:ring-ring/50 focus-visible:outline-1 in-data-[state=focus]:outline-1 in-data-[slot=navigation-menu-content]:rounded-sm [&_svg:not([class*='size-'])]:size-4",
+  "flex items-center gap-1.5 p-2 text-sm transition-all outline-none focus-visible:ring-3 in-data-[state=focus]:ring-3 focus-visible:ring-ring/50 in-data-[state=focus]:ring-ring/50 focus-visible:focus-outline in-data-[state=focus]:focus-outline in-data-[slot=navigation-menu-content]:rounded-sm [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
