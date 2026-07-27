@@ -70,11 +70,9 @@ export default defineConfig({
       ],
     }),
     react(),
-    // Playground is an internal design-showcase surface, not a public page;
-    // exclude from sitemap so search engines don't crawl it
     sitemap({
-      // Exclude the playground showcase and the /404 + /500 error pages
-      filter: (page) => !page.includes("/playground") && !/\/(404|500)\/?$/.test(page),
+      // Exclude the /404 + /500 error pages
+      filter: (page) => !/\/(404|500)\/?$/.test(page),
       // Every entry is stamped with the build time as a baseline lastmod. For
       // per-page accuracy, look `item.url` up against a content date here and fall
       // back to the build date
