@@ -87,8 +87,6 @@ export async function disableAnimations(page: Page) {
  * convention auto-waits via Playwright actionability
  */
 export async function waitForHydration(page: Page) {
-  const hasIslands = await page.evaluate(() => document.querySelector("astro-island") !== null);
-  if (!hasIslands) return;
   /*
    * Three signals composed: Astro island lifecycle complete (`ssr` attr cleared),
    * every lazy boundary resolved (no `data-pending` placeholder left standing),
@@ -102,6 +100,7 @@ export async function waitForHydration(page: Page) {
     () => {
       if (document.querySelector("astro-island[ssr]")) return false;
       if (document.querySelector("[data-pending]")) return false;
+      if (!document.querySelector("astro-island")) return true;
       const formBtns = Array.from(document.querySelectorAll("form button"));
       return formBtns.every((btn) => !(btn as HTMLButtonElement).disabled);
     },
