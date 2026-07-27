@@ -4,11 +4,10 @@
   "main": "@astrojs/cloudflare/entrypoints/server",
   "compatibility_date": "2026-06-17",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-  // CONFIGURE: this demo is served from its *.workers.dev URL, so that route stays on
-  // Once you bind a custom domain (Settings -> Domains & Routes -> Custom Domains), lock
-  // the site to it by adding "workers_dev": false here. On Wrangler 4.44+ "preview_urls"
-  // then default-matches workers_dev (off); add "preview_urls": true to keep per-branch
-  // preview URLs
+  // Served from its *.workers.dev URL, so that route stays on. To lock the site to a
+  // custom domain instead (Settings -> Domains & Routes -> Custom Domains), add
+  // "workers_dev": false here. On Wrangler 4.44+ "preview_urls" then default-matches
+  // workers_dev and goes off too; add "preview_urls": true to keep per-branch preview URLs
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",

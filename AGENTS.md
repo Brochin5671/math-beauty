@@ -107,11 +107,56 @@ Humans keep using `pnpm dev` (foreground). These flags are for tooling that need
 | wrangler | Cloudflare Workers CLI |
 | semantic-release | Automated version + tag + GitHub Release |
 
+### Comments
+- One-line `//` by default. Four lines or more becomes a `/* */` block **where the format has one**: YAML, shell and `.env` have no block form, so there the rule is only the style
+- No trailing periods, plain wording
+- **Wrap at 100 columns**, which is what `biome.json` and `.prettierrc.json` are both set to. Neither tool reflows a comment, so nothing enforces this: a 140-column comment survives `pnpm check` untouched. Reflow the comments you edit, not the whole file
+- A **module's** file-level block opens `/** @fileoverview `. The tag is what distinguishes a description of the file from a description of whatever declaration follows it, and it needs `/**` rather than `/*` because a plain block carries no JSDoc tags. Where a `CONFIGURE:` marker leads the block, the marker stays on the first line and the tag goes on the paragraph below it. **Test files use a plain `/* */` block**: nothing imports them, so there is no declaration for the tag to disambiguate from and no tooling reading it
+- A property whose default lives only in the destructuring gets `@default`. Prose saying "defaults to 3" beside a `rows = 3` restates the code; the tag is what tooling reads. Function parameters take `@param [name=value]` instead, which is the form JSDoc defines for them
+- A semicolon joining two related clauses is fine, and is one of the em-dash replacements below. What to avoid is a comment built out of stacked clauses: if it needs three, it needs a block
+- Applied going forward, to the files you touch. Do not sweep the tree: a script that inserts `@fileoverview` mechanically splices it mid-sentence wherever the first paragraph wraps
+
+### Routing
+- **Always use trailing slashes on internal links**: `<Link href="/contact/">`, never
+  `<Link href="/contact">`. Production Cloudflare 308-redirects `/about` to `/about/`
+  and local dev does not, so a missing slash 404s in dev and on branch previews.
+
+### Known non-issues
+- Biome flags unused imports and destructured `Astro.props` in `.astro` files: its
+  analyzer reads the frontmatter as a TS module and does not trace into the template.
+  The `overrides` block in `biome.json` silences it. Measured at Biome 2.5.4:
+  removing `noUnusedImports` and `noUnusedVariables` from that block produces 138
+  diagnostics across 15 `.astro` files, none of them real. Re-measure the same way
+  on the next Biome minor before assuming the override is still needed.
+
 ## Output Preferences
 - Tables for structured comparisons
 - Bullet lists for enumerated items
 - Code blocks for reviewable content
 - Summary first, details on request
+
+## Test layers
+
+Extension decides the Vitest project, not directory: `.test.ts` is `unit`,
+is `build`. A `.spec.ts` under `tests/build/` matches no project and silently never runs.
+
+A test file may sit in `src/pages/`, but only with an `_` prefix: Astro excludes
+`_`-prefixed files from routing, so `src/pages/_robots.txt.test.ts` runs as a test
+while the same file without the prefix would build as a route.
+
+| Layer | Command | What belongs in it |
+|---|---|---|
+| unit | `pnpm test:unit` | Pure functions and modules; anything with no DOM |
+| components | `pnpm test:components` | React components under happy-dom: props, variants, ARIA wiring, user events |
+| build | `pnpm test:build` | Assertions about the built output in `dist/` |
+| E2E + a11y | `pnpm test:e2e` | Whole-page behaviour, navigation, axe scans |
+| integration | `pnpm test:e2e` | HTTP-only specs: response headers, API contracts. Its own Playwright project (`tests/integration/`, an `APIRequestContext` rather than a page), so it runs once instead of across the browser projects |
+
+`tests/fixtures/site-pages.ts` is the single page registry: adding a page there
+confers smoke, a11y, SEO, emulation and sitemap coverage at once.
+
+Playwright runs against the BUILT output, so a stale `dist/` silently tests the
+wrong thing. Use `pnpm preflight:build` rather than a bare `pnpm test:build`.
 
 ## Additional Documentation
 
@@ -120,11 +165,6 @@ Humans keep using `pnpm dev` (foreground). These flags are for tooling that need
 - `CONTRIBUTING.md` - workflow, branch naming, commit format
 
 ## Mandatory Directives
-
-### Parameterization markers (IMPORTANT)
-`// CONFIGURE:` comment markers flag remaining project-specific swap points
-(e.g. the deployed site URL). Do not remove a marker without setting its
-value. Add new markers when introducing new project-specific values.
 
 ### Staleness Prevention (CRITICAL)
 When codebase changes occur, update ALL affected artifacts BEFORE stopping:
@@ -157,9 +197,10 @@ Three similar lines is better than a premature abstraction.
 ### No Phantom References
 Only reference skills, rules, hooks, or doc pointers that actually exist.
 
-### Library vs Consumer Boundary (IMPORTANT)
-- Library code: `src/components/{elements,composites,forms,layouts,blocks,seo}/`, `src/lib/{utils,seo,structured-data}.ts`, `src/styles/global.css` (the layer + tokens part). Treat as stable; modify with care.
-- App code: `src/pages/`, `src/components/custom/` (FractalViewer), `src/lib/fractals/`, `src/lib/site-config.ts`, brand parameterization points. Edit freely.
+### Library vs App Boundary (IMPORTANT)
+- Library code: `src/components/{elements,composites,forms,layouts,blocks,seo}/`, `src/lib/{utils,seo,structured-data,security-headers,url}.ts`, `src/middleware.ts`, `src/styles/global.css` (the layer + tokens part). Treat as stable; modify with care.
+  `src/middleware.ts` is the only thing putting security headers on server-rendered responses, so deleting it is a security change rather than a cleanup.
+- App code: `src/pages/`, `src/components/custom/` (FractalViewer), `src/lib/fractals/`, `src/lib/site-config.ts`. Edit freely.
 
 When asked for changes, default to app code. Modify library code
 only when the change is genuinely a library improvement (and document it
@@ -194,7 +235,7 @@ When building UI, reach for library primitives in `src/components/{elements,comp
 
 **When workarounds are warranted:**
 - The library primitive truly does not fit (one-off animation, an exact visual that cannot be expressed via existing variants).
-- Adding a variant would over-fit the primitive to a single consumer.
+- Adding a variant would over-fit the primitive to a single call site.
 - The pattern is one-off enough that extending the library would be premature abstraction.
 
 **When you do reach for raw HTML/Tailwind:** flag it explicitly in your response so the user can decide whether to (a) extend the existing primitive, (b) introduce a new primitive, or (c) accept the workaround as a deliberate exception. Silent workarounds erode the library; tracked workarounds let the library grow.

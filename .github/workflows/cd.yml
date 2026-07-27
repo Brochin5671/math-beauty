@@ -166,7 +166,7 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # fail the deploy if a scaffold placeholder survived into the built output (security.txt
+      # fail the deploy if a placeholder value survived into the built output (security.txt
       # is the one intentional placeholder, excluded)
       - name: Guard against placeholder leak
         run: |

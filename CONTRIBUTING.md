@@ -290,13 +290,22 @@ publishing to npm.
 
 ## Adding components
 
-Use the shadcn CLI for primitives:
+Always start from the shadcn CLI rather than hand-rolling a primitive:
 
 ```bash
 pnpm dlx shadcn@latest add tooltip select navigation-menu
 ```
 
-Drops files into `src/components/elements/`, installs Base UI peer deps (`@base-ui/react`).
+It installs the Base UI peer deps (`@base-ui/react`) and writes to
+`src/components/ui/`, which is a **staging area**, not a home. `components.json`
+points its `ui` alias there deliberately: the CLI writes kebab-case files and the
+library is PascalCase, so pointing it at `src/components/elements/` would produce
+`elements/button.tsx` beside `elements/Button.tsx`, with generated imports
+resolving to the duplicate.
+
+So the flow is: `add` into `ui/`, adapt the component into `elements/`,
+`composites/` or `forms/` following the conventions there, then delete the staged
+copy. `src/components/staged-primitives.test.ts` fails if one is left behind.
 
 For block components and layout primitives, follow the patterns in
 existing files.

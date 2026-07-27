@@ -32,18 +32,13 @@ export default defineConfig({
       provider: "v8",
       include: ["src/lib/**", "src/components/**/*.tsx"],
       // render.ts is canvas glue whose loop cannot run under happy-dom (no 2D context)
-      exclude: [
-        "src/components/**/*.astro",
-        "**/*.test.*",
-        "**/playground/**",
-        "src/lib/fractals/render.ts",
-      ],
-      // CONFIGURE: a baseline, not a mandate. Each floor sits a few points under this
-      // codebase's measured coverage, so refactors keep headroom but a real regression fails
-      // the CI `tests` job (which runs `test:coverage`). Re-measure with `pnpm test:coverage`
-      // and reset for your own code; a scaffold that drops features starts lower until you add
-      // tests. Aggregate-only for now; revisit perFile + raising the floor once the suite
-      // stabilizes
+      exclude: ["src/components/**/*.astro", "**/*.test.*", "src/lib/fractals/render.ts"],
+      /*
+       * Each floor sits a few points under measured, so a refactor keeps headroom while
+       * a real regression fails the CI `tests` job. Re-measure with `pnpm test:coverage`
+       * after adding a subsystem and say what the new numbers are. Aggregate-only for
+       * now; revisit perFile once the suite stabilizes
+       */
       thresholds: {
         statements: 78,
         branches: 74,

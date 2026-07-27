@@ -4,11 +4,11 @@ import { describe, expect, it } from "vitest";
 import { apiEndpoints } from "../fixtures/api-endpoints";
 
 /*
- * Catches the "consumer added an API route under src/pages/api/ but forgot
+ * Catches the "an API route was added under src/pages/api/ but nobody updated
  * to update apiEndpoints" failure mode (and vice versa) so every endpoint
  * has at least one matching fixture entry to drive smoke + behavioral tests
  *
- * If the consumer removes APIs entirely (deletes src/pages/api/), set
+ * With no APIs at all (no src/pages/api/), set
  * apiEndpoints = [] in the fixture and this test still passes
  */
 
