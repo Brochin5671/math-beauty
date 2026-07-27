@@ -138,7 +138,18 @@ function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="item-title"
       className={cn(
-        "line-clamp-1 flex w-fit items-center gap-2 text-sm leading-snug font-medium underline-offset-4",
+        /*
+         * No line-clamp here, deliberately. A clamp needs `display: -webkit-box` and
+         * this row is `flex`, so the two fight over `display` and the clamp loses: with
+         * `line-clamp-1` present a long title measured 30 rendered lines. Children are
+         * flex items, so they cannot be wrapped in one clamping span either without
+         * collapsing the gap between them.
+         *
+         * `min-w-0` is what makes truncation possible instead: a flex item defaults to
+         * `min-width: auto` and refuses to shrink below its content, so a child that
+         * should truncate carries `truncate` and this lets it
+         */
+        "flex w-fit min-w-0 items-center gap-2 text-sm leading-snug font-medium underline-offset-4",
         className,
       )}
       {...props}
