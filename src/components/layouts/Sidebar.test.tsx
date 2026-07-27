@@ -82,7 +82,7 @@ describe("Sidebar", () => {
   });
 
   it("renders the mobile sheet branch on a narrow viewport", async () => {
-    const reset = setViewportWidth(375);
+    const viewport = setViewportWidth(375);
     try {
       const user = userEvent.setup();
       render(fixture());
@@ -92,7 +92,7 @@ describe("Sidebar", () => {
       const sheet = await screen.findByRole("dialog");
       expect(sheet).toHaveAttribute("data-mobile", "true");
     } finally {
-      reset();
+      viewport.restore();
     }
   });
 });
