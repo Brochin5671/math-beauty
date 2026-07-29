@@ -19,10 +19,18 @@ const webSiteSchema = buildWebSiteSchema({
   name: site.name,
   url: site.url,
 });
+
+/*
+ * Dark mode default; remove `class="dark"` from the <html> tag below for light, or add a
+ * runtime theme toggle (next-themes is installed)
+ *
+ * Lives here rather than beside the tag because an <!-- --> comment in an Astro template
+ * is markup and ships to the reader, and an expression comment cannot sit between the
+ * doctype and <html>
+ */
 ---
 
 <!doctype html>
-<!-- Dark mode default; remove `class="dark"` for light, or add a runtime theme toggle (next-themes is installed) -->
 <html lang={htmlLang} class="dark">
   <head>
     <meta charset="UTF-8" />
