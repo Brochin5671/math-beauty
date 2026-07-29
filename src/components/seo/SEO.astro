@@ -71,13 +71,13 @@ const imageURL = buildAbsoluteURL(image, Astro.site);
 <title>{metaTitle}</title>
 <meta name="description" content={description} />
 
-<!-- Canonical URL -->
+{/* Canonical URL */}
 <link rel="canonical" href={canonicalURL} />
 
-<!-- Robots -->
+{/* Robots */}
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 
-<!-- Open Graph -->
+{/* Open Graph */}
 <meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content={siteSeo.locale} />
 <meta property="og:title" content={metaTitle} />
@@ -102,7 +102,7 @@ const imageURL = buildAbsoluteURL(image, Astro.site);
 {ogType === "article" && author && <meta property="article:author" content={author} />}
 {ogType === "article" && tags.map((tag) => <meta property="article:tag" content={tag} />)}
 
-<!-- Twitter Card -->
+{/* Twitter Card */}
 <meta name="twitter:card" content={twitterCard} />
 {siteSeo.twitterHandle && <meta name="twitter:site" content={siteSeo.twitterHandle} />}
 {siteSeo.twitterHandle && <meta name="twitter:creator" content={siteSeo.twitterHandle} />}
