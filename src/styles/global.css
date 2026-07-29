@@ -740,3 +740,24 @@
 :root astro-island {
   display: block;
 }
+
+/*
+ * Focus-indicator floor for forced-colors mode
+ *
+ * Twenty primitives carry `outline-none` and show focus with a ring. A ring is a
+ * box-shadow, which forced colors does not paint, and `outline-none` pins
+ * `--tw-outline-style: none` so any outline utility added on top draws nothing. Result:
+ * no visible focus on those controls in High Contrast Mode, and axe does not evaluate
+ * focus-visible styling so nothing catches it
+ *
+ * Style and width only: offset would push `focus-outline-inset` and `focus-outline-image`
+ * outside the clip they exist to stay inside, and forced colors substitutes its own color.
+ * Unlayered so it beats the layered `outline-none`. A floor, not a replacement for the
+ * per-call-site `focus-outline*` utilities
+ */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-style: solid;
+    outline-width: 2px;
+  }
+}
