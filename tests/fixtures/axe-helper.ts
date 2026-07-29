@@ -99,13 +99,25 @@ export async function waitForHydration(page: Page) {
   await page.waitForFunction(
     () => {
       /*
-       * Only islands that are actually rendered. A `client:visible` island inside a
-       * `display: none` wrapper never hydrates, by design, so its `ssr` attribute
-       * stays forever and waiting on it never resolves. `offsetParent` is null for
-       * anything in a `display: none` subtree, which is exactly the set to skip
+       * Only islands that are actually rendered AND in the viewport. Two ways a
+       * `client:visible` island legitimately never hydrates, and waiting on either never
+       * resolves: inside a `display: none` wrapper (`offsetParent` is null for anything in
+       * that subtree), or below the fold, where not hydrating is the whole point of the
+       * directive. The second one cost a ten-second timeout on an a11y scan with no
+       * violation to show for it
+       *
+       * The `[data-pending]` check below stays document-wide on purpose: a pending marker
+       * on a below-the-fold island is a convention violation (do not add one), and keeping
+       * this strict is what surfaces it instead of silently scanning the fallback
        */
+      const inViewport = (el: Element) => {
+        const r = el.getBoundingClientRect();
+        return (
+          r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth
+        );
+      };
       const pendingIslands = Array.from(document.querySelectorAll("astro-island[ssr]")).filter(
-        (el) => (el as HTMLElement).offsetParent !== null,
+        (el) => (el as HTMLElement).offsetParent !== null && inViewport(el),
       );
       if (pendingIslands.length > 0) return false;
       if (document.querySelector("[data-pending]")) return false;
