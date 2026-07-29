@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.3.3](https://github.com/Brochin5671/math-beauty/compare/v2.3.2...v2.3.3) (2026-07-29)
+
+### Fixes
+
+* **a11y:** restore a focus indicator in forced-colors mode ([85a26bb](https://github.com/Brochin5671/math-beauty/commit/85a26bb22529519f97cc90232ea36cf94068ea6b))
+* **a11y:** stop the browser restoring hidden inputs behind React ([3b010a0](https://github.com/Brochin5671/math-beauty/commit/3b010a0c9fbe9f77d1fd7d79039f7903dc4f28de))
+* **build:** keep prose comments out of the shipped HTML ([30f6de2](https://github.com/Brochin5671/math-beauty/commit/30f6de2ebd5f7b9604a257f4d10cdb91b8c6cc4d))
+
 ## [2.3.2](https://github.com/Brochin5671/math-beauty/compare/v2.3.1...v2.3.2) (2026-07-27)
 
 ### Fixes
