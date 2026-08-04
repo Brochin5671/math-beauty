@@ -51,7 +51,12 @@ jobs:
     # containers. The 2-4 min `playwright install --with-deps` cost is
     # the trade-off for that guarantee
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 20, not 10: the Playwright install is normally 45s to 1m51s but has been
+    # measured at 9m15s when the apt mirror is slow, and that spike alone once
+    # pushed this job past 10 and cancelled it. A cancelled job skips deploy AND
+    # release, so a slow mirror costs a version. The tests themselves run 2.8 to
+    # 4.6 min, so 20 covers the worst install on top of the worst run
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
@@ -105,7 +110,9 @@ jobs:
       cancel-in-progress: true
     # See e2e job for the bare-runner rationale
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # 20 for the same reason as the e2e job: these shards install Playwright too,
+    # so the same mirror spike reaches them. They run 2.5 to 3.2 min each
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
