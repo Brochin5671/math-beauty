@@ -14,7 +14,7 @@ const switchVariants = cva(
    * in-data-[state=focus] paints the focus ring when an ancestor carries
    * data-state="focus", so a static render can show the state without real focus
    *
-   * Properties are enumerated, not `transition-all`: that animates outline-width too, from
+   * Properties are enumerated, not `transition-[background-color,border-color,box-shadow]`: that animates outline-width too, from
    * the CSS initial 3px down to 2px, so a computed-style read after focus() catches the
    * start value. Reduced motion does not settle it (the global.css hatch is 0.001ms, not 0s)
    */
