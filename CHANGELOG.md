@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.4.0](https://github.com/Brochin5671/math-beauty/compare/v2.3.4...v2.4.0) (2026-08-04)
+
+### Features
+
+* **ci:** scan dependencies on a schedule, not only on a pull request ([c066e9d](https://github.com/Brochin5671/math-beauty/commit/c066e9d20f792c3bc8ba4764e6a2b4c8bcacbddb))
+
 ## [2.3.4](https://github.com/Brochin5671/math-beauty/compare/v2.3.3...v2.3.4) (2026-08-04)
 
 ### Fixes
