@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.4.1](https://github.com/Brochin5671/math-beauty/compare/v2.4.0...v2.4.1) (2026-08-04)
+
+### Fixes
+
+* **ci:** give the Playwright jobs room for a slow install ([24d693a](https://github.com/Brochin5671/math-beauty/commit/24d693ae7c54f3bbebad0f9cbb074e234d2864e1))
+
 ## [2.4.0](https://github.com/Brochin5671/math-beauty/compare/v2.3.4...v2.4.0) (2026-08-04)
 
 ### Features
