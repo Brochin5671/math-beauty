@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.3.4](https://github.com/Brochin5671/math-beauty/compare/v2.3.3...v2.3.4) (2026-08-04)
+
+### Fixes
+
+* **a11y:** give the light palette values that hold ([6a1889d](https://github.com/Brochin5671/math-beauty/commit/6a1889de6d9d2d5b36778c71e713acff4f5671a3)), closes [#9333ea](https://github.com/Brochin5671/math-beauty/issues/9333ea)
+* **a11y:** keep a focused slide in view when the arrow keys scroll ([9508f8c](https://github.com/Brochin5671/math-beauty/commit/9508f8c59c8efbc2b6fdbcd0188d214c73f71037))
+* **a11y:** narrow transition-all where it animates a focus indicator ([0e2f8f2](https://github.com/Brochin5671/math-beauty/commit/0e2f8f2ceffa672d8e5abd3067762f0d2a838ebb))
+* **deps:** raise fast-uri and pin undici above their advisories ([bac1b89](https://github.com/Brochin5671/math-beauty/commit/bac1b89b99eb826e12834546b7066f91a654de73))
+
 ## [2.3.3](https://github.com/Brochin5671/math-beauty/compare/v2.3.2...v2.3.3) (2026-07-29)
 
 ### Fixes
