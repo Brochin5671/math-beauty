@@ -1,0 +1,61 @@
+# CONFIGURE: the schedule below. Weekly suits a project that ships often; a
+# dormant one is the case this exists for, so do not make it rarer.
+
+name: Scheduled security scan
+
+# The CVE scan in ci.yml only runs on a pull request, which answers "did this
+# change introduce a vulnerability" but never "did one appear in code nobody
+# touched". Advisories are published against lockfiles that have not moved, so
+# a repo with no open PR accumulates findings silently until someone opens one.
+#
+# Dependabot does not close that gap: it raises version updates rather than
+# failing on an advisory, and a transitive dependency needs an `overrides:`
+# entry, which it will not author.
+#
+# CAVEAT: GitHub disables scheduled workflows in a repo with no commit activity
+# for 60 days, which is the same dormancy this guards against. It emails first
+# and the workflow can be re-enabled from the Actions tab, so treat that notice
+# as the signal rather than ignoring it.
+on:
+  schedule:
+    # Off the hour: scheduled runs queue on the hour and are delayed under load
+    - cron: "17 6 * * 1"
+  # So the scan can be run on demand without waiting for Monday
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  deps:
+    name: Vulnerabilities (Trivy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      # Trivy's apt repo serves only the latest release and does not support
+      # version pinning (older versions are pruned when a new one ships), so we
+      # install latest - and run latest locally too, keeping CI + dev in lockstep
+      # on the current release; see https://github.com/aquasecurity/trivy/discussions/10775
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget gnupg
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+          trivy --version
+
+      # Match the script invoked by preflight and by ci.yml, single source of truth
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Trivy fs scan (HIGH+CRITICAL)
+        run: pnpm run check:deps
