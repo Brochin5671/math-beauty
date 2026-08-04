@@ -199,22 +199,33 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  /* Fractal violet accent. White foreground clears WCAG AA on primary buttons.
-     The same values live in `.dark` below */
-  --primary: #a855f7;
-  --primary-foreground: #0a0a0a;
-  --ring: #a855f7;
+  /*
+     Fractal violet accent. The site is dark-only, so this block is never rendered and has never
+     been scanned: at #a855f7 it is 3.96:1 on white, which clears the 3:1 a fill edge needs but
+     fails the 4.5:1 `text-primary` needs. #9333ea is 5.38:1.
+
+     `--primary` carries three roles at once: `text-primary`, `bg-primary` (whose own edge is the
+     only boundary a solid button has), and `--ring`. So each block names its own value and
+     `--primary-foreground` flips with it. The `.dark` block below keeps the brand violet
+  */
+  --primary: #9333ea;
+  --primary-foreground: #ffffff;
+  --ring: #9333ea;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  /* hex, not oklch: axe-core 4.11 under-reads oklch, and this sits at a 4.73:1 margin on white */
+  --muted-foreground: #6b6b6b;
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --warning: oklch(0.7 0.18 85);
-  --success: oklch(0.62 0.16 162);
+  /* the status variants put each of these on a 10% tint of itself, which is the failing pair.
+     On the page alone a lighter value would pass and still fail there */
+  --destructive: #c40008;
+  --warning: #7a5200;
+  --success: #00794d;
   --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  /* a control boundary, so 3:1 rather than the decorative --border above */
+  --input: #8a9199;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
