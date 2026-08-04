@@ -90,6 +90,20 @@ function Carousel({
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
+      /*
+       * WCAG 2.2 SC 2.4.11. This handler scrolls the track without moving focus, so a focused
+       * control inside a slide gets translated out of the clipped viewport and stays focused:
+       * the reader's focus is then on something they cannot see, and a clipped viewport means
+       * it is not merely off-screen but hidden.
+       *
+       * Returning early rather than moving focus onto the new slide: a slide has no guaranteed
+       * focusable content, so there is often nothing to move focus to, and hijacking the arrows
+       * to relocate focus is its own surprise. The arrow keys still drive the carousel from the
+       * region itself and from the previous and next buttons, which is where a reader operating
+       * it by keyboard actually is
+       */
+      if ((event.target as Element).closest?.('[data-slot="carousel-item"]')) return;
+
       if (event.key === "ArrowLeft") {
         event.preventDefault();
         scrollPrev();
