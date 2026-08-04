@@ -29,6 +29,12 @@ overrides:
   # once the flagged transitive bumps past it. Reviewed 2026-07-26
   js-yaml: ^4.3.0 # GHSA-52cp-r559-cp3m (js-yaml <4.3.0, via astro)
   svgo: ^4.0.2 # GHSA-2p49-hgcm-8545 (svgo <4.0.2, via the astro build)
-  fast-uri: ^3.1.4 # GHSA-v2hh-gcrm-f6hx + 4c8g-83qw-93j6 (via @astrojs/check, commitlint)
+  fast-uri: ^3.1.5 # GHSA-v2hh-gcrm-f6hx + 4c8g-83qw-93j6 + CVE-2026-18446 (via @astrojs/check, commitlint)
   yaml: ^2.8.3 # GHSA-48c2-rrv3-qjmp (yaml <2.8.3, via @astrojs/check)
   postcss: ^8.5.18 # GHSA-r28c-9q8g-f849 (postcss <8.5.18, via astro-expressive-code and vite)
+  # CVE-2026-13697 (HIGH): undici's cache interceptor mishandles a malformed
+  # Cache-Control private directive. https://avd.aquasec.com/nvd/cve-2026-13697
+  # Transitive only, via the Cloudflare tooling; nothing here imports it directly
+  # and the deployed runtime is workerd rather than Node. Caret so it cannot
+  # drift onto the v8 major inside those internals
+  undici: ^7.29.0
