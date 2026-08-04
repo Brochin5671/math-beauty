@@ -19,10 +19,10 @@ import * as cheerio from "cheerio";
 import { describe, expect, it } from "vitest";
 import { distPath, sitePages } from "../fixtures/site-pages";
 
-/** Elements ARIA gives no role, so an accessible name on them is prohibited */
-const ROLELESS = ["time", "span", "div"] as const;
-
-/** Only `time` is asserted for now; span and div carry roles once given one */
+/**
+ * Elements ARIA gives no role, so an accessible name on them is prohibited. Only `time` is
+ * asserted: a span or div carries a role once given one, so neither is unconditionally an offender
+ */
 const NAMEABLE_ONLY_WITH_ROLE = ["time"] as const;
 
 function load(urlPath: string) {
@@ -36,7 +36,9 @@ describe("prohibited ARIA attributes", () => {
    */
   it("has pages to scan", () => {
     expect(sitePages.length).toBeGreaterThan(0);
-    expect(ROLELESS.length).toBeGreaterThan(0);
+    // The array the loops below actually iterate. Guarding a different one left every case
+    // vacuous whenever this emptied, while the guard still read as a pass
+    expect(NAMEABLE_ONLY_WITH_ROLE.length).toBeGreaterThan(0);
   });
 
   for (const { path, name } of sitePages) {
