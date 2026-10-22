@@ -42,7 +42,7 @@ body:
     attributes:
       label: Environment
       description: Browser, OS, Node version (`node --version`), pnpm version (`pnpm --version`).
-      placeholder: e.g., Chrome 130, macOS 14.5, Node 22.21.0, pnpm 10.33.0
+      placeholder: e.g., Chrome 130, macOS 14.5, Node 24.22.1, pnpm 10.33.0
   - type: textarea
     id: logs
     attributes:

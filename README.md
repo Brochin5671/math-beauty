@@ -14,7 +14,7 @@ A website for viewing escape fractals such as the [Mandelbrot Set](https://en.wi
 
 ## Development
 
-Requires Node 24+ and pnpm 11+.
+Requires Node 24.22.1 or newer and pnpm 11+.
 
 ```bash
 git clone https://github.com/Brochin5671/math-beauty.git
