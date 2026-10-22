@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 Releases are managed by [semantic-release](https://github.com/semantic-release/semantic-release) using the [conventionalcommits](https://www.conventionalcommits.org) preset; new entries are auto-generated from commit messages.
 
+## [2.4.2](https://github.com/Brochin5671/math-beauty/compare/v2.4.1...v2.4.2) (2026-10-22)
+
+### Fixes
+
+* **deps:** patch the HIGH and CRITICAL dependency advisories ([d0050bd](https://github.com/Brochin5671/math-beauty/commit/d0050bd60bcdce6a3c84656a0243fa82b8f0befd))
+* **deps:** require Node 24.22.1, the October 2026 security release ([24b423d](https://github.com/Brochin5671/math-beauty/commit/24b423de85013515dc7f74939285c7abd10b1092))
+
 ## [2.4.1](https://github.com/Brochin5671/math-beauty/compare/v2.4.0...v2.4.1) (2026-08-04)
 
 ### Fixes
