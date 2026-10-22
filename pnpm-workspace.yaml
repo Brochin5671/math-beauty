@@ -26,15 +26,30 @@ overrides:
   '@cloudflare/vite-plugin': ^1.42.1
   # Dev/build-time audit advisories, no production impact (runtime is workerd)
   # Caret so pnpm unifies upward without downgrading a healthy copy; drop each
-  # once the flagged transitive bumps past it. Reviewed 2026-07-26
-  js-yaml: ^4.3.0 # GHSA-52cp-r559-cp3m (js-yaml <4.3.0, via astro)
-  svgo: ^4.0.2 # GHSA-2p49-hgcm-8545 (svgo <4.0.2, via the astro build)
-  fast-uri: ^3.1.5 # GHSA-v2hh-gcrm-f6hx + 4c8g-83qw-93j6 + CVE-2026-18446 (via @astrojs/check, commitlint)
+  # once the flagged transitive bumps past it. Reviewed 2026-10-22
+  # js-yaml: GHSA-52cp-r559-cp3m + 5p4m-2wfm-xmqj + CVE-2026-84375 (via astro helpers, commitlint)
+  js-yaml: ^4.3.2
+  # fast-uri: GHSA-v2hh-gcrm-f6hx + 4c8g-83qw-93j6, CVE-2026-18446, 75899, 75931, 75975,
+  # 76172 and 84292 (SSRF and host confusion, via @astrojs/check and commitlint)
+  fast-uri: ^3.1.7
   yaml: ^2.8.3 # GHSA-48c2-rrv3-qjmp (yaml <2.8.3, via @astrojs/check)
   postcss: ^8.5.18 # GHSA-r28c-9q8g-f849 (postcss <8.5.18, via astro-expressive-code and vite)
+  browserslist: ^4.28.7 # CVE-2026-73088 + 73089 (HIGH, DoS, via @babel/core in plugin-react)
+  nanoid: ^3.3.18 # CVE-2026-67213 (HIGH, DoS in ID generation, via postcss)
+  smol-toml: ^1.7.1 # CVE-2026-85730 (HIGH, DoS on bad TOML, via @astrojs/internal-helpers)
+  source-map-js: ^1.2.2 # CVE-2026-93749 (HIGH, DoS on bad maps, via postcss, tailwind)
+  # CVE-2026-112942 (HIGH): launch-editor command injection in the vite dev server.
+  # The adapter and @astrojs/react resolve their own older vite; this merges them
+  vite: ^8.3.3
+  # CVE-2026-92708 + GHSA-mcm9-63f2-9j32, r9w8-h9r3-54w4, x5rw-q4pp-hg5g (HIGH):
+  # devalue memory disclosure and DoS, via @astrojs/react. Scoped to v5, since
+  # astro itself takes devalue 6 and a bare key would pull it back
+  'devalue@^5': ^5.9.3
   # CVE-2026-13697 (HIGH): undici's cache interceptor mishandles a malformed
   # Cache-Control private directive. https://avd.aquasec.com/nvd/cve-2026-13697
+  # CVE-2026-19534 + 84961 (HIGH): WebSocket subprotocol DoS and a BalancedPool
+  # TLS validation bypass, fixed in 7.29.1
   # Transitive only, via the Cloudflare tooling; nothing here imports it directly
   # and the deployed runtime is workerd rather than Node. Caret so it cannot
   # drift onto the v8 major inside those internals
-  undici: ^7.29.0
+  undici: ^7.29.1
