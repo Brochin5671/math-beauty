@@ -1,13 +1,23 @@
 # Trivy CVE allowlist. AGENTS.md policy: each entry needs a rationale + review-by date.
 # When the upstream fix lands (or the review-by date arrives), audit and remove.
 
-# GHSA-f88m-g3jw-g9cj (HIGH): sharp inherits libvips CVEs (CVE-2026-33327,
-# CVE-2026-33328, CVE-2026-35590, CVE-2026-35591).
-# https://github.com/advisories/GHSA-f88m-g3jw-g9cj
-# Our direct sharp is 0.35.3 (patched). The flagged copies are dev/build-only
-# transitives: 0.34.5 (miniflare, Cloudflare dev tooling) and 0.33.5 (favilib
-# via astro-favicons, build-time favicon generation). Neither reaches the
-# workerd production runtime. Both are hard-pinned by their parents, so a caret
-# override cannot dedupe them and forcing 0.35.x risks breaking native bindings.
-# Review-by: 2026-09-15 (drop once miniflare + astro-favicons bump sharp >= 0.35.0).
+# sharp, three advisories on the same two transitive copies:
+# GHSA-f88m-g3jw-g9cj (HIGH): libvips CVEs (CVE-2026-33327, CVE-2026-33328,
+#   CVE-2026-35590, CVE-2026-35591), fixed in 0.35.0.
+#   https://github.com/advisories/GHSA-f88m-g3jw-g9cj
+# GHSA-rgj7-g3m4-5g8c (HIGH): libheif (GHSA-g89c-p67h-r497, GHSA-2jg2-4ch7-h545), fixed in
+#   0.35.4.
+#   https://github.com/advisories/GHSA-rgj7-g3m4-5g8c
+# GHSA-wq5f-xc86-pv6w (HIGH): librsvg CVE-2026-96889, fixed in 0.35.5.
+#   https://github.com/advisories/GHSA-wq5f-xc86-pv6w
+# Our direct sharp is 0.35.5 (patched). The flagged copies are dev/build-only
+# transitives: 0.34.5 (pinned exactly by miniflare, the local dev runtime) and
+# 0.33.5 (favilib via astro-favicons, whose ^0.33.5 has no later 0.33 release),
+# for build-time favicon generation. Neither reaches the workerd production
+# runtime. A caret override cannot move them and forcing 0.35.x past their pins
+# risks breaking native bindings; the newest miniflare still pins 0.35.2.
+# Re-checked 2026-10-22, past the earlier review-by: still pinned, no patched release.
+# Review-by: 2026-12-15 (drop once miniflare and astro-favicons take sharp >= 0.35.5).
 GHSA-f88m-g3jw-g9cj
+GHSA-rgj7-g3m4-5g8c
+GHSA-wq5f-xc86-pv6w
